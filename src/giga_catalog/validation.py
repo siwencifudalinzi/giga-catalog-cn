@@ -238,6 +238,14 @@ def validate_catalog(
     if "resources" in catalog:
         errors.extend(_validate_resources(catalog.get("resources")))
 
+    errors.extend(
+        _validate_tags(
+            catalog.get("tags"),
+            videos,
+            required=bool(context.get("requireTags", False)),
+        )
+    )
+
     totals = catalog.get("totals")
     if not isinstance(totals, Mapping):
         errors.append("totals must be an object")
@@ -264,6 +272,70 @@ def validate_catalog(
     )
     errors.extend(_validate_mode(videos, previous_videos, mode, context))
     return sorted(set(errors))
+
+
+def _validate_tags(value: object, videos: Mapping[str, dict], required: bool) -> List[str]:
+    errors: List[str] = []
+    if value is None:
+        if required:
+            errors.append("tags must be an array when tag coverage is required")
+        return errors
+    if not isinstance(value, list):
+        return ["tags must be an array"]
+    definitions = {}
+    previous_id = 0
+    for index, tag in enumerate(value):
+        path = f"tags[{index}]"
+        if not isinstance(tag, Mapping):
+            errors.append(f"{path} must be an object")
+            continue
+        tag_id = tag.get("id")
+        if not isinstance(tag_id, int) or isinstance(tag_id, bool) or tag_id <= 0:
+            errors.append(f"{path}.id must be a positive integer")
+            continue
+        if tag_id in definitions:
+            errors.append(f"duplicate tag id {tag_id}")
+        if tag_id <= previous_id:
+            errors.append("tags must be sorted by id")
+        previous_id = tag_id
+        definitions[tag_id] = tag
+        if tag.get("group") not in {"genre", "character"}:
+            errors.append(f"{path}.group is invalid")
+        for name in ("nameJa", "nameZh"):
+            if not isinstance(tag.get(name), str) or not tag[name].strip():
+                errors.append(f"{path}.{name} must be non-empty text")
+        count = tag.get("count")
+        if not isinstance(count, int) or isinstance(count, bool) or count < 0:
+            errors.append(f"{path}.count must be a non-negative integer")
+
+    expected_counts = {tag_id: 0 for tag_id in definitions}
+    for code, video in videos.items():
+        tag_ids = video.get("tagIds")
+        if required and video.get("tagsStatus") != "complete":
+            errors.append(f"{code}.tagsStatus must be complete")
+        if required and not _valid_generated_at(video.get("tagsUpdatedAt")):
+            errors.append(f"{code}.tagsUpdatedAt must be a UTC RFC3339 timestamp")
+        if tag_ids is None:
+            if required:
+                errors.append(f"{code}.tagIds must be an array")
+            continue
+        if not isinstance(tag_ids, list):
+            errors.append(f"{code}.tagIds must be an array")
+            continue
+        if tag_ids != sorted(set(tag_ids)):
+            errors.append(f"{code}.tagIds must be unique and sorted")
+        for tag_id in set(tag_ids):
+            if tag_id not in definitions:
+                errors.append(f"{code} references unknown tag id {tag_id}")
+            else:
+                expected_counts[tag_id] += 1
+    for tag_id, expected in expected_counts.items():
+        actual = definitions[tag_id].get("count")
+        if actual != expected:
+            errors.append(
+                f"tag count mismatch for {tag_id}: expected {expected}, got {actual}"
+            )
+    return errors
 
 
 def validate_stored_catalog(catalog: Mapping[str, object]) -> List[str]:

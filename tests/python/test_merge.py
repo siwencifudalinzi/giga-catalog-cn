@@ -25,6 +25,30 @@ def product(code, date="2026-07-01", **overrides):
 
 
 class DeterministicMergeTests(unittest.TestCase):
+    def test_publishes_normalized_tag_index_and_video_tag_references(self) -> None:
+        catalog, _ = build_catalog(
+            [
+                product(
+                    "SPSF-1",
+                    tagIds=[25, 6],
+                    tagsStatus="complete",
+                    tagsUpdatedAt=GENERATED_AT,
+                )
+            ],
+            {},
+            generated_at=GENERATED_AT,
+            tags=[
+                {"id": 6, "group": "genre", "nameJa": "陰落", "nameZh": "沦陷"},
+                {"id": 25, "group": "genre", "nameJa": "黒髪", "nameZh": "黑发"},
+            ],
+        )
+
+        video = catalog["series"][0]["videos"][0]
+        self.assertEqual(video["tagIds"], [6, 25])
+        self.assertEqual(video["tagsStatus"], "complete")
+        self.assertEqual(video["tagsUpdatedAt"], GENERATED_AT)
+        self.assertEqual([tag["count"] for tag in catalog["tags"]], [1, 1])
+
     def test_adapts_legacy_records_and_derives_code_fields(self) -> None:
         """Trusting legacy field names or supplied series data would leak a second schema."""
         catalog, summary = build_catalog(

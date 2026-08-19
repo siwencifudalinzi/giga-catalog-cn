@@ -40,6 +40,35 @@ def video_map(catalog):
 
 
 class CatalogSchemaValidationTests(unittest.TestCase):
+    def test_validates_complete_tag_references_and_counts(self) -> None:
+        catalog = build_catalog(
+            [
+                product(
+                    "SPSF-1",
+                    tagIds=[6],
+                    tagsStatus="complete",
+                    tagsUpdatedAt=GENERATED_AT,
+                )
+            ],
+            {},
+            generated_at=GENERATED_AT,
+            tags=[
+                {"id": 6, "group": "genre", "nameJa": "陰落", "nameZh": "沦陷"}
+            ],
+        )[0]
+
+        self.assertEqual(
+            validate_catalog(catalog, refresh_context={"requireTags": True}),
+            [],
+        )
+
+        invalid = copy.deepcopy(catalog)
+        invalid["tags"][0]["count"] = 9
+        video_map(invalid)["SPSF-1"]["tagIds"] = [999]
+        errors = validate_catalog(invalid, refresh_context={"requireTags": True})
+        self.assertTrue(any("unknown tag id 999" in error for error in errors))
+        self.assertTrue(any("tag count mismatch" in error for error in errors))
+
     def test_accepts_a_valid_catalog_without_requiring_links_by_default(self) -> None:
         """Legitimate unlinked legacy products must not make normal publication impossible."""
         catalog = catalog_for([product("SPSF-1")])

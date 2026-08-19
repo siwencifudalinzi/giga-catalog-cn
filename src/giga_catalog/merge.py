@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 from src.giga_catalog.codes import normalize_code
 from src.giga_catalog.previews import preview_descriptor_from_cover
+from src.giga_catalog.tags import build_public_tag_index
 
 
 _PROVIDERS = ("gofile", "player4me", "streamtape", "subtitle")
@@ -36,6 +37,7 @@ def build_catalog(
     refresh_context: Optional[Mapping[str, object]] = None,
     resources: Optional[Mapping[str, object]] = None,
     series_links: Optional[Mapping[str, Mapping[str, object]]] = None,
+    tags: Optional[Sequence[Mapping[str, object]]] = None,
 ) -> Tuple[dict, dict]:
     """Build the deployable catalog and a richer private deterministic summary."""
     context = dict(refresh_context or {})
@@ -142,6 +144,16 @@ def build_catalog(
     }
     if selected_resources:
         catalog["resources"] = selected_resources
+    selected_tags = tags
+    if selected_tags is None and isinstance(previous_catalog, Mapping):
+        previous_tags = previous_catalog.get("tags")
+        if isinstance(previous_tags, list):
+            selected_tags = previous_tags
+    if selected_tags is not None:
+        catalog["tags"] = build_public_tag_index(
+            list(current_with_links.values()),
+            selected_tags,
+        )
     diagnostics = sorted(
         product_diagnostics
         + link_diagnostics
@@ -255,6 +267,24 @@ def _canonical_product(source: Mapping[str, object]) -> Tuple[Optional[dict], di
         preview_count = _positive_int(source.get("previewCount"))
         if preview_count is not None:
             canonical["previewCount"] = preview_count
+    if "tagIds" in source:
+        tag_ids = source.get("tagIds")
+        if isinstance(tag_ids, list):
+            canonical["tagIds"] = sorted(
+                {
+                    value
+                    for value in tag_ids
+                    if isinstance(value, int)
+                    and not isinstance(value, bool)
+                    and value > 0
+                }
+            )
+    tags_status = source.get("tagsStatus")
+    if isinstance(tags_status, str) and tags_status.strip():
+        canonical["tagsStatus"] = tags_status.strip()
+    tags_updated_at = source.get("tagsUpdatedAt")
+    if isinstance(tags_updated_at, str) and tags_updated_at.strip():
+        canonical["tagsUpdatedAt"] = tags_updated_at.strip()
     existing_links = source.get("links")
     if isinstance(existing_links, Mapping):
         cleaned = _clean_link_record(existing_links)
