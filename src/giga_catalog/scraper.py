@@ -241,6 +241,9 @@ def create_session(
                 response.status_code == 302
                 and session.cookies.get("old_check") == "yes"
             ):
+                # Current product detail pages redirect to top.php unless the
+                # request came from a same-site catalog page.
+                session.headers["Referer"] = f"{base_url.rstrip('/')}/search/"
                 return session
             failure = f"http_{response.status_code}"
             transient = (

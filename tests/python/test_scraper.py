@@ -371,6 +371,10 @@ class IncrementalDiscoveryTests(unittest.TestCase):
         self.assertIs(session, fake_session)
         self.assertEqual(session.headers["Accept-Language"], "ja,en;q=0.5")
         self.assertEqual(
+            session.headers["Referer"],
+            "https://www.giga-web.jp/search/",
+        )
+        self.assertEqual(
             session.calls,
             [
                 (
