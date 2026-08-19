@@ -1,0 +1,145 @@
+name: Refresh catalog
+
+on:
+  schedule:
+    # 03:17 Asia/Shanghai (UTC+8)
+    - cron: '17 19 * * *'
+    # Sunday 04:47 Asia/Shanghai (Saturday 20:47 UTC)
+    - cron: '47 20 * * 6'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Refresh mode
+        required: true
+        default: incremental
+        type: choice
+        options: [incremental, audit, links-only]
+      start_id:
+        description: Optional inclusive product-ID lower bound (audit only)
+        required: false
+        type: string
+      end_id:
+        description: Optional inclusive product-ID upper bound (audit only)
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: catalog-refresh-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Refresh catalog
+        timeout-minutes: 300
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_START_ID: ${{ inputs.start_id }}
+          INPUT_END_ID: ${{ inputs.end_id }}
+        run: |
+          set -euo pipefail
+
+          MODE=""
+          REFRESH_ARGS=()
+
+          if [[ "$EVENT_NAME" == "schedule" ]]; then
+            case "$SCHEDULE" in
+              "17 19 * * *") MODE="incremental" ;;
+              "47 20 * * 6") MODE="audit" ;;
+              *)
+                echo "Unsupported schedule: $SCHEDULE" >&2
+                exit 2
+                ;;
+            esac
+          elif [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            case "$INPUT_MODE" in
+              incremental|audit|links-only) MODE="$INPUT_MODE" ;;
+              *)
+                echo "Unsupported refresh mode: $INPUT_MODE" >&2
+                exit 2
+                ;;
+            esac
+          else
+            echo "Unsupported event: $EVENT_NAME" >&2
+            exit 2
+          fi
+
+          if [[ -n "$INPUT_START_ID" || -n "$INPUT_END_ID" ]]; then
+            if [[ "$EVENT_NAME" != "workflow_dispatch" || "$MODE" != "audit" ]]; then
+              echo "ID bounds are accepted only for manual audit runs." >&2
+              exit 2
+            fi
+          fi
+
+          if [[ -n "$INPUT_START_ID" ]]; then
+            [[ "$INPUT_START_ID" =~ ^[1-9][0-9]*$ ]] || {
+              echo "start_id must be a positive integer." >&2
+              exit 2
+            }
+            REFRESH_ARGS+=(--start-id "$INPUT_START_ID")
+          fi
+
+          if [[ -n "$INPUT_END_ID" ]]; then
+            [[ "$INPUT_END_ID" =~ ^[1-9][0-9]*$ ]] || {
+              echo "end_id must be a positive integer." >&2
+              exit 2
+            }
+            REFRESH_ARGS+=(--end-id "$INPUT_END_ID")
+          fi
+
+          python scripts/refresh.py --mode "$MODE" "${REFRESH_ARGS[@]}"
+
+      - name: Validate generated catalog
+        run: python -m unittest discover -s tests/python -v && npm run test:js
+
+      - name: Stage changed generated data
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- data/raw data/state data/update-summary.json public/data/catalog.json public/data/featured-covers.json public/media/featured-covers
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Catalog data is unchanged."
+            exit 0
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          git diff --cached --stat
+
+      - name: Commit and push generated data
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: refresh catalog"
+          git push

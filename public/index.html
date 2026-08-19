@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark" data-density="comfortable">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta
+      name="description"
+      content="按系列、番号、标题与演员浏览的 GIGA 影片目录。"
+    >
+    <title>GIGA Catalog · 影片目录</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preload" href="data/catalog.json" as="fetch" crossorigin="anonymous">
+    <link rel="preload" href="data/featured-covers.json" as="fetch" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <div id="page-top" class="page-top" aria-hidden="true"></div>
+    <a class="skip-link" href="#main-content">跳到影片目录</a>
+
+    <header class="app-header">
+      <div class="app-header__main">
+        <a class="brand" href="./">
+          <span class="brand__mark" aria-hidden="true">G</span>
+          <span class="brand__copy">
+            <span class="brand__eyebrow">GIGA ARCHIVE</span>
+            <span class="brand__title">影片目录</span>
+          </span>
+        </a>
+
+        <form id="search-form" class="search-box" role="search">
+          <label class="visually-hidden" for="catalog-search">
+            搜索番号、标题、演员或系列
+          </label>
+          <span class="search-box__icon" aria-hidden="true"></span>
+          <input
+            id="catalog-search"
+            type="search"
+            inputmode="search"
+            autocomplete="off"
+            placeholder="搜索番号、标题、演员…"
+            aria-describedby="search-hint"
+          >
+          <button
+            id="search-clear"
+            class="icon-button search-box__clear"
+            type="button"
+            data-action="clear-search"
+            aria-label="清除搜索"
+            hidden
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+          <span id="search-hint" class="search-box__hint" aria-hidden="true">
+            Ctrl K
+          </span>
+        </form>
+
+        <div class="header-tools" aria-label="显示设置">
+          <span id="connection-status" class="connection-status">
+            准备载入
+          </span>
+          <a
+            id="subtitle-directory-link"
+            class="button button--quiet subtitle-directory-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            hidden
+          >
+            字幕入口
+          </a>
+          <button
+            class="button button--quiet mobile-catalog-button"
+            type="button"
+            data-action="open-drawer"
+            aria-haspopup="dialog"
+          >
+            查看目录
+          </button>
+          <button
+            id="density-toggle"
+            class="button button--quiet header-control"
+            type="button"
+            data-action="toggle-density"
+            aria-pressed="false"
+            aria-label="切换到紧凑布局"
+          >
+            <span class="control-glyph control-glyph--density" aria-hidden="true"></span>
+            <span data-control-label>紧凑</span>
+          </button>
+          <button
+            id="theme-toggle"
+            class="button button--quiet header-control"
+            type="button"
+            data-action="toggle-theme"
+            aria-pressed="false"
+            aria-label="切换到浅色主题"
+          >
+            <span class="control-glyph control-glyph--theme" aria-hidden="true"></span>
+            <span data-control-label>浅色</span>
+          </button>
+        </div>
+      </div>
+
+      <nav class="view-tabs" aria-label="目录视图">
+        <div role="tablist" aria-label="目录视图">
+          <button
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="main-content"
+            data-action="switch-view"
+            data-view="recent"
+          >
+            最近更新
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="main-content"
+            data-action="switch-view"
+            data-view="all"
+            tabindex="-1"
+          >
+            全部系列
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="main-content"
+            data-action="switch-view"
+            data-view="favorites"
+            tabindex="-1"
+          >
+            收藏
+            <span id="favorite-count" class="tab-count" aria-label="收藏数量">0</span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <section class="catalog-summary" aria-label="目录摘要">
+      <div class="summary-item">
+        <span id="summary-videos" class="summary-item__value">—</span>
+        <span class="summary-item__label">影片</span>
+      </div>
+      <div class="summary-item">
+        <span id="summary-series" class="summary-item__value">—</span>
+        <span class="summary-item__label">系列</span>
+      </div>
+      <div class="summary-item">
+        <span id="summary-linked" class="summary-item__value">—</span>
+        <span class="summary-item__label">有链接</span>
+      </div>
+      <div class="summary-item summary-item--accent">
+        <span id="summary-added" class="summary-item__value">—</span>
+        <span class="summary-item__label">本次新增</span>
+      </div>
+      <p class="summary-sync">
+        最后同步
+        <time id="sync-time">尚未同步</time>
+      </p>
+    </section>
+
+    <div class="app-layout">
+      <nav class="series-rail" aria-labelledby="series-rail-title">
+        <div class="series-rail__heading">
+          <span class="state-kicker">INDEX</span>
+          <h2 id="series-rail-title">系列索引</h2>
+          <p>选择后只挂载当前系列。</p>
+        </div>
+        <div id="series-rail-list" class="series-index"></div>
+      </nav>
+
+      <main
+        id="main-content"
+        class="main-content"
+        tabindex="-1"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <section class="state-panel loading-panel" aria-labelledby="initial-loading">
+          <span class="state-kicker">正在整理展柜</span>
+          <h2 id="initial-loading">载入影片目录…</h2>
+          <p>正在建立轻量检索索引。</p>
+        </section>
+      </main>
+    </div>
+
+    <noscript>
+      <p class="noscript-message">
+        此目录需要 JavaScript 才能按需载入数据。请启用后刷新页面。
+      </p>
+    </noscript>
+
+    <dialog
+      id="series-drawer"
+      class="drawer-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="series-drawer-title"
+    >
+      <div class="drawer-panel">
+        <header class="drawer-panel__header">
+          <div>
+            <span class="state-kicker">SERIES DIRECTORY</span>
+            <h2 id="series-drawer-title">选择系列</h2>
+          </div>
+          <button
+            class="icon-button"
+            type="button"
+            data-action="close-drawer"
+            aria-label="关闭系列目录"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+        <div id="series-drawer-list" class="series-index series-index--drawer"></div>
+      </div>
+    </dialog>
+
+    <dialog
+      id="video-detail"
+      class="video-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="video-detail-title"
+    >
+      <div class="video-dialog__panel">
+        <button
+          class="icon-button video-dialog__close"
+          type="button"
+          data-action="close-dialog"
+          aria-label="关闭影片详情"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+        <div id="video-detail-content"></div>
+      </div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+      <span id="toast-message"></span>
+      <button
+        class="toast__close"
+        type="button"
+        data-action="close-toast"
+        aria-label="关闭提示"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+
+    <button
+      id="back-to-top"
+      class="back-to-top"
+      type="button"
+      data-action="back-top"
+      aria-label="返回页面顶部"
+      hidden
+    >
+      <span aria-hidden="true">↑</span>
+    </button>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+* text=auto
+.gitattributes text eol=lf
+
+# Input and output digests are byte-level provenance, so checkout must not
+# rewrite their line endings on Windows.
+data/raw/*.json text eol=lf
+# Preserve the downloaded CSV source bytes (including CRLF) so its recorded
+# SHA-256 remains reproducible.
+data/raw/*.csv binary
+data/state/*.json text eol=lf
+data/update-summary.json text eol=lf
+public/data/*.json text eol=lf
+
+# Keep executable/configuration text identical to the Linux Actions runner.
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.svg text eol=lf

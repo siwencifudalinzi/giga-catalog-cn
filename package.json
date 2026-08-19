@@ -1,0 +1,10 @@
+{
+  "name": "giga-catalog",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:js": "node --test",
+    "test": "py -m unittest discover -s tests/python -v && npm run test:js",
+    "serve": "py -m http.server 8000 --directory public"
+  }
+}
