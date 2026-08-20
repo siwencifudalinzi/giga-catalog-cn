@@ -1,3 +1,5 @@
+import { createTagIndex, filterVideosByTags } from "./tags.js";
+
 function cloneValue(value) {
   if (Array.isArray(value)) {
     return value.map(cloneValue);
@@ -104,6 +106,7 @@ function normalizedLimit(limit, length) {
  * Build a DOM-independent, immutable view over a generated catalog payload.
  */
 export function createCatalogModel(payload = {}) {
+  const tagIndex = createTagIndex(payload?.tags);
   const sourceSeries = Array.isArray(payload?.series) ? payload.series : [];
   const recentSeries = sourceSeries
     .map(buildSeries)
@@ -112,6 +115,7 @@ export function createCatalogModel(payload = {}) {
   const seriesByCode = new Map();
   const videosByCode = new Map();
   const searchIndex = [];
+  const allVideos = [];
 
   for (const series of recentSeries) {
     seriesByCode.set(series.code, series);
@@ -121,9 +125,19 @@ export function createCatalogModel(payload = {}) {
         continue;
       }
       videosByCode.set(code, video);
+      allVideos.push(video);
       const actors = Array.isArray(video.actors) ? video.actors : [];
+      const assignedTags = Array.isArray(video.tagIds)
+        ? video.tagIds.map((tagId) => tagIndex.get(tagId)).filter(Boolean)
+        : [];
       const haystack = normalizeText(
-        [video.code, video.title, ...actors, series.code].join(" "),
+        [
+          video.code,
+          video.title,
+          ...actors,
+          series.code,
+          ...assignedTags.flatMap((tag) => [tag.nameZh, tag.nameJa]),
+        ].join(" "),
       );
       searchIndex.push(Object.freeze({ video, haystack }));
     }
@@ -166,6 +180,22 @@ export function createCatalogModel(payload = {}) {
     getVideo(code) {
       const key = normalizeVideoCode(code);
       return key ? videosByCode.get(key) ?? null : null;
+    },
+
+    getTag(id) {
+      return tagIndex.get(id);
+    },
+
+    getTags(group) {
+      return group === undefined ? tagIndex.getAll() : tagIndex.getGroup(group);
+    },
+
+    searchTags(query) {
+      return tagIndex.search(query);
+    },
+
+    filterByTags(options) {
+      return filterVideosByTags(allVideos, options);
     },
   });
 }

@@ -117,6 +117,10 @@ jobs:
 
           python scripts/refresh.py --mode "$MODE" "${REFRESH_ARGS[@]}"
 
+      - name: Refresh official Chinese tags
+        timeout-minutes: 90
+        run: python scripts/sync_official_tags.py --max-products 50
+
       - name: Validate generated catalog
         run: python -m unittest discover -s tests/python -v && npm run test:js
 

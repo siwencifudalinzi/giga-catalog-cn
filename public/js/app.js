@@ -83,6 +83,20 @@ export function bindDebouncedSearchInput({
   });
 }
 
+export function clearActiveSearch({
+  state,
+  input,
+  clearButton,
+  clearTimer = globalThis.clearTimeout,
+}) {
+  clearTimer(state.searchTimer);
+  state.searchTimer = null;
+  state.query = "";
+  state.searchStart = 0;
+  input.value = "";
+  clearButton.hidden = true;
+}
+
 function isRecord(value) {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
@@ -436,6 +450,12 @@ function startApplication() {
     previewStart: 0,
     previewLoading: false,
     coverObserver: null,
+    tagInclude: new Set(),
+    tagExclude: new Set(),
+    tagMatch: "all",
+    tagSearch: "",
+    tagSort: "newest",
+    tagStart: 0,
   };
 
   function persistPreferences() {
@@ -654,6 +674,7 @@ function startApplication() {
       mode,
       start,
       featuredCovers: state.featuredCovers,
+      tagLookup: (tagId) => state.model.getTag(tagId),
     });
     const toolbar = createElement("div", "series-controls");
     const modeButton = createElement(
@@ -767,7 +788,8 @@ function startApplication() {
     const metadata = renderSearchResults(container, results, {
       start: state.searchStart,
       featuredCovers: state.featuredCovers,
-      emptyMessage: "没有匹配的影片，试试番号、标题、演员或系列名。",
+      emptyMessage: "没有匹配的影片，试试番号、标题、演员、系列名或标签。",
+      tagLookup: (tagId) => state.model.getTag(tagId),
     });
     appendPagination(container, metadata, { action: "page-results" });
     refreshDeferredCovers();
@@ -819,6 +841,7 @@ function startApplication() {
         context: "favorites",
         start: state.favoriteStarts[favoriteState],
         featuredCovers: state.featuredCovers,
+        tagLookup: (tagId) => state.model.getTag(tagId),
       });
       appendPagination(container, metadata, {
         action: "page-favorites",
@@ -830,13 +853,208 @@ function startApplication() {
     refreshDeferredCovers();
   }
 
+  function tagSelectionState(tagId) {
+    if (state.tagInclude.has(tagId)) {
+      return "include";
+    }
+    return state.tagExclude.has(tagId) ? "exclude" : "neutral";
+  }
+
+  function cycleTagSelection(tagId) {
+    const current = tagSelectionState(tagId);
+    state.tagInclude.delete(tagId);
+    state.tagExclude.delete(tagId);
+    if (current === "neutral") {
+      state.tagInclude.add(tagId);
+    } else if (current === "include") {
+      state.tagExclude.add(tagId);
+    }
+    state.tagStart = 0;
+  }
+
+  function createTagChip(tag) {
+    const selected = tagSelectionState(tag.id);
+    const chip = createElement("button", "tag-chip");
+    chip.type = "button";
+    chip.dataset.action = "cycle-tag";
+    chip.dataset.tagId = String(tag.id);
+    chip.dataset.state = selected;
+    chip.setAttribute(
+      "aria-pressed",
+      selected === "exclude" ? "mixed" : String(selected === "include"),
+    );
+    const stateLabel =
+      selected === "include" ? "已包含" : selected === "exclude" ? "已排除" : "未选";
+    chip.setAttribute(
+      "aria-label",
+      `${tag.nameZh}，${formatNumber(tag.count)} 部，${stateLabel}；按下切换状态`,
+    );
+    chip.append(
+      createElement("span", "tag-chip__name", tag.nameZh),
+      createElement("span", "tag-chip__count", formatNumber(tag.count)),
+    );
+    return chip;
+  }
+
+  function sortTagResults(videos) {
+    const sorted = [...videos];
+    if (state.tagSort === "oldest") {
+      sorted.sort(
+        (left, right) =>
+          String(left.releaseDate ?? "").localeCompare(String(right.releaseDate ?? "")) ||
+          String(left.code).localeCompare(String(right.code)),
+      );
+    } else if (state.tagSort === "code") {
+      sorted.sort((left, right) =>
+        String(left.code).localeCompare(String(right.code), "en", { numeric: true }),
+      );
+    } else {
+      sorted.sort(
+        (left, right) =>
+          String(right.releaseDate ?? "").localeCompare(String(left.releaseDate ?? "")) ||
+          String(left.code).localeCompare(String(right.code)),
+      );
+    }
+    return sorted;
+  }
+
+  function renderTagView() {
+    const fragment = document.createDocumentFragment();
+    fragment.append(
+      renderViewHeading(
+        "OFFICIAL TAG DIRECTORY",
+        "中文标签索引",
+        "完整收录 GIGA 官网的类型、玩法、角色和造型小标签。点击依次切换：包含 → 排除 → 取消。",
+      ),
+    );
+
+    const toolbar = createElement("section", "tag-toolbar");
+    toolbar.setAttribute("aria-label", "标签筛选设置");
+    const searchLabel = createElement("label", "tag-toolbar__search");
+    searchLabel.append(createElement("span", "visually-hidden", "搜索标签"));
+    const search = createElement("input", "tag-search");
+    search.type = "search";
+    search.id = "tag-directory-search";
+    search.placeholder = "搜索中文或日文标签";
+    search.value = state.tagSearch;
+    searchLabel.append(search);
+
+    const matchLabel = createElement("label", "tag-toolbar__field");
+    matchLabel.append(createElement("span", "", "包含方式"));
+    const matchSelect = createElement("select", "tag-select");
+    matchSelect.id = "tag-match-mode";
+    for (const [value, label] of [["all", "同时包含全部"], ["any", "包含任意一个"]]) {
+      const option = createElement("option", "", label);
+      option.value = value;
+      option.selected = state.tagMatch === value;
+      matchSelect.append(option);
+    }
+    matchLabel.append(matchSelect);
+
+    const sortLabel = createElement("label", "tag-toolbar__field");
+    sortLabel.append(createElement("span", "", "结果排序"));
+    const sortSelect = createElement("select", "tag-select");
+    sortSelect.id = "tag-result-sort";
+    for (const [value, label] of [["newest", "最新发布"], ["oldest", "最早发布"], ["code", "番号名称"]]) {
+      const option = createElement("option", "", label);
+      option.value = value;
+      option.selected = state.tagSort === value;
+      sortSelect.append(option);
+    }
+    sortLabel.append(sortSelect);
+    const clear = createElement("button", "button button--quiet", "清空已选");
+    clear.type = "button";
+    clear.dataset.action = "clear-tags";
+    clear.disabled = !state.tagInclude.size && !state.tagExclude.size;
+    toolbar.append(searchLabel, matchLabel, sortLabel, clear);
+    fragment.append(toolbar);
+
+    const selected = createElement("div", "tag-selection");
+    selected.setAttribute("aria-live", "polite");
+    const selectionParts = [];
+    for (const tagId of [...state.tagInclude].sort((a, b) => a - b)) {
+      const tag = state.model.getTag(tagId);
+      if (tag) selectionParts.push(`+ ${tag.nameZh}`);
+    }
+    for (const tagId of [...state.tagExclude].sort((a, b) => a - b)) {
+      const tag = state.model.getTag(tagId);
+      if (tag) selectionParts.push(`− ${tag.nameZh}`);
+    }
+    selected.textContent = selectionParts.length
+      ? `已选：${selectionParts.join("  ")}`
+      : "尚未选择标签";
+    fragment.append(selected);
+
+    const matchingIds = state.tagSearch
+      ? new Set(state.model.searchTags(state.tagSearch).map((tag) => tag.id))
+      : null;
+    const groups = createElement("div", "tag-groups");
+    for (const [group, title] of [["genre", "类型与玩法"], ["character", "角色与造型"]]) {
+      const tags = state.model
+        .getTags(group)
+        .filter((tag) => !matchingIds || matchingIds.has(tag.id));
+      const section = createElement("section", "tag-group");
+      const heading = createElement("h3", "tag-group__title", `${title} · ${formatNumber(tags.length)}`);
+      const cloud = createElement("div", "tag-cloud");
+      for (const tag of tags) {
+        cloud.append(createTagChip(tag));
+      }
+      if (!tags.length) {
+        cloud.append(createElement("p", "empty-state empty-state--compact", "没有匹配标签"));
+      }
+      section.append(heading, cloud);
+      groups.append(section);
+    }
+    fragment.append(groups);
+
+    const resultSection = createElement("section", "tag-results");
+    const hasSelection = state.tagInclude.size || state.tagExclude.size;
+    if (!hasSelection) {
+      resultSection.append(
+        createElement("p", "empty-state empty-state--compact", "选择标签后，这里会按时间或番号显示影片。"),
+      );
+    } else {
+      const videos = sortTagResults(
+        state.model.filterByTags({
+          include: [...state.tagInclude],
+          exclude: [...state.tagExclude],
+          match: state.tagMatch,
+        }),
+      );
+      resultSection.append(
+        createElement("h3", "tag-results__title", `匹配影片 · ${formatNumber(videos.length)}`),
+      );
+      const grid = createElement("div", "tag-results__grid");
+      resultSection.append(grid);
+      fragment.append(resultSection);
+      ui.main.replaceChildren(fragment);
+      state.mountedSeries = null;
+      const metadata = renderSearchResults(grid, videos, {
+        start: state.tagStart,
+        context: "tags",
+        tagLookup: (tagId) => state.model.getTag(tagId),
+        emptyMessage: "没有同时满足条件的影片。",
+      });
+      appendPagination(grid, metadata, { action: "page-tag-results" });
+      refreshDeferredCovers();
+      return;
+    }
+    fragment.append(resultSection);
+    ui.main.replaceChildren(fragment);
+    state.mountedSeries = null;
+    refreshDeferredCovers();
+  }
+
   function renderCurrentView(options) {
     if (!state.model) {
       return;
     }
     ui.main.removeAttribute("aria-busy");
+    document.body.dataset.view = state.query ? "search" : state.view;
     if (state.query) {
       renderSearchView();
+    } else if (state.view === "tags") {
+      renderTagView();
     } else if (state.view === "all") {
       renderAllSeriesView();
     } else if (state.view === "favorites") {
@@ -1113,6 +1331,35 @@ function startApplication() {
     return section;
   }
 
+  function createOfficialTagSection(video) {
+    const assigned = Array.isArray(video.tagIds)
+      ? video.tagIds.map((tagId) => state.model.getTag(tagId)).filter(Boolean)
+      : [];
+    if (!assigned.length) {
+      return null;
+    }
+    const section = createElement("section", "detail-tags");
+    section.append(createElement("h3", "", "官方标签"));
+    for (const [group, title] of [["genre", "类型与玩法"], ["character", "角色与造型"]]) {
+      const groupTags = assigned.filter((tag) => tag.group === group);
+      if (!groupTags.length) continue;
+      const block = createElement("div", "detail-tag-group");
+      block.append(createElement("h4", "", title));
+      const list = createElement("div", "detail-tag-list");
+      for (const tag of groupTags) {
+        const button = createElement("button", "detail-tag", tag.nameZh);
+        button.type = "button";
+        button.dataset.action = "select-detail-tag";
+        button.dataset.tagId = String(tag.id);
+        button.setAttribute("aria-label", `用标签“${tag.nameZh}”筛选影片`);
+        list.append(button);
+      }
+      block.append(list);
+      section.append(block);
+    }
+    return section;
+  }
+
   function createDialogActions(video) {
     const actions = createElement("div", "detail-actions");
     const copy = createElement("button", "button button--quiet", "复制番号");
@@ -1192,7 +1439,10 @@ function startApplication() {
       }
       details.append(actors);
     }
-    details.append(createDialogActions(video), createLinkSection(video));
+    const officialTags = createOfficialTagSection(video);
+    details.append(createDialogActions(video));
+    if (officialTags) details.append(officialTags);
+    details.append(createLinkSection(video));
     layout.append(coverFrame, details);
     ui.videoDialogContent.replaceChildren(layout, createPreviewSection(video));
     if (!ui.videoDialog.open) {
@@ -1329,6 +1579,32 @@ function startApplication() {
       state.searchStart = 0;
       renderCurrentView();
       ui.search.focus();
+    } else if (action === "cycle-tag") {
+      const tagId = Number.parseInt(control.dataset.tagId, 10);
+      if (state.model.getTag(tagId)) {
+        cycleTagSelection(tagId);
+        renderTagView();
+      }
+    } else if (action === "clear-tags") {
+      state.tagInclude.clear();
+      state.tagExclude.clear();
+      state.tagStart = 0;
+      renderTagView();
+    } else if (action === "select-detail-tag") {
+      const tagId = Number.parseInt(control.dataset.tagId, 10);
+      if (state.model.getTag(tagId)) {
+        state.tagInclude.add(tagId);
+        state.tagExclude.delete(tagId);
+        state.tagStart = 0;
+        state.view = "tags";
+        clearActiveSearch({
+          state,
+          input: ui.search,
+          clearButton: ui.searchClear,
+        });
+        closeVideoDialog();
+        renderCurrentView({ focusMain: true });
+      }
     } else if (action === "page-series") {
       mountSeriesWindow(
         control.dataset.series,
@@ -1342,6 +1618,9 @@ function startApplication() {
       state.favoriteStarts[favoriteState] =
         Number.parseInt(control.dataset.start, 10) || 0;
       renderFavoritesView();
+    } else if (action === "page-tag-results") {
+      state.tagStart = Number.parseInt(control.dataset.start, 10) || 0;
+      renderTagView();
     } else if (action === "retry") {
       void loadCatalog();
     } else if (action === "back-top") {
@@ -1378,6 +1657,31 @@ function startApplication() {
     clearButton: ui.searchClear,
     state,
     render: renderCurrentView,
+  });
+
+  document.addEventListener("input", (event) => {
+    if (event.target?.id === "tag-directory-search") {
+      state.tagSearch = event.target.value;
+      state.tagStart = 0;
+      renderTagView();
+      const replacement = document.querySelector("#tag-directory-search");
+      replacement?.focus();
+      replacement?.setSelectionRange(state.tagSearch.length, state.tagSearch.length);
+    }
+  });
+
+  document.addEventListener("change", (event) => {
+    if (event.target?.id === "tag-match-mode") {
+      state.tagMatch = event.target.value === "any" ? "any" : "all";
+      state.tagStart = 0;
+      renderTagView();
+    } else if (event.target?.id === "tag-result-sort") {
+      state.tagSort = ["newest", "oldest", "code"].includes(event.target.value)
+        ? event.target.value
+        : "newest";
+      state.tagStart = 0;
+      renderTagView();
+    }
   });
 
   document.querySelector("#search-form").addEventListener("submit", (event) => {

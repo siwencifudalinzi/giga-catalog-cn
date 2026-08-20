@@ -33,6 +33,7 @@ class DeterministicMergeTests(unittest.TestCase):
                     tagIds=[25, 6],
                     tagsStatus="complete",
                     tagsUpdatedAt=GENERATED_AT,
+                    tagsSource="official",
                 )
             ],
             {},
@@ -47,6 +48,7 @@ class DeterministicMergeTests(unittest.TestCase):
         self.assertEqual(video["tagIds"], [6, 25])
         self.assertEqual(video["tagsStatus"], "complete")
         self.assertEqual(video["tagsUpdatedAt"], GENERATED_AT)
+        self.assertEqual(video["tagsSource"], "official")
         self.assertEqual([tag["count"] for tag in catalog["tags"]], [1, 1])
 
     def test_adapts_legacy_records_and_derives_code_fields(self) -> None:

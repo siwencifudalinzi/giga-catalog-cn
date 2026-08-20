@@ -388,7 +388,35 @@ function actorSummary(actors) {
   return names.length > 2 ? `${visible} +${names.length - 2}` : visible;
 }
 
-function renderVideoCard(video, { priority = false, featuredCover = null } = {}) {
+function renderTagPreview(video, tagLookup) {
+  if (!Array.isArray(video?.tagIds) || typeof tagLookup !== "function") {
+    return "";
+  }
+  const names = video.tagIds
+    .map((tagId) => tagLookup(tagId))
+    .filter((tag) => tag && typeof tag.nameZh === "string" && tag.nameZh.trim())
+    .map((tag) => tag.nameZh.trim());
+  if (!names.length) {
+    return "";
+  }
+  const visible = names.slice(0, 3);
+  const remainder = names.length - visible.length;
+  return [
+    '<span class="video-tags" aria-label="官方标签">',
+    ...visible.map(
+      (name) => `<span class="video-tag">${escapeHtml(name)}</span>`,
+    ),
+    remainder > 0
+      ? `<span class="video-tag video-tag--more">+${remainder}</span>`
+      : "",
+    "</span>",
+  ].join("");
+}
+
+function renderVideoCard(
+  video,
+  { priority = false, featuredCover = null, tagLookup = null } = {},
+) {
   const code = String(video?.code ?? "").trim();
   const title = String(video?.title ?? "").trim() || code || "未命名影片";
   const originalCover = safeHttpUrl(video?.cover);
@@ -412,6 +440,7 @@ function renderVideoCard(video, { priority = false, featuredCover = null } = {})
     ? `<span class="video-actors">${escapeHtml(actors)}</span>`
     : "";
   const linkMarkup = renderLinkBadges(video?.links);
+  const tagMarkup = renderTagPreview(video, tagLookup);
 
   return [
     `<article class="video-card has-video" data-code="${escapeHtml(code)}">`,
@@ -421,6 +450,7 @@ function renderVideoCard(video, { priority = false, featuredCover = null } = {})
     `<span class="video-code">${escapeHtml(code)}</span>`,
     `<span class="video-title">${escapeHtml(title)}</span>`,
     actorMarkup,
+    tagMarkup,
     linkMarkup,
     "</span>",
     "</button>",
@@ -547,6 +577,7 @@ function renderItems(window, options = {}) {
       return renderVideoCard(item.video, {
         priority,
         featuredCover: code ? featuredCovers.get(code) ?? null : null,
+        tagLookup: options.tagLookup,
       });
     })
     .join("");

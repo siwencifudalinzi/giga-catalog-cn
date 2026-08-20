@@ -2,12 +2,22 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
+test("the public shell exposes an accessible official tag index tab", () => {
+  const html = readFileSync(
+    new URL("../../public/index.html", import.meta.url),
+    "utf8",
+  );
+  assert.match(html, /data-view="tags"/u);
+  assert.match(html, />\s*标签索引\s*</u);
+});
+
 import {
   UI_STORAGE_KEY,
   applyRenderFocus,
   applyCoverFallback,
   attachPreviewProbe,
   bindDebouncedSearchInput,
+  clearActiveSearch,
   collectLinkGroups,
   createPreviewIntersectionObserver,
   densityToggleLabel,
@@ -17,6 +27,27 @@ import {
   startPreviewProbeRequest,
   tabKeyTargetIndex,
 } from "../../public/js/app.js";
+
+test("opening a detail tag clears global search before switching views", () => {
+  const state = { query: "黑丝袜", searchStart: 100, searchTimer: 42 };
+  const input = { value: "黑丝袜" };
+  const clearButton = { hidden: false };
+  const cleared = [];
+
+  clearActiveSearch({
+    state,
+    input,
+    clearButton,
+    clearTimer: (timer) => cleared.push(timer),
+  });
+
+  assert.deepEqual(cleared, [42]);
+  assert.equal(state.query, "");
+  assert.equal(state.searchStart, 0);
+  assert.equal(state.searchTimer, null);
+  assert.equal(input.value, "");
+  assert.equal(clearButton.hidden, true);
+});
 
 test("tab key navigation moves in both directions and wraps", () => {
   assert.equal(tabKeyTargetIndex("ArrowRight", 0, 3), 1);

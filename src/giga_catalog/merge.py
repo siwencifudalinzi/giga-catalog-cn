@@ -285,6 +285,9 @@ def _canonical_product(source: Mapping[str, object]) -> Tuple[Optional[dict], di
     tags_updated_at = source.get("tagsUpdatedAt")
     if isinstance(tags_updated_at, str) and tags_updated_at.strip():
         canonical["tagsUpdatedAt"] = tags_updated_at.strip()
+    tags_source = source.get("tagsSource")
+    if tags_source in {"official", "official-unavailable"}:
+        canonical["tagsSource"] = tags_source
     existing_links = source.get("links")
     if isinstance(existing_links, Mapping):
         cleaned = _clean_link_record(existing_links)

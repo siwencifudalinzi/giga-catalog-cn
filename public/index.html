@@ -30,7 +30,7 @@
 
         <form id="search-form" class="search-box" role="search">
           <label class="visually-hidden" for="catalog-search">
-            搜索番号、标题、演员或系列
+            搜索番号、标题、演员、系列或标签
           </label>
           <span class="search-box__icon" aria-hidden="true"></span>
           <input
@@ -38,7 +38,7 @@
             type="search"
             inputmode="search"
             autocomplete="off"
-            placeholder="搜索番号、标题、演员…"
+            placeholder="搜索番号、标题、演员、标签…"
             aria-describedby="search-hint"
           >
           <button
@@ -124,6 +124,17 @@
             tabindex="-1"
           >
             全部系列
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="main-content"
+            data-action="switch-view"
+            data-view="tags"
+            tabindex="-1"
+          >
+            标签索引
           </button>
           <button
             type="button"

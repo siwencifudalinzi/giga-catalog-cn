@@ -146,6 +146,14 @@ class RefreshWorkflowConfigTests(unittest.TestCase):
             'python scripts/refresh.py --mode "$MODE" "${REFRESH_ARGS[@]}"',
             self.workflow,
         )
+        self.assertIn(
+            "python scripts/sync_official_tags.py --max-products 50",
+            self.workflow,
+        )
+        self.assertLess(
+            self.workflow.index('python scripts/refresh.py --mode "$MODE"'),
+            self.workflow.index("python scripts/sync_official_tags.py --max-products 50"),
+        )
         run_blocks = "\n".join(
             line for line in self.workflow.splitlines() if not line.lstrip().startswith("env:")
         )

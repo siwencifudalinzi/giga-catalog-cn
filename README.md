@@ -69,6 +69,23 @@ python scripts/refresh.py --mode incremental --dry-run
 - `data/update-summary.json`
 - `public/data/catalog.json`
 
+影片标签使用独立的详情页同步器。首次回填或需要重建全部标签时运行：
+
+```powershell
+# 全量抓取官网详情页，支持 data/state/tag-sync-checkpoint.json 断点续传
+python scripts/sync_official_tags.py --full
+
+# 日常只处理缺失、失败或超过 90 天未复查的影片；一次最多 50 部
+python scripts/sync_official_tags.py --max-products 50
+```
+
+标签以官网稳定 `tag_id` 关联，中文名称由机器初译和
+`data/tag-translation-overrides.json` 人工校正共同生成。完整结果写入
+`data/raw/tags.json`、`data/raw/products.json` 和
+`public/data/catalog.json`；详情页不存在的历史存档会明确标记为
+`official-unavailable` 并保留空标签，不会伪造分类。前端可同时搜索中文或日文标签，
+并支持包含全部、包含任意、排除标签以及按最新、最早、番号排序。
+
 公开目录和私有状态按同一事务发布。下载、解析、校验或写入失败时，程序保留上一版文件。
 
 播放和字幕链接使用追加保留（append-only overlay）语义：新表格中的空白或缺失单元格不会删除已验证的历史链接。当前没有隐式删除机制；未来如需删除，必须先设计并校验显式 tombstone。
@@ -167,7 +184,10 @@ gh run view RUN_ID --log
 
 手动运行 `Refresh catalog` 即可触发同一条刷新→Pages 部署链路；即使刷新没有产生 commit，成功的 `workflow_run` 仍会重新发布当前 `public/`。也可以单独手动运行 `Deploy catalog`。
 
-每次刷新依次执行数据更新、完整 Python/JavaScript 测试、限路径暂存、有效变更检查和 bot 提交。它不会执行 `git add -A`，因此缓存、日志或意外源码改动不会混入自动数据提交。
+每次刷新依次执行影片/链接更新、最多 50 部详情标签增量、完整
+Python/JavaScript 测试、限路径暂存、有效变更检查和 bot 提交。它不会执行
+`git add -A`，因此缓存、日志或意外源码改动不会混入自动数据提交。任何标签详情、
+翻译或完整性校验失败都会在发布前终止，并保留上一版公开 catalog。
 
 网络下载只对连接异常和明确的短暂 HTTP 状态做有限次重试与间隔退避，达到上限后失败关闭，不会把不完整来源发布到线上。每次权威完整审计都会持久化 `lastAuditAt`、卡片对账计数、未解析诊断和历史档案保留证据；即使 catalog 内容未变，成功审计也会更新证据，后续增量运行则保留最近一次成功审计时间。
 

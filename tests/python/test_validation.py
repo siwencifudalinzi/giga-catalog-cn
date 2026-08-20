@@ -48,6 +48,7 @@ class CatalogSchemaValidationTests(unittest.TestCase):
                     tagIds=[6],
                     tagsStatus="complete",
                     tagsUpdatedAt=GENERATED_AT,
+                    tagsSource="official",
                 )
             ],
             {},

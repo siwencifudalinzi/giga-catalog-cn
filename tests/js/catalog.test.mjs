@@ -2,6 +2,34 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createCatalogModel } from "../../public/js/catalog.js";
+
+test("catalog search and filters resolve normalized official tags", () => {
+  const model = createCatalogModel({
+    tags: [
+      { id: 6, group: "genre", nameJa: "陰落", nameZh: "沦陷", count: 1 },
+      { id: 25, group: "genre", nameJa: "黒髪", nameZh: "黑发", count: 1 },
+    ],
+    series: [
+      {
+        code: "SPSF",
+        latestReleaseDate: "2026-01-01",
+        videos: [
+          { code: "SPSF-1", number: 1, title: "Title", actors: [], tagIds: [6, 25] },
+          { code: "SPSF-2", number: 2, title: "Other", actors: [], tagIds: [] },
+        ],
+      },
+    ],
+  });
+
+  assert.deepEqual(model.search("沦陷").map((video) => video.code), ["SPSF-1"]);
+  assert.deepEqual(model.search("黒髪").map((video) => video.code), ["SPSF-1"]);
+  assert.deepEqual(
+    model.filterByTags({ include: [6, 25], match: "all" }).map((video) => video.code),
+    ["SPSF-1"],
+  );
+  assert.equal(model.getTag(6).nameZh, "沦陷");
+  assert.equal(model.getTags("genre").length, 2);
+});
 import {
   derivePreviewUrls,
   mountSeries,
@@ -556,6 +584,28 @@ test("video cards escape content, prioritize the first row, and show link badges
     container.innerHTML,
     /class="video-card__button"[^>]*\saria-label=/u,
   );
+});
+
+test("video cards show three Chinese tags and a bounded remainder count", () => {
+  const container = containerFixture();
+  const names = new Map([
+    [1, { nameZh: "黑丝袜" }],
+    [2, { nameZh: "黑化" }],
+    [3, { nameZh: "战队女英雄" }],
+    [4, { nameZh: "危机" }],
+  ]);
+
+  renderSearchResults(
+    container,
+    [videoFixture(44, { tagIds: [1, 2, 3, 4] })],
+    { tagLookup: (tagId) => names.get(tagId) ?? null },
+  );
+
+  assert.match(container.innerHTML, />黑丝袜</);
+  assert.match(container.innerHTML, />黑化</);
+  assert.match(container.innerHTML, />战队女英雄</);
+  assert.match(container.innerHTML, />\+1</);
+  assert.equal(container.innerHTML.includes("危机"), false);
 });
 
 test("cards below the first mobile row remain lazily loaded", () => {

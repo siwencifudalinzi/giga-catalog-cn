@@ -315,6 +315,11 @@ def _validate_tags(value: object, videos: Mapping[str, dict], required: bool) ->
             errors.append(f"{code}.tagsStatus must be complete")
         if required and not _valid_generated_at(video.get("tagsUpdatedAt")):
             errors.append(f"{code}.tagsUpdatedAt must be a UTC RFC3339 timestamp")
+        if required and video.get("tagsSource") not in {
+            "official",
+            "official-unavailable",
+        }:
+            errors.append(f"{code}.tagsSource must identify official provenance")
         if tag_ids is None:
             if required:
                 errors.append(f"{code}.tagIds must be an array")

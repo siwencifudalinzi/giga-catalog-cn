@@ -1190,6 +1190,7 @@ def _effective_catalog(catalog: Mapping[str, object]) -> str:
             "schemaVersion": catalog.get("schemaVersion"),
             "totals": catalog.get("totals"),
             "resources": catalog.get("resources"),
+            "tags": catalog.get("tags"),
             "series": catalog.get("series"),
         }
     )
