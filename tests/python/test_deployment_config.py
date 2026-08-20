@@ -466,7 +466,31 @@ class FrontendPerformanceHintTests(unittest.TestCase):
                 pattern = (
                     r'<link\s+rel="preload"\s+href="'
                     + re.escape(path)
-                    + r'"\s+as="fetch"\s+crossorigin="anonymous"\s*>'
+                    + r'"\s+as="fetch"\s+crossorigin="anonymous"'
+                    + r'(?:\s+fetchpriority="high")?\s*>'
+                )
+                self.assertEqual(len(re.findall(pattern, head)), 1)
+
+    def test_catalog_preload_is_high_priority_and_module_graph_is_parallelized(self):
+        source = INDEX_PATH.read_text(encoding="utf-8")
+        head = source.split("</head>", 1)[0]
+        self.assertRegex(
+            head,
+            r'<link\s+rel="preload"\s+href="data/catalog\.json"\s+'
+            r'as="fetch"\s+crossorigin="anonymous"\s+fetchpriority="high"\s*>',
+        )
+        for path in (
+            "js/app.js",
+            "js/catalog.js",
+            "js/render.js",
+            "js/favorites.js",
+            "js/tags.js",
+        ):
+            with self.subTest(path=path):
+                pattern = (
+                    r'<link\s+rel="modulepreload"\s+href="'
+                    + re.escape(path)
+                    + r'"\s*>'
                 )
                 self.assertEqual(len(re.findall(pattern, head)), 1)
 
