@@ -49,6 +49,7 @@ class RefreshWorkflowConfigTests(unittest.TestCase):
             schedule_entries,
             [
                 "17 19 * * *",
+                "30 3 * * *",
                 "47 20 * * 6",
             ],
         )
@@ -119,7 +120,11 @@ class RefreshWorkflowConfigTests(unittest.TestCase):
             self.workflow,
         )
         self.assertIn(
-            '"17 19 * * *") MODE="incremental"',
+            '"17 19 * * *") MODE="links-only"',
+            self.workflow,
+        )
+        self.assertIn(
+            '"30 3 * * *") MODE="incremental"',
             self.workflow,
         )
         self.assertIn(

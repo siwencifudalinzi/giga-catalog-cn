@@ -163,13 +163,16 @@ curl.exe -I https://siwencifudalinzi.github.io/giga-catalog-cn/js/does-not-exist
 
 ## 自动同步
 
-`.github/workflows/refresh-catalog.yml` 只有三种触发方式：
+`.github/workflows/refresh-catalog.yml` 使用以下自动与手动触发方式：
 
-- 每天 `03:17`（`Asia/Shanghai`）运行 `incremental`
+- 每天 `03:17`（`Asia/Shanghai`）运行 `links-only`，保留原链接更新时间
+- 每天 `11:30`（`Asia/Shanghai`）运行 `incremental`，同步官网影片目录
 - 每周日 `04:47`（`Asia/Shanghai`）运行完整 `audit`
 - 在 GitHub Actions 页面手动运行
 
 workflow 中的 cron 已换算为 UTC，用户看到的运行时间仍按上海时区计算。同一仓库和分支上的刷新使用并发组，不会取消正在写入状态的任务；GitHub 公共 runner 可能延迟定时任务几分钟，时间点不是实时 SLA。刷新 job 有默认分支 guard，负责刷新、验证和受限路径 bot 提交，不读取部署 secret，也不直接部署。成功结束后由独立 Pages workflow 发布最新 `public/`。
+
+调整目录抓取时间不会重置既有影片链接：链接仍按追加保留语义合并，表格未提供新值时继续保留上一版链接及其已有更新时间。
 
 手动运行时可选择 `incremental`、`audit` 或 `links-only`。`start_id` 和 `end_id` 只允许用于手动 `audit`，并且必须是正整数。也可以使用 GitHub CLI：
 

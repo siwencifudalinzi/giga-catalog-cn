@@ -2,8 +2,10 @@ name: Refresh catalog
 
 on:
   schedule:
-    # 03:17 Asia/Shanghai (UTC+8)
+    # 03:17 Asia/Shanghai (UTC+8): preserve the existing link refresh slot
     - cron: '17 19 * * *'
+    # 11:30 Asia/Shanghai (UTC+8)
+    - cron: '30 3 * * *'
     # Sunday 04:47 Asia/Shanghai (Saturday 20:47 UTC)
     - cron: '47 20 * * 6'
   workflow_dispatch:
@@ -72,7 +74,8 @@ jobs:
 
           if [[ "$EVENT_NAME" == "schedule" ]]; then
             case "$SCHEDULE" in
-              "17 19 * * *") MODE="incremental" ;;
+              "17 19 * * *") MODE="links-only" ;;
+              "30 3 * * *") MODE="incremental" ;;
               "47 20 * * 6") MODE="audit" ;;
               *)
                 echo "Unsupported schedule: $SCHEDULE" >&2
