@@ -10,6 +10,7 @@ import {
   unmountSeries,
 } from "./render.js";
 import { createFavoritesStore, getFavoriteVideos } from "./favorites.js";
+import { createLazyTagLoader } from "./runtime-tags.js";
 
 export const UI_STORAGE_KEY = "giga_catalog_ui_v1";
 
@@ -456,6 +457,10 @@ function startApplication() {
     tagSearch: "",
     tagSort: "newest",
     tagStart: 0,
+    tagsReady: false,
+    tagError: null,
+    ensureTags: null,
+    activeDialogCode: null,
   };
 
   function persistPreferences() {
@@ -514,6 +519,29 @@ function startApplication() {
       '<span class="skeleton-card"></span><span class="skeleton-card"></span>',
       "</div></section>",
     ].join("");
+  }
+
+  function renderTagLoadState(error = null) {
+    ui.main.setAttribute("aria-busy", String(!error));
+    const panel = createElement("section", `state-panel ${error ? "error-panel" : "loading-panel"}`);
+    panel.append(
+      createElement("span", "state-kicker", error ? "标签暂不可用" : "按需加载"),
+      createElement("h2", "", error ? "标签载入失败" : "正在载入中文标签…"),
+      createElement(
+        "p",
+        "",
+        error
+          ? "影片目录仍可正常浏览，可以重新载入标签。"
+          : "基础目录已经就绪，只在需要时下载标签索引。",
+      ),
+    );
+    if (error) {
+      const retry = createElement("button", "button button--primary", "重新载入标签");
+      retry.type = "button";
+      retry.dataset.action = "retry-tags";
+      panel.append(retry);
+    }
+    ui.main.replaceChildren(panel);
   }
 
   function renderLoadError(error) {
@@ -1053,8 +1081,14 @@ function startApplication() {
     document.body.dataset.view = state.query ? "search" : state.view;
     if (state.query) {
       renderSearchView();
+      if (!state.tagsReady && !state.tagError) void ensureTagCatalog();
     } else if (state.view === "tags") {
-      renderTagView();
+      if (state.tagsReady) {
+        renderTagView();
+      } else {
+        renderTagLoadState(state.tagError);
+        if (!state.tagError) void ensureTagCatalog();
+      }
     } else if (state.view === "all") {
       renderAllSeriesView();
     } else if (state.view === "favorites") {
@@ -1066,6 +1100,53 @@ function startApplication() {
     applyRenderFocus(ui.main, options);
   }
 
+  function configureTagLoader() {
+    state.tagsReady = false;
+    state.tagError = null;
+    state.ensureTags = createLazyTagLoader({
+      getCore: () => state.payload,
+      loadPayload: async () => {
+        const response = await fetch(
+          new URL("../data/catalog-tags.json", import.meta.url),
+          {
+            headers: { Accept: "application/json" },
+            signal: state.fetchController?.signal,
+          },
+        );
+        if (!response.ok) {
+          throw new Error(`标签请求失败（HTTP ${response.status}）`);
+        }
+        return response.json();
+      },
+      onHydrated: (payload) => {
+        state.payload = payload;
+        state.model = createCatalogModel(payload);
+        state.tagsReady = true;
+        state.tagError = null;
+      },
+    });
+  }
+
+  async function ensureTagCatalog() {
+    if (state.tagsReady) return true;
+    try {
+      await state.ensureTags?.();
+      if (state.query || state.view === "tags") renderCurrentView();
+      if (ui.videoDialog.open && state.activeDialogCode) {
+        openVideoDialog(state.activeDialogCode, state.dialogTrigger);
+      }
+      return true;
+    } catch (error) {
+      if (error?.name === "AbortError") return false;
+      state.tagError = error;
+      if (!state.query && state.view === "tags") {
+        renderTagLoadState(error);
+        updateTabs();
+      }
+      return false;
+    }
+  }
+
   async function loadCatalog() {
     state.fetchController?.abort();
     state.fetchController = new AbortController();
@@ -1073,7 +1154,7 @@ function startApplication() {
     ui.connectionStatus.textContent =
       navigator.onLine === false ? "离线" : "同步目录";
     try {
-      const catalogRequest = fetch(new URL("../data/catalog.json", import.meta.url), {
+      const catalogRequest = fetch(new URL("../data/catalog-core.json", import.meta.url), {
         headers: { Accept: "application/json" },
         signal: state.fetchController.signal,
       });
@@ -1091,6 +1172,7 @@ function startApplication() {
       state.featuredCovers = await featuredCoversRequest;
       state.payload = payload;
       state.model = createCatalogModel(payload);
+      configureTagLoader();
       const fallbackSeries = state.model.getRecentSeries(1)[0]?.code ?? "";
       if (!state.model.getSeries(state.preferences.selectedSeries)) {
         state.preferences.selectedSeries = fallbackSeries;
@@ -1386,6 +1468,7 @@ function startApplication() {
       return;
     }
     disconnectPreviewObserver();
+    state.activeDialogCode = code;
     state.dialogTrigger = trigger ?? document.activeElement;
     const layout = createElement("div", "detail-layout");
     const coverFrame = createElement("figure", "detail-cover-frame");
@@ -1456,6 +1539,7 @@ function startApplication() {
     if (ui.videoDialog.open) {
       ui.videoDialog.close();
     }
+    state.activeDialogCode = null;
   }
 
   function trapDialogFocus(event) {
@@ -1555,6 +1639,7 @@ function startApplication() {
       mountSeriesWindow(code, 0);
     } else if (action === "open-video") {
       openVideoDialog(control.dataset.code, control);
+      if (!state.tagsReady && !state.tagError) void ensureTagCatalog();
     } else if (action === "close-dialog") {
       closeVideoDialog();
     } else if (action === "copy-code") {
@@ -1623,6 +1708,10 @@ function startApplication() {
       renderTagView();
     } else if (action === "retry") {
       void loadCatalog();
+    } else if (action === "retry-tags") {
+      state.tagError = null;
+      renderTagLoadState();
+      void ensureTagCatalog();
     } else if (action === "back-top") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (action === "close-toast") {

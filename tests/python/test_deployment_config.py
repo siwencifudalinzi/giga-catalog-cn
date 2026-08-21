@@ -170,7 +170,8 @@ class RefreshWorkflowConfigTests(unittest.TestCase):
         self.assertNotIn("npm test", self.workflow)
         stage_command = (
             "git add -- data/raw data/state data/update-summary.json "
-            "public/data/catalog.json public/data/featured-covers.json "
+            "public/data/catalog.json public/data/catalog-core.json "
+            "public/data/catalog-tags.json public/data/featured-covers.json "
             "public/media/featured-covers"
         )
         self.assertIn(stage_command, self.workflow)
@@ -459,7 +460,7 @@ class FrontendPerformanceHintTests(unittest.TestCase):
         source = INDEX_PATH.read_text(encoding="utf-8")
         head = source.split("</head>", 1)[0]
         for path in (
-            "data/catalog.json",
+            "data/catalog-core.json",
             "data/featured-covers.json",
         ):
             with self.subTest(path=path):
@@ -476,7 +477,7 @@ class FrontendPerformanceHintTests(unittest.TestCase):
         head = source.split("</head>", 1)[0]
         self.assertRegex(
             head,
-            r'<link\s+rel="preload"\s+href="data/catalog\.json"\s+'
+            r'<link\s+rel="preload"\s+href="data/catalog-core\.json"\s+'
             r'as="fetch"\s+crossorigin="anonymous"\s+fetchpriority="high"\s*>',
         )
         for path in (
@@ -485,6 +486,7 @@ class FrontendPerformanceHintTests(unittest.TestCase):
             "js/render.js",
             "js/favorites.js",
             "js/tags.js",
+            "js/runtime-tags.js",
         ):
             with self.subTest(path=path):
                 pattern = (
@@ -493,6 +495,8 @@ class FrontendPerformanceHintTests(unittest.TestCase):
                     + r'"\s*>'
                 )
                 self.assertEqual(len(re.findall(pattern, head)), 1)
+        self.assertNotIn('href="data/catalog.json"', head)
+        self.assertNotIn('href="data/catalog-tags.json"', head)
 
 
 class LocalDeploymentStateTests(unittest.TestCase):

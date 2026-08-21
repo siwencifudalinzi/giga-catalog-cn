@@ -1,8 +1,12 @@
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 
 from scripts.sync_official_tags import (
     apply_product_detail,
     apply_product_id_overrides,
+    build_publish_targets,
+    create_parser,
     mark_unavailable_product_tags,
     merge_tag_definitions,
     select_tag_sync_targets,
@@ -13,6 +17,36 @@ STAMP = "2026-08-20T00:00:00Z"
 
 
 class OfficialTagSyncTests(unittest.TestCase):
+    def test_runtime_artifact_defaults_are_public_and_published_atomically(self):
+        options = create_parser().parse_args([])
+        self.assertEqual(options.runtime_core.name, "catalog-core.json")
+        self.assertEqual(options.runtime_tags.name, "catalog-tags.json")
+
+        fake = SimpleNamespace(
+            products=Path("products.json"),
+            tags=Path("tags.json"),
+            catalog=Path("catalog.json"),
+            runtime_core=Path("catalog-core.json"),
+            runtime_tags=Path("catalog-tags.json"),
+        )
+        catalog = {
+            "generatedAt": STAMP,
+            "tags": [],
+            "series": [],
+        }
+        targets = build_publish_targets(fake, [], {"tags": []}, catalog)
+
+        self.assertEqual(
+            [path.name for path, _ in targets],
+            [
+                "products.json",
+                "tags.json",
+                "catalog.json",
+                "catalog-core.json",
+                "catalog-tags.json",
+            ],
+        )
+
     def test_applies_authoritative_detail_and_marks_even_empty_tags_complete(self):
         existing = {
             "code": "SPSF-1",

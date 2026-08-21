@@ -32,6 +32,7 @@ from src.giga_catalog.tags import (
     parse_tag_directory,
 )
 from src.giga_catalog.validation import validate_catalog
+from src.giga_catalog.runtime_catalog import build_runtime_catalogs
 from scripts.refresh import _commit_transaction
 
 
@@ -49,6 +50,16 @@ def create_parser() -> argparse.ArgumentParser:
         "--catalog",
         type=Path,
         default=ROOT / "public" / "data" / "catalog.json",
+    )
+    parser.add_argument(
+        "--runtime-core",
+        type=Path,
+        default=ROOT / "public" / "data" / "catalog-core.json",
+    )
+    parser.add_argument(
+        "--runtime-tags",
+        type=Path,
+        default=ROOT / "public" / "data" / "catalog-tags.json",
     )
     parser.add_argument(
         "--products",
@@ -401,17 +412,25 @@ def run_sync(argv: Optional[Sequence[str]] = None) -> dict:
         "tags": normalize_tag_definitions(definitions),
     }
     _commit_transaction(
-        [
-            (options.products, _json_bytes(raw_products)),
-            (options.tags, _json_bytes(raw_tags)),
-            (options.catalog, serialize_catalog(rebuilt)),
-        ],
+        build_publish_targets(options, raw_products, raw_tags, rebuilt),
         replacer=None,
         stale_remover=None,
     )
     if options.checkpoint.is_file():
         options.checkpoint.unlink()
     return result
+
+
+def build_publish_targets(options, raw_products, raw_tags, catalog) -> list:
+    """Build the one-transaction target set for full and runtime catalogs."""
+    runtime_core, runtime_tags = build_runtime_catalogs(catalog)
+    return [
+        (options.products, _json_bytes(raw_products)),
+        (options.tags, _json_bytes(raw_tags)),
+        (options.catalog, serialize_catalog(catalog)),
+        (options.runtime_core, _json_bytes(runtime_core)),
+        (options.runtime_tags, _json_bytes(runtime_tags)),
+    ]
 
 
 def _fetch_tag_directories(*, timeout: float, retries: int) -> list:

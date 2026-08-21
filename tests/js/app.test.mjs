@@ -11,6 +11,17 @@ test("the public shell exposes an accessible official tag index tab", () => {
   assert.match(html, />\s*标签索引\s*</u);
 });
 
+test("startup uses the compact core and keeps tags on the lazy path", () => {
+  const source = readFileSync(
+    new URL("../../public/js/app.js", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /data\/catalog-core\.json/u);
+  assert.match(source, /data\/catalog-tags\.json/u);
+  assert.doesNotMatch(source, /data\/catalog\.json/u);
+  assert.match(source, /createLazyTagLoader/u);
+});
+
 import {
   UI_STORAGE_KEY,
   applyRenderFocus,

@@ -86,6 +86,11 @@ python scripts/sync_official_tags.py --max-products 50
 `official-unavailable` 并保留空标签，不会伪造分类。前端可同时搜索中文或日文标签，
 并支持包含全部、包含任意、排除标签以及按最新、最早、番号排序。
 
+同步器还会在同一事务中生成 `public/data/catalog-core.json` 和
+`public/data/catalog-tags.json`。浏览器首屏只下载不含标签关系的 core；打开标签索引、
+进行标签搜索或查看影片详情时才按需加载标签包。完整 `catalog.json` 继续作为公开权威
+数据和发布校验输入，不会因首屏优化丢失字段。
+
 公开目录和私有状态按同一事务发布。下载、解析、校验或写入失败时，程序保留上一版文件。
 
 播放和字幕链接使用追加保留（append-only overlay）语义：新表格中的空白或缺失单元格不会删除已验证的历史链接。当前没有隐式删除机制；未来如需删除，必须先设计并校验显式 tombstone。
