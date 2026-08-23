@@ -26,7 +26,7 @@
 
 ## 验证证据
 
-- Python：263 tests passed，1 skipped（Windows 无目录 symlink 权限）。
+- Python：264 tests passed，1 skipped（Windows 无目录 symlink 权限）。
 - JavaScript：72 tests passed。
 - `node --check`：全部公开 JavaScript 通过。
 - `git diff --check`：通过。
