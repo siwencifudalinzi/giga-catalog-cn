@@ -101,7 +101,7 @@
 - Consumes: main 分支部署。
 - Produces: 正式站直达按钮、覆盖统计、失败分类和可回滚提交。
 
-- [ ] 推送并等待 Deploy catalog 成功。
-- [ ] 验证首屏懒加载、桌面与 390px、外链 rel、Console/Network。
+- [x] 推送并等待 Deploy catalog 成功。
+- [x] 验证首屏懒加载、320/390/768/1440px、外链 rel、Console/Network。
 - [x] 对 manifest 每一条复算 source hash，并对 catalog 每一条链接核对覆盖或终态。
-- [ ] 3122 个 slot 均已核对；完成生产部署和真实浏览器验收后宣告完成。
+- [x] 3122 个 slot 均已核对，生产部署、真实浏览器验收和每日计划任务烟测已完成。

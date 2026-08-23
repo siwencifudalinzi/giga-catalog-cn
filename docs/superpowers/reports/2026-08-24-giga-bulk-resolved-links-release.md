@@ -37,6 +37,17 @@
 
 Windows 计划任务每天 12:30 运行，一次最多处理 100 个新增/变更 slot，使用 4 个持久 Chrome profile。它只允许提交 `public/data/resolved-links.json`，没有变更时不产生提交，推送不使用 force。
 
+计划任务 `GIGA Resolved Links Daily` 已安装，触发器为北京时间 12:30，`MultipleInstances=IgnoreNew`。手工烟测返回 `LastTaskResult=0`，无新增数据时日志为 `unchanged`。
+
+## 生产验收
+
+- 站点：`https://siwencifudalinzi.github.io/giga-catalog-cn/`
+- GitHub Pages release manifest 改为可公开访问的 `/giga-release.json`，并从内容 hash 中排除平台不对外提供的 `.nojekyll` 控制文件。
+- Release pre-check：内容身份和 manifest 列出的全部公开文件一次匹配。
+- GitHub Pages 不支持项目自定义 HTTP security headers，因此 Netlify 专用的 header gate 不适用于该 Pages URL；内容 hash gate 已通过。
+- 真实 Chrome：首屏不请求 `resolved-links.json`，打开 SPSF-58 详情时只请求 1 次；4 个直达按钮均指向已验证落地页，`target=_blank` 且 `rel=noopener noreferrer`。
+- 320/390/768/1440px 没有横向溢出，Console 无报错，键盘第一个焦点为“跳到影片目录”。
+
 ## 回滚
 
 回退本次数据提交即可恢复原短链行为。`catalog.json`、每日影片同步和原链接从未被改写。
