@@ -118,6 +118,27 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
             "gofile",
         )
 
+    def test_manifest_keeps_allowlisted_destination_when_source_label_is_stale(self):
+        catalog = {
+            "series": [{"videos": [{
+                "code": "ATHB-1",
+                "links": {"streamtape": "https://ouo.io/NEMymt"},
+            }]}],
+        }
+        candidate = next(iter(iter_catalog_candidates(catalog)))
+        state = {"schemaVersion": 1, "results": {candidate.key: {
+            "sourceUrlHash": candidate.source_url_hash,
+            "status": "verified",
+            "provider": "player4me",
+            "finalUrl": "https://gigaandzen.embed4me.com/#nrf8u",
+            "checkedAt": "2026-08-23T00:00:00Z",
+            "attempts": 1,
+        }}}
+        manifest = build_manifest([candidate], state, generated_at="2026-08-23T01:00:00Z")
+        entry = manifest["entries"]["ATHB-1"]["standard.streamtape"]
+        self.assertEqual(entry["provider"], "player4me")
+        self.assertEqual(entry["finalUrl"], "https://gigaandzen.embed4me.com/#nrf8u")
+
     def test_existing_public_manifest_seeds_empty_private_state(self):
         catalog = {
             "series": [{"videos": [{

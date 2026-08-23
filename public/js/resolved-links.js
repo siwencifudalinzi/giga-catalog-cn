@@ -4,6 +4,11 @@ const ALLOWED_HOSTS = new Set([
   "streamtape.com",
   "gigaandzen.embed4me.com",
 ]);
+const PROVIDER_LABELS = Object.freeze({
+  gofile: "Gofile",
+  streamtape: "Streamtape",
+  player4me: "Player4me",
+});
 
 function keyFor(code, slot) {
   return `${code}\u0000${slot}`;
@@ -78,7 +83,6 @@ export function normalizeResolvedLinkManifest(raw) {
       const finalUrl = normalizeFinalUrl(entry?.finalUrl);
       if (
         !/^(?:standard|uncensored)\.(?:gofile|streamtape|player4me)$/u.test(slot) ||
-        entry?.provider !== slot.split(".").at(-1) ||
         providerForFinalUrl(finalUrl || "https://invalid.invalid/") !== entry?.provider ||
         entry?.kind !== "external" ||
         entry?.status !== "verified" ||
@@ -127,7 +131,7 @@ export async function resolveLinkTarget(input, manifest, subtle) {
       entry.sourceUrlHash
       ? {
           url: entry.finalUrl,
-          label: `直达 ${input.label}`,
+          label: `直达 ${PROVIDER_LABELS[entry.provider] || input.label}`,
           resolved: true,
         }
       : fallback;

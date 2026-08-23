@@ -131,6 +131,30 @@ test("a final landing domain must match the declared provider", () => {
   assert.equal(normalizeResolvedLinkManifest(raw).size, 0);
 });
 
+test("a stale source slot label may resolve to a different allowlisted provider", async () => {
+  const raw = manifestWith("https://gigaandzen.embed4me.com/#nrf8u");
+  raw.entries["SPSF-58"]["standard.gofile"].provider = "player4me";
+  const manifest = normalizeResolvedLinkManifest(raw);
+  assert.equal(manifest.size, 1);
+  assert.deepEqual(
+    await resolveLinkTarget(
+      {
+        code: "SPSF-58",
+        provider: "gofile",
+        slot: "standard.gofile",
+        label: "Gofile",
+        sourceUrl: SOURCE,
+      },
+      manifest,
+    ),
+    {
+      url: "https://gigaandzen.embed4me.com/#nrf8u",
+      label: "直达 Player4me",
+      resolved: true,
+    },
+  );
+});
+
 test("loader fetches once and network failure falls back empty", async () => {
   let calls = 0;
   const load = createResolvedLinkLoader(async () => {

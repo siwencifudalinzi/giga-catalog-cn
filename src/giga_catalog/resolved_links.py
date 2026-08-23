@@ -135,6 +135,20 @@ def validate_final_url(value: object, *, expected_provider: Optional[str] = None
     return urlunsplit(("https", host, parsed.path, "", parsed.fragment))
 
 
+def provider_for_final_url(value: object) -> Optional[str]:
+    normalized = validate_final_url(value)
+    if not normalized:
+        return None
+    host = (urlsplit(normalized).hostname or "").lower()
+    if host in GOFILE_HOSTS:
+        return "gofile"
+    if host in STREAMTAPE_HOSTS:
+        return "streamtape"
+    if host in PLAYER4ME_HOSTS:
+        return "player4me"
+    return None
+
+
 def build_manifest(
     candidates: Iterable[LinkCandidate],
     state: Mapping[str, object],
@@ -149,18 +163,20 @@ def build_manifest(
         result = results.get(candidate.key)
         if not isinstance(result, Mapping):
             continue
-        final_url = validate_final_url(result.get("finalUrl"), expected_provider=candidate.provider)
+        provider = result.get("provider") or provider_for_final_url(result.get("finalUrl"))
+        final_url = validate_final_url(result.get("finalUrl"), expected_provider=provider)
         checked_at = result.get("checkedAt")
         if (
             result.get("status") != "verified"
             or result.get("sourceUrlHash") != candidate.source_url_hash
+            or provider not in PROVIDER_ORDER
             or not final_url
             or not isinstance(checked_at, str)
             or not checked_at
         ):
             continue
         entries.setdefault(candidate.code, {})[candidate.slot] = {
-            "provider": candidate.provider,
+            "provider": provider,
             "sourceUrlHash": candidate.source_url_hash,
             "finalUrl": final_url,
             "kind": "external",
@@ -190,10 +206,11 @@ def seed_state_from_manifest(
             continue
         code_entries = entries.get(candidate.code)
         entry = code_entries.get(candidate.slot) if isinstance(code_entries, Mapping) else None
-        final_url = validate_final_url(entry.get("finalUrl"), expected_provider=candidate.provider) if isinstance(entry, Mapping) else None
+        provider = entry.get("provider") if isinstance(entry, Mapping) else None
+        final_url = validate_final_url(entry.get("finalUrl"), expected_provider=provider) if isinstance(entry, Mapping) else None
         if (
             isinstance(entry, Mapping)
-            and entry.get("provider") == candidate.provider
+            and provider in PROVIDER_ORDER
             and entry.get("sourceUrlHash") == candidate.source_url_hash
             and entry.get("status") == "verified"
             and entry.get("kind") == "external"
@@ -203,6 +220,7 @@ def seed_state_from_manifest(
             results[candidate.key] = {
                 "sourceUrlHash": candidate.source_url_hash,
                 "status": "verified",
+                "provider": provider,
                 "finalUrl": final_url,
                 "checkedAt": entry["checkedAt"],
                 "attempts": 0,
