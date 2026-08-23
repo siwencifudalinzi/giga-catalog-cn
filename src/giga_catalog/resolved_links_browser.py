@@ -27,6 +27,11 @@ def choose_flow_url(urls):
     return None
 
 
+def is_human_verification_title(value: object) -> bool:
+    title = str(value or "").strip().lower()
+    return any(marker in title for marker in ("just a moment", "请稍候", "安全验证"))
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -91,6 +96,12 @@ def _make_result(candidate, previous, raw):
         "checkedAt": utc_now(),
         "attempts": attempts,
     }
+    if (
+        result["status"] == "retryable"
+        and raw.get("errorCode") == "unknown-destination"
+        and attempts >= 4
+    ):
+        result["status"] = "unsupported"
     if result["status"] == "verified":
         result["provider"] = final_provider
         result["finalUrl"] = final_url
@@ -216,7 +227,7 @@ class PlaywrightOuoResolver:
                     "observedHost": (urlsplit(page.url).hostname or "").lower(),
                 }
             title = (await page.title()).lower()
-            if "just a moment" in title or (response is not None and response.status == 403):
+            if is_human_verification_title(title) or (response is not None and response.status == 403):
                 await page.wait_for_timeout(4_000)
                 response = None
                 continue
@@ -245,6 +256,8 @@ class PlaywrightOuoResolver:
         final_url = validate_final_url(page.url)
         if final_url:
             return {"status": "verified", "finalUrl": final_url}
+        if is_human_verification_title(await page.title()):
+            return {"status": "blocked-human", "errorCode": "human-verification"}
         return {"status": "retryable", "errorCode": "flow-timeout"}
 
     async def _adopt_flow_page(self):

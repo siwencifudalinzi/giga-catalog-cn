@@ -15,6 +15,7 @@ from src.giga_catalog.resolved_links_browser import (
     choose_flow_url,
     collect_candidates,
     collect_candidates_parallel,
+    is_human_verification_title,
     is_ouo_flow_url,
 )
 
@@ -173,6 +174,11 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
 
 
 class ResolvedLinkCollectorTests(unittest.IsolatedAsyncioTestCase):
+    def test_localized_cloudflare_title_is_human_verification(self):
+        self.assertTrue(is_human_verification_title("请稍候…"))
+        self.assertTrue(is_human_verification_title("Just a moment..."))
+        self.assertFalse(is_human_verification_title("OUO link flow"))
+
     def test_ouo_flow_accepts_the_service_canonical_press_host_only(self):
         self.assertTrue(is_ouo_flow_url("https://ouo.io/abc123"))
         self.assertTrue(is_ouo_flow_url("https://ouo.press/go/abc123"))
@@ -269,6 +275,29 @@ class ResolvedLinkCollectorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(processed, 1)
         self.assertEqual(state["results"][candidate.key]["status"], "verified")
         self.assertEqual(state["results"][candidate.key]["attempts"], 2)
+
+    async def test_persistent_unknown_destination_becomes_unsupported(self):
+        candidate = next(iter(iter_catalog_candidates({
+            "series": [{"videos": [{
+                "code": "OLD-1",
+                "links": {"streamtape": "https://ouo.io/oldLink"},
+            }]}],
+        })))
+        state = {"schemaVersion": 1, "results": {candidate.key: {
+            "sourceUrlHash": candidate.source_url_hash,
+            "status": "retryable",
+            "attempts": 3,
+        }}}
+        resolver = AsyncMock(return_value={
+            "status": "retryable",
+            "errorCode": "unknown-destination",
+            "observedHost": "strmup.to",
+        })
+        await collect_candidates([candidate], state, resolver, checkpoint=lambda value: None)
+        result = state["results"][candidate.key]
+        self.assertEqual(result["status"], "unsupported")
+        self.assertEqual(result["attempts"], 4)
+        self.assertEqual(result["observedHost"], "strmup.to")
 
     async def test_parallel_collector_processes_each_candidate_once(self):
         catalog = {"series": [{"videos": [
