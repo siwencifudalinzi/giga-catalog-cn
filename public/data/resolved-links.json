@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-23T00:00:00Z",
+  "entries": {
+    "SPSF-58": {
+      "gofile": {
+        "sourceUrlHash": "sha256:8e4a74b155b39a37bc851982ed6c75f3b6ee95f0b42528b11cc6cc62afe198fc",
+        "finalUrl": "https://gofile.io/d/N87ugOtd",
+        "kind": "external",
+        "status": "verified",
+        "checkedAt": "2026-08-23T00:00:00Z"
+      }
+    }
+  }
+}
