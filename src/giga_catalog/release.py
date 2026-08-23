@@ -16,6 +16,7 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 SCHEMA_VERSION = 1
 MANIFEST_RELATIVE_PATH = "giga-release.json"
+DEPLOY_CONTROL_PATHS = {".nojekyll"}
 CATALOG_RELATIVE_PATH = "data/catalog.json"
 HOME_RELATIVE_PATH = "index.html"
 MISSING_PROBE_RELATIVE_PATH = "js/__giga_release_probe_missing__.js"
@@ -596,7 +597,7 @@ def _collect_public_hashes(public_dir: Path) -> Dict[str, str]:
         if not path.is_file():
             continue
         relative_path = path.relative_to(public_dir).as_posix()
-        if relative_path == MANIFEST_RELATIVE_PATH:
+        if relative_path == MANIFEST_RELATIVE_PATH or relative_path in DEPLOY_CONTROL_PATHS:
             continue
         _validate_relative_path(relative_path)
         files[relative_path] = _hash_file(path)

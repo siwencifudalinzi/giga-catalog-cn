@@ -89,6 +89,7 @@ class ReleaseTestCase(unittest.TestCase):
 
 class ManifestTests(ReleaseTestCase):
     def test_full_public_hash_is_deterministic_and_excludes_release_manifest(self):
+        (self.public / ".nojekyll").write_bytes(b"")
         first = self.build_manifest()
         self.manifest_path.write_text("different stale content", encoding="utf-8")
         second = self.build_manifest()
@@ -101,6 +102,7 @@ class ManifestTests(ReleaseTestCase):
         self.assertEqual(first["sourceCommit"], SOURCE_COMMIT)
         self.assertEqual(first["schemaVersion"], 1)
         self.assertNotIn("giga-release.json", first["files"])
+        self.assertNotIn(".nojekyll", first["files"])
 
     def test_manifest_writer_emits_compact_utf8_and_validates_local_files(self):
         manifest = release.write_manifest(
