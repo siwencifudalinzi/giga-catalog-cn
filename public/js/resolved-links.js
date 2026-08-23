@@ -4,8 +4,8 @@ const ALLOWED_HOSTS = new Set([
   "streamtape.com",
 ]);
 
-function keyFor(code, provider) {
-  return `${code}\u0000${provider}`;
+function keyFor(code, slot) {
+  return `${code}\u0000${slot}`;
 }
 
 function normalizeFinalUrl(value) {
@@ -31,8 +31,7 @@ function normalizeFinalUrl(value) {
     }
     if (
       url.hostname === "streamtape.com" &&
-      (/\.mp4(?:$|\/)/iu.test(url.pathname) ||
-        !/^\/v\/[A-Za-z0-9_-]+(?:\/[^/]*)?\/?$/u.test(url.pathname))
+      !/^\/(?:v|e)\/[A-Za-z0-9_-]+(?:\/[^/?#]*)?\/?$/u.test(url.pathname)
     ) {
       return null;
     }
@@ -46,22 +45,23 @@ export function normalizeResolvedLinkManifest(raw) {
   const result = new Map();
   if (
     !raw ||
-    raw.schemaVersion !== 1 ||
+    raw.schemaVersion !== 2 ||
     !raw.entries ||
     typeof raw.entries !== "object" ||
     Array.isArray(raw.entries)
   ) {
     return result;
   }
-  for (const [rawCode, providers] of Object.entries(raw.entries)) {
+  for (const [rawCode, slots] of Object.entries(raw.entries)) {
     const code = rawCode.normalize("NFKC").trim().toUpperCase();
-    if (!code || !providers || typeof providers !== "object") {
+    if (!code || !slots || typeof slots !== "object") {
       continue;
     }
-    for (const [provider, entry] of Object.entries(providers)) {
+    for (const [slot, entry] of Object.entries(slots)) {
       const finalUrl = normalizeFinalUrl(entry?.finalUrl);
       if (
-        !["gofile", "streamtape"].includes(provider) ||
+        !/^(?:standard|uncensored)\.(?:gofile|streamtape|player4me)$/u.test(slot) ||
+        entry?.provider !== slot.split(".").at(-1) ||
         entry?.kind !== "external" ||
         entry?.status !== "verified" ||
         !/^sha256:[0-9a-f]{64}$/u.test(entry?.sourceUrlHash || "") ||
@@ -70,7 +70,7 @@ export function normalizeResolvedLinkManifest(raw) {
         continue;
       }
       result.set(
-        keyFor(code, provider),
+        keyFor(code, slot),
         Object.freeze({ ...entry, finalUrl }),
       );
     }
@@ -100,7 +100,7 @@ export async function resolveLinkTarget(input, manifest, subtle) {
     resolved: false,
   };
   const code = input.code.normalize("NFKC").trim().toUpperCase();
-  const entry = manifest?.get(keyFor(code, input.provider));
+  const entry = manifest?.get(keyFor(code, input.slot));
   if (!entry) {
     return fallback;
   }

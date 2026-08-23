@@ -14,10 +14,11 @@ const HASH =
 
 function manifestWith(finalUrl) {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     entries: {
       "SPSF-58": {
-        gofile: {
+        "standard.gofile": {
+          provider: "gofile",
           sourceUrlHash: HASH,
           finalUrl,
           kind: "external",
@@ -43,6 +44,7 @@ test("safe entry resolves direct and changed source falls back", async () => {
       {
         code: "SPSF-58",
         provider: "gofile",
+        slot: "standard.gofile",
         label: "Gofile",
         sourceUrl: SOURCE,
       },
@@ -59,6 +61,7 @@ test("safe entry resolves direct and changed source falls back", async () => {
       {
         code: "SPSF-58",
         provider: "gofile",
+        slot: "standard.gofile",
         label: "Gofile",
         sourceUrl: "https://ouo.io/changed",
       },
@@ -72,12 +75,31 @@ test("safe entry resolves direct and changed source falls back", async () => {
   );
 });
 
-test("unsafe or media-looking destinations are dropped", () => {
+test("Streamtape mp4-looking watch pages remain external landing pages", () => {
+  const manifest = normalizeResolvedLinkManifest({
+    schemaVersion: 2,
+    entries: {
+      "SPSF-58": {
+        "standard.streamtape": {
+          provider: "streamtape",
+          sourceUrlHash: HASH,
+          finalUrl: "https://streamtape.com/v/dKVZ8pvyRduk8vA/SPSF-58.mp4",
+          kind: "external",
+          status: "verified",
+          checkedAt: "2026-08-23T00:00:00Z",
+        },
+      },
+    },
+  });
+  assert.equal(manifest.size, 1);
+});
+
+test("unsafe or non-watch destinations are dropped", () => {
   for (const finalUrl of [
     "http://gofile.io/d/N87ugOtd",
     "https://user:pass@gofile.io/d/N87ugOtd",
     "https://evil.example/d/N87ugOtd",
-    "https://streamtape.com/v/file/movie.mp4",
+    "https://streamtape.com/get_video?id=file",
   ]) {
     assert.equal(normalizeResolvedLinkManifest(manifestWith(finalUrl)).size, 0);
   }
@@ -89,7 +111,7 @@ test("loader fetches once and network failure falls back empty", async () => {
     calls += 1;
     return {
       ok: true,
-      json: async () => ({ schemaVersion: 1, entries: {} }),
+      json: async () => ({ schemaVersion: 2, entries: {} }),
     };
   });
   assert.equal((await load()).size, 0);

@@ -252,17 +252,17 @@ export function collectLinkGroups(links) {
     return [];
   }
   const groups = [];
-  const collectProviders = (source) => {
+  const collectProviders = (source, groupKey) => {
     if (!isRecord(source)) {
       return [];
     }
     return PROVIDERS.flatMap(([provider, label]) => {
       const url = safeHttpUrl(source[provider]);
-      return url ? [{ provider, label, url }] : [];
+      return url ? [{ provider, slot: `${groupKey}.${provider}`, label, url }] : [];
     });
   };
-  const standard = collectProviders(links);
-  const uncensored = collectProviders(links.uncensored);
+  const standard = collectProviders(links, "standard");
+  const uncensored = collectProviders(links.uncensored, "uncensored");
   const subtitleUrl = safeHttpUrl(links.subtitle);
   if (standard.length) {
     groups.push({ key: "standard", label: "普通版", links: standard });
@@ -281,6 +281,7 @@ export function collectLinkGroups(links) {
       links: [
         {
           provider: "subtitle",
+          slot: "subtitle.subtitle",
           label: "字幕",
           url: subtitleUrl,
         },
@@ -301,6 +302,7 @@ export async function upgradeLinkGroups(videoCode, groups, manifest) {
             {
               code: videoCode,
               provider: item.provider,
+              slot: item.slot,
               label: item.label,
               sourceUrl: item.url,
             },

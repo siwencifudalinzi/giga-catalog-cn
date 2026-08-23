@@ -408,11 +408,13 @@ test("external links are grouped deterministically and unsafe URLs are dropped",
         links: [
           {
             provider: "streamtape",
+            slot: "standard.streamtape",
             label: "Streamtape",
             url: "https://video.example/watch",
           },
           {
             provider: "gofile",
+            slot: "standard.gofile",
             label: "Gofile",
             url: "https://files.example/item",
           },
@@ -424,6 +426,7 @@ test("external links are grouped deterministically and unsafe URLs are dropped",
         links: [
           {
             provider: "player4me",
+            slot: "uncensored.player4me",
             label: "Player4me",
             url: "https://player.example/watch",
           },
@@ -435,6 +438,7 @@ test("external links are grouped deterministically and unsafe URLs are dropped",
         links: [
           {
             provider: "subtitle",
+            slot: "subtitle.subtitle",
             label: "字幕",
             url: "https://subtitles.example/file",
           },
@@ -444,14 +448,15 @@ test("external links are grouped deterministically and unsafe URLs are dropped",
   );
 });
 
-test("resolved cache upgrades one matching link and preserves the other", async () => {
+test("resolved cache upgrades matching slots without colliding with uncensored links", async () => {
   const groups = collectLinkGroups({
     gofile: "https://ouo.io/mT78vqU",
     streamtape: "https://ouo.io/kPWPLr",
+    uncensored: { gofile: "https://ouo.io/HNjGRu" },
   });
   const manifest = new Map([
     [
-      "SPSF-58\u0000gofile",
+      "SPSF-58\u0000standard.gofile",
       {
         sourceUrlHash:
           "sha256:8e4a74b155b39a37bc851982ed6c75f3b6ee95f0b42528b11cc6cc62afe198fc",
@@ -467,15 +472,26 @@ test("resolved cache upgrades one matching link and preserves the other", async 
   assert.deepEqual(upgraded[0].links, [
     {
       provider: "streamtape",
+      slot: "standard.streamtape",
       label: "Streamtape",
       url: "https://ouo.io/kPWPLr",
       resolved: false,
     },
     {
       provider: "gofile",
+      slot: "standard.gofile",
       label: "直达 Gofile",
       url: "https://gofile.io/d/N87ugOtd",
       resolved: true,
+    },
+  ]);
+  assert.deepEqual(upgraded[1].links, [
+    {
+      provider: "gofile",
+      slot: "uncensored.gofile",
+      label: "Gofile",
+      url: "https://ouo.io/HNjGRu",
+      resolved: false,
     },
   ]);
 });
