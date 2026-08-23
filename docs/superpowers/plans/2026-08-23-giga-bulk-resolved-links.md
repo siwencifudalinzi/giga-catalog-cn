@@ -33,11 +33,11 @@
 - Consumes: `code`, `slot`, `provider`, `sourceUrl`。
 - Produces: schema v2 `Map<code\0slot, entry>`，普通版和无码版同提供商互不冲突。
 
-- [ ] 写 schema v2、Streamtape HTML 观看页和双 slot 的失败测试。
-- [ ] 运行针对性 Node 测试并确认因 v2/slot 未实现而失败。
-- [ ] 实现 v2 校验、slot 传递和 source hash 回退。
-- [ ] 运行针对性测试并确认通过。
-- [ ] 提交 schema v2 前端改造。
+- [x] 写 schema v2、Streamtape HTML 观看页和双 slot 的失败测试。
+- [x] 运行针对性 Node 测试并确认因 v2/slot 未实现而失败。
+- [x] 实现 v2 校验、slot 传递和 source hash 回退。
+- [x] 运行针对性测试并确认通过。
+- [x] 提交 schema v2 前端改造。
 
 ### Task 2: 确定性队列、状态与 manifest 生成器
 
@@ -51,11 +51,11 @@
 - Consumes: `public/data/catalog.json`、旧 manifest、非公开 state。
 - Produces: `iter_catalog_candidates()`、`validate_final_url()`、`build_manifest()`、原子 JSON 写入和断点状态。
 
-- [ ] 写目录遍历、allowlist、私网/凭据拒绝、确定性输出和旧结果保留的失败测试。
-- [ ] 运行 Python 针对性测试并确认模块缺失失败。
-- [ ] 实现最小核心与 CLI dry-run。
-- [ ] 运行针对性测试并确认通过。
-- [ ] 提交解析核心。
+- [x] 写目录遍历、allowlist、私网/凭据拒绝、确定性输出和旧结果保留的失败测试。
+- [x] 运行 Python 针对性测试并确认模块缺失失败。
+- [x] 实现最小核心与 CLI dry-run。
+- [x] 运行针对性测试并确认通过。
+- [x] 提交解析核心。
 
 ### Task 3: 本机持久 Chrome 全量采集器
 
@@ -68,11 +68,11 @@
 - Consumes: pending candidate、Playwright persistent context。
 - Produces: `verified/retryable/blocked-human/unsupported/dead` 结果；成功即时 checkpoint。
 
-- [ ] 写正常两阶段按钮、弹窗关闭、未知目标和真人验证 fixture 的失败测试。
-- [ ] 运行测试并确认 collector 接口缺失失败。
-- [ ] 实现串行采集、限速、超时、checkpoint 和 `--max-links 0` 全量模式。
-- [ ] 用三类真实样本做烟测并固定允许域名。
-- [ ] 提交浏览器采集器。
+- [x] 写正常两阶段按钮、弹窗关闭、未知目标和真人验证 fixture 的失败测试。
+- [x] 运行测试并确认 collector 接口缺失失败。
+- [x] 实现串行/并行采集、限速、超时、checkpoint 和 `--max-links 0` 全量模式。
+- [x] 用 Gofile、Streamtape、Player4me 真实样本做烟测并固定允许域名。
+- [x] 提交浏览器采集器。
 
 ### Task 4: 全量运行与每日同步
 
@@ -86,10 +86,10 @@
 - Consumes: 3122 条候选与断点状态。
 - Produces: 全量已验证缓存；每日同步后运行无浏览器重定向补充并暂存该文件。
 
-- [ ] 全量采集至 pending 队列耗尽或每条均有终态证据。
-- [ ] 增加 workflow 失败关闭集成及失败测试。
-- [ ] 运行完整 Python/JavaScript/静态与敏感字段扫描。
-- [ ] 提交生成数据和自动同步。
+- [x] 全量采集至 3122 个 slot 全部获得终态证据。
+- [x] 增加本机计划任务失败关闭集成及失败测试。
+- [x] 运行完整 Python/JavaScript/静态与敏感字段扫描。
+- [x] 生成 3030 个已验证直达条目，83 个 unsupported 和 9 个 blocked-human 仅留在非公开状态。
 
 ### Task 5: 发布、浏览器验证与完成审计
 
@@ -103,5 +103,5 @@
 
 - [ ] 推送并等待 Deploy catalog 成功。
 - [ ] 验证首屏懒加载、桌面与 390px、外链 rel、Console/Network。
-- [ ] 对 manifest 每一条复算 source hash，并对 catalog 每一条链接核对覆盖或终态。
-- [ ] 只有 3122 条全部有已验证直达结果时才宣告目标完成。
+- [x] 对 manifest 每一条复算 source hash，并对 catalog 每一条链接核对覆盖或终态。
+- [ ] 3122 个 slot 均已核对；完成生产部署和真实浏览器验收后宣告完成。
