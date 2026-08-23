@@ -12,8 +12,9 @@ if (-not (Test-Path -LiteralPath $runner -PathType Leaf)) {
 
 $escapedRunner = $runner.Replace('"', '""')
 $escapedRepo = $RepoPath.Replace('"', '""')
+$pwshPath = (Get-Command 'pwsh.exe' -ErrorAction Stop).Source
 $action = New-ScheduledTaskAction `
-    -Execute 'pwsh.exe' `
+    -Execute $pwshPath `
     -Argument ("-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"{0}`" -RepoPath `"{1}`"" -f $escapedRunner, $escapedRepo)
 $trigger = New-ScheduledTaskTrigger -Daily -At '12:30'
 $settings = New-ScheduledTaskSettingsSet `

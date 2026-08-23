@@ -11,6 +11,8 @@ class ResolvedLinksTaskTests(unittest.TestCase):
         self.assertIn("12:30", text)
         self.assertIn("IgnoreNew", text)
         self.assertIn("run_resolved_links_sync.ps1", text)
+        self.assertIn("Get-Command 'pwsh.exe'", text)
+        self.assertIn("-Execute $pwshPath", text)
 
     def test_runner_updates_only_generated_manifest_and_never_force_pushes(self):
         text = (ROOT / "scripts/run_resolved_links_sync.ps1").read_text(encoding="utf-8")
