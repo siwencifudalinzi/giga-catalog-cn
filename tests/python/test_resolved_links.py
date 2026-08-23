@@ -63,6 +63,9 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
             validate_final_url("https://gigaandzen.embed4me.com/#a3nxx"),
             "https://gigaandzen.embed4me.com/#a3nxx",
         )
+        self.assertIsNone(
+            validate_final_url("https://gofile.io/d/N87ugOtd", expected_provider="streamtape")
+        )
         for value in (
             "http://gofile.io/d/N87ugOtd",
             "https://user:pass@gofile.io/d/N87ugOtd",

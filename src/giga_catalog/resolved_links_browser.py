@@ -80,7 +80,7 @@ async def _resolve_safely(resolver, candidate):
 
 def _make_result(candidate, previous, raw):
     attempts = int(previous.get("attempts", 0)) + 1 if isinstance(previous, Mapping) else 1
-    final_url = validate_final_url(raw.get("finalUrl"))
+    final_url = validate_final_url(raw.get("finalUrl"), expected_provider=candidate.provider)
     status = raw.get("status")
     if status == "verified" and not final_url:
         status = "retryable"

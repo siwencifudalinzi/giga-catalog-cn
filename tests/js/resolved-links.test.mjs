@@ -126,6 +126,11 @@ test("unsafe or non-watch destinations are dropped", () => {
   }
 });
 
+test("a final landing domain must match the declared provider", () => {
+  const raw = manifestWith("https://streamtape.com/v/id/SPSF-58.mp4");
+  assert.equal(normalizeResolvedLinkManifest(raw).size, 0);
+});
+
 test("loader fetches once and network failure falls back empty", async () => {
   let calls = 0;
   const load = createResolvedLinkLoader(async () => {

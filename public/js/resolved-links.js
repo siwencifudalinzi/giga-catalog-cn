@@ -50,6 +50,14 @@ function normalizeFinalUrl(value) {
   }
 }
 
+function providerForFinalUrl(value) {
+  const host = new URL(value).hostname;
+  if (["gofile.io", "www.gofile.io"].includes(host)) return "gofile";
+  if (host === "streamtape.com") return "streamtape";
+  if (host === "gigaandzen.embed4me.com") return "player4me";
+  return null;
+}
+
 export function normalizeResolvedLinkManifest(raw) {
   const result = new Map();
   if (
@@ -71,6 +79,7 @@ export function normalizeResolvedLinkManifest(raw) {
       if (
         !/^(?:standard|uncensored)\.(?:gofile|streamtape|player4me)$/u.test(slot) ||
         entry?.provider !== slot.split(".").at(-1) ||
+        providerForFinalUrl(finalUrl || "https://invalid.invalid/") !== entry?.provider ||
         entry?.kind !== "external" ||
         entry?.status !== "verified" ||
         !/^sha256:[0-9a-f]{64}$/u.test(entry?.sourceUrlHash || "") ||
