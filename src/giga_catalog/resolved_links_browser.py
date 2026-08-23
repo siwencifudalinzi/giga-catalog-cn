@@ -201,7 +201,7 @@ class PlaywrightOuoResolver:
             )
         except Exception:
             response = None
-        await page.wait_for_timeout(10_000)
+        await page.wait_for_timeout(3_000)
         for _ in range(8):
             page = await self._adopt_flow_page()
             final_url = validate_final_url(page.url)
@@ -215,7 +215,7 @@ class PlaywrightOuoResolver:
                 }
             title = (await page.title()).lower()
             if "just a moment" in title or (response is not None and response.status == 403):
-                await page.wait_for_timeout(5_000)
+                await page.wait_for_timeout(4_000)
                 response = None
                 continue
             human = page.get_by_role("button", name="I'm a human")
@@ -224,22 +224,22 @@ class PlaywrightOuoResolver:
                     await human.first.click(timeout=5_000, no_wait_after=True)
                 except Exception:
                     pass
-                await page.wait_for_timeout(2_500)
+                await page.wait_for_timeout(1_500)
                 await self._adopt_flow_page()
                 continue
             get_link = page.get_by_role("button", name="Get Link")
             if await get_link.count() and await get_link.first.is_visible():
-                await page.wait_for_timeout(5_500)
+                await page.wait_for_timeout(4_000)
                 try:
                     await get_link.first.click(timeout=5_000, no_wait_after=True)
                 except Exception:
                     pass
-                await page.wait_for_timeout(5_000)
+                await page.wait_for_timeout(3_000)
                 await self._adopt_flow_page()
                 continue
             if "verify" in title or "captcha" in title or "security" in title:
                 return {"status": "blocked-human", "errorCode": "human-verification"}
-            await page.wait_for_timeout(2_000)
+            await page.wait_for_timeout(1_000)
         final_url = validate_final_url(page.url)
         if final_url:
             return {"status": "verified", "finalUrl": final_url}
