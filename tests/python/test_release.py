@@ -65,12 +65,11 @@ class ReleaseTestCase(unittest.TestCase):
         self.public = self.root / "public"
         (self.public / "data").mkdir(parents=True)
         (self.public / "js").mkdir()
-        (self.public / ".well-known").mkdir()
         (self.public / "index.html").write_bytes(b"home\n")
         (self.public / "data" / "catalog.json").write_bytes(b'{"ok":true}\n')
         (self.public / "js" / "app.js").write_bytes(b'console.log("ok")\n')
         self.manifest_path = (
-            self.public / ".well-known" / "giga-release.json"
+            self.public / "giga-release.json"
         )
         self.manifest_path.write_text("stale manifest", encoding="utf-8")
         self.netlify = self.root / "netlify.toml"
@@ -101,7 +100,7 @@ class ManifestTests(ReleaseTestCase):
         self.assertEqual(first["netlifyTomlSha256"], NETLIFY_SHA256)
         self.assertEqual(first["sourceCommit"], SOURCE_COMMIT)
         self.assertEqual(first["schemaVersion"], 1)
-        self.assertNotIn(".well-known/giga-release.json", first["files"])
+        self.assertNotIn("giga-release.json", first["files"])
 
     def test_manifest_writer_emits_compact_utf8_and_validates_local_files(self):
         manifest = release.write_manifest(
@@ -273,7 +272,7 @@ class LiveReleaseTests(ReleaseTestCase):
     def full_routes(self, manifest=None):
         value = manifest if manifest is not None else self.build_manifest()
         return {
-            "/.well-known/giga-release.json": [
+            "/giga-release.json": [
                 (
                     200,
                     self.manifest_bytes(value),
@@ -336,7 +335,7 @@ class LiveReleaseTests(ReleaseTestCase):
     def test_precheck_retries_malformed_json_then_matches_content_identity(self):
         live = self.build_manifest(source_commit="b" * 40)
         routes = self.full_routes(live)
-        routes["/.well-known/giga-release.json"] = [
+        routes["/giga-release.json"] = [
             (200, b"{malformed"),
             (200, self.manifest_bytes(live)),
         ]
@@ -355,7 +354,7 @@ class LiveReleaseTests(ReleaseTestCase):
             request
             for request in fixture.requests
             if request["path"].split("?", 1)[0]
-            == "/.well-known/giga-release.json"
+            == "/giga-release.json"
         ]
         self.assertEqual(len(manifest_requests), 2)
         for request in fixture.requests:
@@ -434,7 +433,7 @@ class LiveReleaseTests(ReleaseTestCase):
             "b6c8b243b01ef6d5673ee7911b7970ed2e83f2d22259149013823394481270af"
         )
         routes = {
-            "/.well-known/giga-release.json": [
+            "/giga-release.json": [
                 (200, self.manifest_bytes(live)),
             ]
         }
@@ -453,7 +452,7 @@ class LiveReleaseTests(ReleaseTestCase):
 
     def test_precheck_returns_unavailable_after_http_and_network_failures(self):
         with HttpFixture(
-            {"/.well-known/giga-release.json": [(503, b"retry later")]}
+            {"/giga-release.json": [(503, b"retry later")]}
         ) as fixture:
             http_result = release.compare_live_release(
                 self.build_manifest(),
@@ -489,7 +488,7 @@ class LiveReleaseTests(ReleaseTestCase):
 
     def test_truncated_manifest_is_retried_as_unavailable(self):
         routes = {
-            "/.well-known/giga-release.json": [
+            "/giga-release.json": [
                 (
                     200,
                     b'{"schemaVersion":',
@@ -519,7 +518,7 @@ class LiveReleaseTests(ReleaseTestCase):
             )
             handler.end_headers()
 
-        routes = {"/.well-known/giga-release.json": [oversized]}
+        routes = {"/giga-release.json": [oversized]}
         with HttpFixture(routes) as fixture:
             result = release.compare_live_release(
                 self.build_manifest(),
@@ -726,7 +725,7 @@ class LiveReleaseTests(ReleaseTestCase):
 
     def test_manifest_redirect_to_same_origin_different_path_is_not_followed(self):
         routes = self.full_routes()
-        routes["/.well-known/giga-release.json"] = [
+        routes["/giga-release.json"] = [
             (302, b"", {"Location": "/redirected-release.json"}),
         ]
         routes["/redirected-release.json"] = [
@@ -821,7 +820,7 @@ class LiveReleaseTests(ReleaseTestCase):
             for request in fixture.requests
         ]
         for required in (
-            "/.well-known/giga-release.json",
+            "/giga-release.json",
             "/",
             "/index.html",
             "/data/catalog.json",
@@ -900,7 +899,7 @@ class LiveReleaseTests(ReleaseTestCase):
                 "max-age=300",
             ),
             (
-                "/.well-known/giga-release.json",
+                "/giga-release.json",
                 "public, max-age=300",
                 "no-store",
             ),
@@ -938,7 +937,7 @@ class LiveReleaseTests(ReleaseTestCase):
     def test_post_deploy_rejects_conflicting_or_extra_cache_directives(self):
         cases = (
             (
-                "/.well-known/giga-release.json",
+                "/giga-release.json",
                 "no-store, public, max-age=31536000, immutable",
             ),
             (

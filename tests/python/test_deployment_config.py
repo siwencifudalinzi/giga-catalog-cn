@@ -412,7 +412,7 @@ class NetlifyConfigTests(unittest.TestCase):
             self.assertIn("must-revalidate", asset_cache)
 
         release_cache = self._header_values(
-            "/.well-known/giga-release.json"
+            "/giga-release.json"
         )["Cache-Control"]
         self.assertEqual(release_cache, "no-store")
         covers_cache = self._header_values(

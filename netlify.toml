@@ -34,7 +34,7 @@
     Cache-Control = "public, max-age=300, must-revalidate"
 
 [[headers]]
-  for = "/.well-known/giga-release.json"
+  for = "/giga-release.json"
   [headers.values]
     Cache-Control = "no-store"
 

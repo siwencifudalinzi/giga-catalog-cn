@@ -15,7 +15,7 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 
 SCHEMA_VERSION = 1
-MANIFEST_RELATIVE_PATH = ".well-known/giga-release.json"
+MANIFEST_RELATIVE_PATH = "giga-release.json"
 CATALOG_RELATIVE_PATH = "data/catalog.json"
 HOME_RELATIVE_PATH = "index.html"
 MISSING_PROBE_RELATIVE_PATH = "js/__giga_release_probe_missing__.js"
