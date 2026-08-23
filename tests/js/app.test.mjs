@@ -20,6 +20,11 @@ test("startup uses the compact core and keeps tags on the lazy path", () => {
   assert.match(source, /data\/catalog-tags\.json/u);
   assert.doesNotMatch(source, /data\/catalog\.json/u);
   assert.match(source, /createLazyTagLoader/u);
+  const html = readFileSync(
+    new URL("../../public/index.html", import.meta.url),
+    "utf8",
+  );
+  assert.doesNotMatch(html, /resolved-links\.json/u);
 });
 
 import {
@@ -37,6 +42,7 @@ import {
   normalizeSubtitleDirectoryResource,
   startPreviewProbeRequest,
   tabKeyTargetIndex,
+  upgradeLinkGroups,
 } from "../../public/js/app.js";
 
 test("opening a detail tag clears global search before switching views", () => {
@@ -436,6 +442,42 @@ test("external links are grouped deterministically and unsafe URLs are dropped",
       },
     ],
   );
+});
+
+test("resolved cache upgrades one matching link and preserves the other", async () => {
+  const groups = collectLinkGroups({
+    gofile: "https://ouo.io/mT78vqU",
+    streamtape: "https://ouo.io/kPWPLr",
+  });
+  const manifest = new Map([
+    [
+      "SPSF-58\u0000gofile",
+      {
+        sourceUrlHash:
+          "sha256:8e4a74b155b39a37bc851982ed6c75f3b6ee95f0b42528b11cc6cc62afe198fc",
+        finalUrl: "https://gofile.io/d/N87ugOtd",
+        kind: "external",
+        status: "verified",
+      },
+    ],
+  ]);
+
+  const upgraded = await upgradeLinkGroups("SPSF-58", groups, manifest);
+
+  assert.deepEqual(upgraded[0].links, [
+    {
+      provider: "streamtape",
+      label: "Streamtape",
+      url: "https://ouo.io/kPWPLr",
+      resolved: false,
+    },
+    {
+      provider: "gofile",
+      label: "直达 Gofile",
+      url: "https://gofile.io/d/N87ugOtd",
+      resolved: true,
+    },
+  ]);
 });
 
 test("global subtitle resource is normalized once and unsafe metadata is dropped", () => {

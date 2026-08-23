@@ -11,6 +11,10 @@ import {
 } from "./render.js";
 import { createFavoritesStore, getFavoriteVideos } from "./favorites.js";
 import { createLazyTagLoader } from "./runtime-tags.js";
+import {
+  createResolvedLinkLoader,
+  resolveLinkTarget,
+} from "./resolved-links.js";
 
 export const UI_STORAGE_KEY = "giga_catalog_ui_v1";
 
@@ -18,6 +22,7 @@ const SEARCH_DELAY_MS = 180;
 const FEATURED_COVERS_TIMEOUT_MS = 2000;
 const RECENT_SERIES_COUNT = 6;
 const PREVIEW_BATCH_SIZE = 4;
+const loadResolvedLinks = createResolvedLinkLoader();
 const PROVIDERS = Object.freeze([
   ["streamtape", "Streamtape"],
   ["player4me", "Player4me"],
@@ -283,6 +288,28 @@ export function collectLinkGroups(links) {
     });
   }
   return groups;
+}
+
+export async function upgradeLinkGroups(videoCode, groups, manifest) {
+  return Promise.all(
+    groups.map(async (group) => ({
+      ...group,
+      links: await Promise.all(
+        group.links.map(async (item) => ({
+          ...item,
+          ...await resolveLinkTarget(
+            {
+              code: videoCode,
+              provider: item.provider,
+              label: item.label,
+              sourceUrl: item.url,
+            },
+            manifest,
+          ),
+        })),
+      ),
+    })),
+  );
 }
 
 export function normalizeSubtitleDirectoryResource(resources) {
@@ -1385,11 +1412,10 @@ function startApplication() {
     }
   }
 
-  function createLinkSection(video) {
+  function renderLinkSection(groups) {
     const section = createElement("section", "detail-links");
     const heading = createElement("h3", "", "观看链接");
     section.append(heading);
-    const groups = collectLinkGroups(video.links);
     if (!groups.length) {
       section.append(
         createElement("p", "empty-state empty-state--compact", "暂无可用链接"),
@@ -1410,6 +1436,22 @@ function startApplication() {
       block.append(list);
       section.append(block);
     }
+    return section;
+  }
+
+  function createLinkSection(video) {
+    const groups = collectLinkGroups(video.links);
+    const section = renderLinkSection(groups);
+    void loadResolvedLinks()
+      .then((manifest) => upgradeLinkGroups(video.code, groups, manifest))
+      .then((upgraded) => {
+        const hasResolved = upgraded.some((group) =>
+          group.links.some((item) => item.resolved)
+        );
+        if (section.isConnected && hasResolved) {
+          section.replaceWith(renderLinkSection(upgraded));
+        }
+      });
     return section;
   }
 
