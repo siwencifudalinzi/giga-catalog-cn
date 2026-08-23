@@ -94,12 +94,33 @@ test("Streamtape mp4-looking watch pages remain external landing pages", () => {
   assert.equal(manifest.size, 1);
 });
 
+test("the exact Player4me landing host accepts its required content fragment", () => {
+  const manifest = normalizeResolvedLinkManifest({
+    schemaVersion: 2,
+    entries: {
+      "SPSF-52": {
+        "standard.player4me": {
+          provider: "player4me",
+          sourceUrlHash: HASH,
+          finalUrl: "https://gigaandzen.embed4me.com/#a3nxx",
+          kind: "external",
+          status: "verified",
+          checkedAt: "2026-08-23T00:00:00Z",
+        },
+      },
+    },
+  });
+  assert.equal(manifest.size, 1);
+});
+
 test("unsafe or non-watch destinations are dropped", () => {
   for (const finalUrl of [
     "http://gofile.io/d/N87ugOtd",
     "https://user:pass@gofile.io/d/N87ugOtd",
     "https://evil.example/d/N87ugOtd",
     "https://streamtape.com/get_video?id=file",
+    "https://evil.embed4me.com/#a3nxx",
+    "https://gigaandzen.embed4me.com/#bad-value",
   ]) {
     assert.equal(normalizeResolvedLinkManifest(manifestWith(finalUrl)).size, 0);
   }

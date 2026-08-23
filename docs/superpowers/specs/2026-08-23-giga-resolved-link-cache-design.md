@@ -61,11 +61,12 @@ public/data/resolved-links.json
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "generatedAt": "2026-08-23T00:00:00Z",
   "entries": {
     "SPSF-58": {
-      "gofile": {
+      "standard.gofile": {
+        "provider": "gofile",
         "sourceUrlHash": "sha256:<64-lowercase-hex>",
         "finalUrl": "https://gofile.io/d/N87ugOtd",
         "kind": "external",
@@ -76,6 +77,8 @@ public/data/resolved-links.json
   }
 }
 ```
+
+当前实现升级为 `schemaVersion: 2`；slot 使用 `standard.<provider>` 或 `uncensored.<provider>`，因此同一影片普通版和无码版可以同时保存同一提供商。
 
 约束：
 
@@ -110,11 +113,12 @@ catalog.json 中的链接
 最终落地页验证规则：
 
 - 必须为 HTTPS。
-- 拒绝用户名/密码、fragment、超长 URL、`javascript:`、`data:`、HTTP 降级。
+- 拒绝用户名/密码、超长 URL、`javascript:`、`data:`、HTTP 降级；仅 `gigaandzen.embed4me.com/#<content-id>` 因其公开内容 ID 必需而允许受限 fragment。
 - 拒绝 localhost、私网、链路本地地址和解析到非公网 IP 的主机。
-- 初始 allowlist：`gofile.io`、`www.gofile.io`、`streamtape.com`。
+- allowlist：`gofile.io`、`www.gofile.io`、`streamtape.com`、`gigaandzen.embed4me.com`。
 - Gofile 只接受 `/d/<public-id>`。
-- Streamtape 第一阶段只接受公开观看页；不把 `/v/...mp4` 的文件名外观当成真实媒体。
+- Streamtape 只接受 `/v/<id>/<filename>` 或 `/e/<id>/` 公开观看页；`/v/...mp4` 仍标记为 `external` HTML 页面，不标记成真实媒体。
+- Player4me 只接受精确主机 `gigaandzen.embed4me.com` 的根路径和字母数字内容 fragment。
 - 最大重定向数、响应体大小、单链接超时和全局并发必须有硬上限。
 - 验证失败不覆盖上一版已发布文件。
 

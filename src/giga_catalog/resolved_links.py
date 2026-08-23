@@ -16,7 +16,8 @@ PROVIDER_ORDER = ("streamtape", "player4me", "gofile")
 SOURCE_HOST = "ouo.io"
 GOFILE_HOSTS = {"gofile.io", "www.gofile.io"}
 STREAMTAPE_HOSTS = {"streamtape.com"}
-ALLOWED_FINAL_HOSTS = GOFILE_HOSTS | STREAMTAPE_HOSTS
+PLAYER4ME_HOSTS = {"gigaandzen.embed4me.com"}
+ALLOWED_FINAL_HOSTS = GOFILE_HOSTS | STREAMTAPE_HOSTS | PLAYER4ME_HOSTS
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 SLOT_RE = re.compile(r"^(standard|uncensored)\.(streamtape|player4me|gofile)$")
 GOFILE_PATH_RE = re.compile(r"^/d/[A-Za-z0-9]+/?$")
@@ -112,14 +113,19 @@ def validate_final_url(value: object) -> Optional[str]:
         or parsed.password
         or port not in (None, 443)
         or parsed.query
-        or parsed.fragment
     ):
         return None
     if host in GOFILE_HOSTS and not GOFILE_PATH_RE.fullmatch(parsed.path):
         return None
     if host in STREAMTAPE_HOSTS and not STREAMTAPE_PATH_RE.fullmatch(parsed.path):
         return None
-    return urlunsplit(("https", host, parsed.path, "", ""))
+    if host in PLAYER4ME_HOSTS and (
+        parsed.path not in ("", "/") or not re.fullmatch(r"[A-Za-z0-9]+", parsed.fragment)
+    ):
+        return None
+    if host not in PLAYER4ME_HOSTS and parsed.fragment:
+        return None
+    return urlunsplit(("https", host, parsed.path, "", parsed.fragment))
 
 
 def build_manifest(
@@ -159,6 +165,44 @@ def build_manifest(
         "generatedAt": generated_at,
         "entries": entries,
     }
+
+
+def seed_state_from_manifest(
+    candidates: Iterable[LinkCandidate],
+    manifest: Mapping[str, object],
+    state: Mapping[str, object],
+) -> dict:
+    seeded = dict(state) if isinstance(state, Mapping) else {}
+    existing_results = seeded.get("results")
+    results = dict(existing_results) if isinstance(existing_results, Mapping) else {}
+    entries = manifest.get("entries", {}) if isinstance(manifest, Mapping) and manifest.get("schemaVersion") == 2 else {}
+    if not isinstance(entries, Mapping):
+        entries = {}
+    for candidate in candidates:
+        if candidate.key in results:
+            continue
+        code_entries = entries.get(candidate.code)
+        entry = code_entries.get(candidate.slot) if isinstance(code_entries, Mapping) else None
+        final_url = validate_final_url(entry.get("finalUrl")) if isinstance(entry, Mapping) else None
+        if (
+            isinstance(entry, Mapping)
+            and entry.get("provider") == candidate.provider
+            and entry.get("sourceUrlHash") == candidate.source_url_hash
+            and entry.get("status") == "verified"
+            and entry.get("kind") == "external"
+            and final_url
+            and isinstance(entry.get("checkedAt"), str)
+        ):
+            results[candidate.key] = {
+                "sourceUrlHash": candidate.source_url_hash,
+                "status": "verified",
+                "finalUrl": final_url,
+                "checkedAt": entry["checkedAt"],
+                "attempts": 0,
+            }
+    seeded["schemaVersion"] = 1
+    seeded["results"] = results
+    return seeded
 
 
 def atomic_write_json(path: Path, value: object) -> None:

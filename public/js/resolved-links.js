@@ -2,6 +2,7 @@ const ALLOWED_HOSTS = new Set([
   "gofile.io",
   "www.gofile.io",
   "streamtape.com",
+  "gigaandzen.embed4me.com",
 ]);
 
 function keyFor(code, slot) {
@@ -18,7 +19,6 @@ function normalizeFinalUrl(value) {
       url.protocol !== "https:" ||
       url.username ||
       url.password ||
-      url.hash ||
       !ALLOWED_HOSTS.has(url.hostname)
     ) {
       return null;
@@ -33,6 +33,15 @@ function normalizeFinalUrl(value) {
       url.hostname === "streamtape.com" &&
       !/^\/(?:v|e)\/[A-Za-z0-9_-]+(?:\/[^/?#]*)?\/?$/u.test(url.pathname)
     ) {
+      return null;
+    }
+    if (
+      url.hostname === "gigaandzen.embed4me.com" &&
+      (!/^\/?$/u.test(url.pathname) || !/^#[A-Za-z0-9]+$/u.test(url.hash))
+    ) {
+      return null;
+    }
+    if (url.hostname !== "gigaandzen.embed4me.com" && url.hash) {
       return null;
     }
     return url.href;
