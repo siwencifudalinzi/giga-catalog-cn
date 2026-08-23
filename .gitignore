@@ -11,3 +11,5 @@ test-results/
 *.log
 *.tmp
 data/state/tag-sync-checkpoint.json
+data/state/resolved-links-state.json
+data/browser/
