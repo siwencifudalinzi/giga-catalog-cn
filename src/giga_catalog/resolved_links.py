@@ -154,6 +154,7 @@ def build_manifest(
     state: Mapping[str, object],
     *,
     generated_at: str,
+    previous_manifest: Optional[Mapping[str, object]] = None,
 ) -> dict:
     results = state.get("results", {}) if isinstance(state, Mapping) else {}
     if not isinstance(results, Mapping):
@@ -183,6 +184,14 @@ def build_manifest(
             "status": "verified",
             "checkedAt": checked_at,
         }
+    if (
+        isinstance(previous_manifest, Mapping)
+        and previous_manifest.get("schemaVersion") == 2
+        and previous_manifest.get("entries") == entries
+        and isinstance(previous_manifest.get("generatedAt"), str)
+        and previous_manifest.get("generatedAt")
+    ):
+        generated_at = previous_manifest["generatedAt"]
     return {
         "schemaVersion": 2,
         "generatedAt": generated_at,

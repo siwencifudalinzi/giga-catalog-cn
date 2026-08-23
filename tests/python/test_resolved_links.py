@@ -140,6 +140,28 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
         self.assertEqual(entry["provider"], "player4me")
         self.assertEqual(entry["finalUrl"], "https://gigaandzen.embed4me.com/#nrf8u")
 
+    def test_manifest_preserves_timestamp_when_public_entries_are_unchanged(self):
+        catalog = {"series": [{"videos": [{
+            "code": "SPSF-58",
+            "links": {"gofile": "https://ouo.io/normalGo"},
+        }]}]}
+        candidate = next(iter(iter_catalog_candidates(catalog)))
+        state = {"schemaVersion": 1, "results": {candidate.key: {
+            "sourceUrlHash": candidate.source_url_hash,
+            "status": "verified",
+            "provider": "gofile",
+            "finalUrl": "https://gofile.io/d/N87ugOtd",
+            "checkedAt": "2026-08-23T00:00:00Z",
+        }}}
+        previous = build_manifest([candidate], state, generated_at="2026-08-23T01:00:00Z")
+        current = build_manifest(
+            [candidate],
+            state,
+            generated_at="2026-08-24T01:00:00Z",
+            previous_manifest=previous,
+        )
+        self.assertEqual(current, previous)
+
     def test_existing_public_manifest_seeds_empty_private_state(self):
         catalog = {
             "series": [{"videos": [{

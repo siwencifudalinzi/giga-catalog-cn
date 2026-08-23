@@ -42,7 +42,7 @@ def parse_args(argv=None):
     return parser.parse_args(argv)
 
 
-async def run_browser(args, candidates, state):
+async def run_browser(args, candidates, state, previous_manifest):
     if not 1 <= args.workers <= 8:
         raise SystemExit("--workers must be between 1 and 8")
     resolvers = []
@@ -54,7 +54,12 @@ async def run_browser(args, candidates, state):
         def checkpoint(current_state):
             atomic_write_json(args.state, current_state)
             generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-            atomic_write_json(args.output, build_manifest(candidates, current_state, generated_at=generated_at))
+            atomic_write_json(args.output, build_manifest(
+                candidates,
+                current_state,
+                generated_at=generated_at,
+                previous_manifest=previous_manifest,
+            ))
 
         collector = collect_candidates if len(resolvers) == 1 else collect_candidates_parallel
         resolver_input = resolvers[0] if len(resolvers) == 1 else resolvers
@@ -68,13 +73,19 @@ def main(argv=None):
     catalog = load_json(args.catalog, {})
     candidates = list(iter_catalog_candidates(catalog))
     state = load_json(args.state, {"schemaVersion": 1, "results": {}})
-    state = seed_state_from_manifest(candidates, load_json(args.output, {}), state)
+    previous_manifest = load_json(args.output, {})
+    state = seed_state_from_manifest(candidates, previous_manifest, state)
     if args.browser:
-        processed = asyncio.run(run_browser(args, candidates, state))
+        processed = asyncio.run(run_browser(args, candidates, state, previous_manifest))
         print(f"processed={processed}")
         state = load_json(args.state, state)
     generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    manifest = build_manifest(candidates, state, generated_at=generated_at)
+    manifest = build_manifest(
+        candidates,
+        state,
+        generated_at=generated_at,
+        previous_manifest=previous_manifest,
+    )
     resolved = sum(len(slots) for slots in manifest["entries"].values())
     print(f"candidates={len(candidates)} resolved={resolved} pending={len(candidates) - resolved}")
     if args.write:
