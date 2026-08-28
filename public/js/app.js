@@ -26,6 +26,7 @@ const loadResolvedLinks = createResolvedLinkLoader();
 const PROVIDERS = Object.freeze([
   ["streamtape", "Streamtape"],
   ["player4me", "Player4me"],
+  ["vidara", "Vidara"],
   ["gofile", "Gofile"],
 ]);
 const FAVORITE_PRESENTATION = Object.freeze({

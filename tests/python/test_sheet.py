@@ -19,6 +19,32 @@ FIXTURE_PATH = Path(__file__).parents[1] / "fixtures" / "sheet.csv"
 
 
 class SheetParserTests(unittest.TestCase):
+    def test_maps_vidara_replacement_header_without_losing_uncensored_player4me(self) -> None:
+        """The live sheet may replace only the normal Player4me column with Vidara."""
+        text = (
+            "NEW CODE,STREAMTAPE LINK,VIDARA LINK,GOFILE LINK,UNCENSORED,"
+            "STREAMTAPE LINK,PLAYER4ME LINK,GOFILE LINK\n"
+            "SPSF-61,https://ouo.io/a,https://ouo.io/vidara,https://ouo.io/c,,"
+            "https://ouo.io/d,https://ouo.io/player4me,https://ouo.io/f\n"
+        )
+
+        links, conflicts = parse_sheet_csv(text)
+
+        self.assertEqual(
+            links["SPSF-61"],
+            {
+                "streamtape": "https://ouo.io/a",
+                "vidara": "https://ouo.io/vidara",
+                "gofile": "https://ouo.io/c",
+                "uncensored": {
+                    "streamtape": "https://ouo.io/d",
+                    "player4me": "https://ouo.io/player4me",
+                    "gofile": "https://ouo.io/f",
+                },
+            },
+        )
+        self.assertEqual(conflicts, [])
+
     def test_maps_normal_and_uncensored_link_columns(self) -> None:
         """The repeated provider headers belong to separate normal and uncensored groups."""
         links, conflicts = parse_sheet_csv(FIXTURE_PATH.read_text(encoding="utf-8"))

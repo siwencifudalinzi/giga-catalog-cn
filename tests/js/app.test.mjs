@@ -394,6 +394,7 @@ test("external links are grouped deterministically and unsafe URLs are dropped",
     collectLinkGroups({
       gofile: "https://files.example/item",
       streamtape: "https://video.example/watch",
+      vidara: "https://vidara.example/watch",
       player4me: "javascript:alert(1)",
       subtitle: "https://subtitles.example/file",
       uncensored: {
@@ -411,6 +412,12 @@ test("external links are grouped deterministically and unsafe URLs are dropped",
             slot: "standard.streamtape",
             label: "Streamtape",
             url: "https://video.example/watch",
+          },
+          {
+            provider: "vidara",
+            slot: "standard.vidara",
+            label: "Vidara",
+            url: "https://vidara.example/watch",
           },
           {
             provider: "gofile",

@@ -77,6 +77,14 @@ class CatalogSchemaValidationTests(unittest.TestCase):
         self.assertEqual(validate_catalog(catalog), [])
         self.assertEqual(DEFAULT_MIN_RELEASE_DATE, "2007-12-07")
 
+    def test_accepts_vidara_as_a_public_video_provider(self) -> None:
+        catalog = catalog_for(
+            [product("SPSF-61")],
+            {"SPSF-61": {"vidara": "https://ouo.io/vidara"}},
+        )
+
+        self.assertEqual(validate_catalog(catalog), [])
+
     def test_accepts_an_exact_canonical_zero_code_and_number_pair(self) -> None:
         """A real official zero suffix remains valid only as matching code and integer zero."""
         catalog = catalog_for([product("THZA-1", productId=7390)])

@@ -25,6 +25,18 @@ def product(code, date="2026-07-01", **overrides):
 
 
 class DeterministicMergeTests(unittest.TestCase):
+    def test_preserves_vidara_links_from_the_live_sheet(self) -> None:
+        catalog, _ = build_catalog(
+            [product("SPSF-61")],
+            {"SPSF-61": {"vidara": "https://ouo.io/vidara"}},
+            generated_at=GENERATED_AT,
+        )
+
+        self.assertEqual(
+            catalog["series"][0]["videos"][0]["links"],
+            {"vidara": "https://ouo.io/vidara"},
+        )
+
     def test_publishes_normalized_tag_index_and_video_tag_references(self) -> None:
         catalog, _ = build_catalog(
             [

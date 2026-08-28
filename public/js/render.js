@@ -13,6 +13,7 @@ const LINK_LABELS = Object.freeze({
   player4me: "Player4me",
   streamtape: "Streamtape",
   subtitle: "字幕",
+  vidara: "Vidara",
 });
 
 let activeSeriesContainer = null;

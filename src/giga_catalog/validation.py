@@ -19,8 +19,8 @@ DEFAULT_MAX_SERIES_DELETIONS = 25
 
 _SERIES_RE = re.compile(r"[A-Z0-9]+")
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
-_PROVIDERS = {"streamtape", "player4me", "gofile", "subtitle"}
-_UNCENSORED_PROVIDERS = {"streamtape", "player4me", "gofile"}
+_PROVIDERS = {"streamtape", "player4me", "vidara", "gofile", "subtitle"}
+_UNCENSORED_PROVIDERS = {"streamtape", "player4me", "vidara", "gofile"}
 _REFRESH_MODES = {"incremental", "audit", "links-only"}
 _REFRESH_COUNT_KEYS = {
     "added",

@@ -13,8 +13,14 @@ from src.giga_catalog.codes import normalize_code
 _PROVIDER_HEADERS = {
     "STREAMTAPE LINK": "streamtape",
     "PLAYER4ME LINK": "player4me",
+    "VIDARA LINK": "vidara",
     "GOFILE LINK": "gofile",
 }
+_PROVIDER_HEADER_SLOTS = (
+    ("STREAMTAPE LINK",),
+    ("PLAYER4ME LINK", "VIDARA LINK"),
+    ("GOFILE LINK",),
+)
 _TRANSIENT_STATUS_CODES = {408, 425, 429}
 
 
@@ -196,17 +202,19 @@ def _provider_columns(
     group: str,
 ) -> list[tuple[int, str]]:
     columns = []
-    for name, provider in _PROVIDER_HEADERS.items():
+    for aliases in _PROVIDER_HEADER_SLOTS:
         indexes = [
             index
             for index in range(start, end)
-            if header[index] == name
+            if header[index] in aliases
         ]
         if len(indexes) != 1:
+            expected = " or ".join(repr(name) for name in aliases)
             raise SheetFormatError(
-                f"sheet {group} columns must contain exactly one {name!r}"
+                f"sheet {group} columns must contain exactly one of {expected}"
             )
-        columns.append((indexes[0], provider))
+        index = indexes[0]
+        columns.append((index, _PROVIDER_HEADERS[header[index]]))
     return sorted(columns)
 
 
