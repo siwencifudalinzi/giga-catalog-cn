@@ -87,6 +87,19 @@ test("catalog cache and progressive controls have responsive accessible states",
   assert.match(css, /\.catalog-cache-state\s*\{/u);
   assert.match(css, /\.load-more\s*\{/u);
   assert.match(css, /\.progressive-status\s*\{/u);
+  const mobileCascade = css.match(
+    /@media\s*\(max-width:\s*74\.99rem\)[\s\S]*?(?=\n@media|$)/u,
+  )?.[0] ?? "";
+  assert.match(mobileCascade, /\.connection-status,\s*\.header-control/u);
+  const mobileCacheState = mobileCascade.match(
+    /\.connection-status\.catalog-cache-state\s*\{[\s\S]*?\}/u,
+  )?.[0] ?? "";
+  assert.match(mobileCacheState, /display:\s*(?:block|inline-flex|flex);/u);
+  assert.doesNotMatch(mobileCacheState, /display:\s*none/u);
+  assert.match(mobileCacheState, /position:\s*absolute;/u);
+  assert.match(mobileCacheState, /width:\s*1px;/u);
+  assert.match(mobileCacheState, /height:\s*1px;/u);
+  assert.match(mobileCacheState, /clip-path:\s*inset\(50%\);/u);
   assert.match(css, /\.load-more\s*\{[\s\S]*?min-height:\s*44px;/u);
   assert.match(
     css,

@@ -1632,6 +1632,7 @@ body[data-view="tags"] .series-rail {
   }
 
   .connection-status.catalog-cache-state {
+    display: block;
     position: absolute;
     width: 1px;
     height: 1px;
