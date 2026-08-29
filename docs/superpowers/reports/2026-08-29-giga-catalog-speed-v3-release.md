@@ -4,7 +4,7 @@ Date: 2026-08-30 (Asia/Shanghai)
 Branch: `codex/catalog-speed-v3`
 Task 7 baseline: `532e953e8bf65aedf45173b37d1bd97d536e542d`
 Prior preparation commit: `40504025ec27ada50e513e95afe12f8b8b0b9c74`
-Fix/release commit: pending (`fix: make runtime catalog consumable`)
+Fix/release commit: `df089f6c743a665e4b759210e3058fec9636b095`
 
 ## Fix round and generated artifact evidence
 
@@ -22,9 +22,12 @@ breakpoint stacks/wraps the header, retains 44px controls, and removes the
 `py scripts/build_runtime_catalog.py` was run twice. Both runs produced
 generation `ebdab7b6c52031aa730681eb8924edbf8ce8021cf5d37765528621b74779fde1`
 with 139 runtime JSON files (search, tags, and 137 series shards). The second
-run produced the same 140-file current generation/bootstrap byte hash
-(`20f4413b2b315a6037d8519641f5e2a67c170f6830fd68ef9ca7671d11aa64bfb`); the
-builder only pruned the superseded prior generation directory.
+run compared all 140 expected paths (bootstrap plus the 139 runtime files)
+against the first run by relative path and exact file bytes: every path and
+byte sequence matched. The aggregate current-generation/bootstrap hash was
+also unchanged (`20f4413b2b315a6037d8519641f5e2a67c170f6830fd68ef9ca7671d11aa64bfb`);
+that digest is supplemental, not the equality check. The builder only pruned
+the superseded prior generation directory.
 
 | Artifact gate | Measured result |
 | --- | --- |
@@ -37,10 +40,10 @@ builder only pruned the superseded prior generation directory.
 
 The Python builder assertion and the JS integration test read the current
 generated files rather than fixtures; `parseSeriesPayload` passed for all 137
-shards. The release verifier preparation passed with source commit
-`40504025ec27ada50e513e95afe12f8b8b0b9c74` and validated every local public
-file. Its temporary `public/giga-release.json` was removed because it is not a
-planned Task 7 commit file.
+shards. `py scripts/release.py prepare --source-commit
+df089f6c743a665e4b759210e3058fec9636b095` passed and validated every local
+public file. Its temporary `public/giga-release.json` was removed because it
+is not a planned Task 7 commit file.
 
 ## Regression and refresh gates
 
@@ -57,6 +60,13 @@ The local server was `py -m http.server 8000 --directory public`, tested with
 the real Chromium Playwright CLI browser. Each initial navigation mounted 24
 cards and requested only bootstrap plus the shell/module/CSS/featured-cover
 assets; no core, search, tags, or series shard was requested.
+
+Reproduction entry point: start that server, then run
+`npx --yes --package @playwright/cli playwright-cli open http://127.0.0.1:8000/`
+and use `resize`, `goto`, `fill`, `click`, `eval`, `requests`, and `console` for
+the checks below. The measured values and request assertions are recorded in
+this report; the ignored `.superpowers/sdd/2026-08-29-giga-catalog-speed-v3-plan/task-7-report.md`
+contains the task evidence notes. No raw browser log artifact is claimed.
 
 | Viewport | Overflow (`scrollWidth - clientWidth`) | Initial cards | Console errors / failed requests |
 | ---: | ---: | ---: | --- |
