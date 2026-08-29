@@ -171,6 +171,9 @@ test("bootstrap rejects private, local, link-local, and credential-bearing HTTP(
   for (const url of [
     "https://user:password@files.example/private",
     "http://:@files.example/",
+    "http:\\\\@files.example/",
+    "http:/\\@files.example/",
+    "http:////@files.example/",
     "http://localhost/",
     "http://localhost./",
     "http://printer.local/",
@@ -200,6 +203,18 @@ test("bootstrap retains ordinary public IPv4 literals outside special-use ranges
     parseBootstrap(value).resources.subtitleDirectory.url,
     "https://192.0.1.5/file",
   );
+});
+
+test("bootstrap permits at-signs outside a normalized special-scheme authority", () => {
+  for (const url of [
+    "https://files.example/path@name",
+    "https://files.example/?q=@name",
+    "https://files.example/#@name",
+  ]) {
+    const value = validBootstrap();
+    value.resources.subtitleDirectory.url = url;
+    assert.equal(parseBootstrap(value).resources.subtitleDirectory.url, url);
+  }
 });
 
 test("bootstrap and child payloads require real UTC RFC3339 generation timestamps", () => {

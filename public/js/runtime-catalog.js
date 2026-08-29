@@ -137,14 +137,21 @@ function publicHostname(hostname) {
   return !(ipv4 ? privateIpv4(ipv4) : privateIpv6(lower));
 }
 
+function specialSchemeAuthorityHasAt(source) {
+  const match = /^(https?):/iu.exec(source);
+  if (!match) return false;
+  const remainder = source.slice(match[0].length).replace(/^[\\/]+/u, "");
+  const authority = remainder.split(/[\\/?#]/u, 1)[0];
+  return authority.includes("@");
+}
+
 function safeHttpUrl(value, kind) {
   if (typeof value !== "string" || !value.trim() || /[\u0000-\u001f\u007f]/u.test(value)) fail(kind);
   try {
     const source = value.trim();
-    const authority = /^[a-z][a-z0-9+.-]*:\/\/([^/?#]*)/iu.exec(source)?.[1];
     const parsed = new URL(source);
     if (!(["http:", "https:"].includes(parsed.protocol) && parsed.host)
-      || authority?.includes("@") || parsed.username || parsed.password
+      || specialSchemeAuthorityHasAt(source) || parsed.username || parsed.password
       || !publicHostname(parsed.hostname)) fail(kind);
   } catch {
     fail(kind);
