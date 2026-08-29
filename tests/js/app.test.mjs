@@ -245,8 +245,43 @@ test("view activation resets its target progressive context and favorite changes
   assert.equal(visible.favorites[2], 24);
 });
 
+test("retrying a failed tag activation re-renders the current query result", async () => {
+  assert.equal(typeof runtimeApplication.createTagRetryHandler, "function");
+  let attempts = 0;
+  const renders = [];
+  const handler = runtimeApplication.createTagRetryHandler({
+    ensureTags: async () => {
+      attempts += 1;
+      return attempts > 1;
+    },
+    getQuery: () => "战士",
+    getView: () => "recent",
+    renderSearch: () => renders.push("search"),
+    renderTags: () => renders.push("tags"),
+  });
+
+  assert.equal(await handler.retry(), false);
+  assert.deepEqual(renders, []);
+  assert.equal(await handler.retry(), true);
+  assert.deepEqual(renders, ["search"]);
+});
+
+test("stale resource-load cleanup cannot clear a newer generation", () => {
+  assert.equal(typeof runtimeApplication.createResourceLoadTracker, "function");
+  const tracker = runtimeApplication.createResourceLoadTracker();
+  const oldLoad = tracker.begin();
+  tracker.nextGeneration();
+  const freshLoad = tracker.begin();
+
+  assert.equal(tracker.end(oldLoad), false);
+  assert.equal(tracker.activeCount, 1);
+  assert.equal(tracker.end(freshLoad), true);
+  assert.equal(tracker.activeCount, 0);
+});
+
 test("detail hydration deduplicates pending opens and retries after a bounded failure", async () => {
   assert.equal(typeof runtimeApplication.createDetailHydrationController, "function");
+  assert.equal(typeof runtimeApplication.resolveDetailDialogTrigger, "function");
   assert.deepEqual(runtimeApplication.detailRetryAction("spsf-61"), {
     action: "retry-detail",
     code: "SPSF-61",
@@ -266,11 +301,20 @@ test("detail hydration deduplicates pending opens and retries after a bounded fa
   };
   const failures = [];
   const loading = [];
+  const retryControl = {
+    disabled: false,
+    setAttribute() {},
+    removeAttribute() {},
+  };
   const trigger = {
     disabled: false,
     setAttribute() {},
     removeAttribute() {},
   };
+  assert.equal(
+    runtimeApplication.resolveDetailDialogTrigger(trigger, retryControl),
+    trigger,
+  );
   const controller = runtimeApplication.createDetailHydrationController({
     loader,
     store,
@@ -278,18 +322,26 @@ test("detail hydration deduplicates pending opens and retries after a bounded fa
     onFailure: (code) => failures.push(code),
   });
 
-  const first = controller.open(unloaded.code, trigger);
-  const duplicate = controller.open(unloaded.code, trigger);
+  const first = controller.open(unloaded.code, trigger, {
+    controls: [retryControl],
+  });
+  const duplicate = controller.open(unloaded.code, trigger, {
+    controls: [retryControl],
+  });
   assert.equal(first, duplicate);
   assert.equal(trigger.disabled, true);
+  assert.equal(retryControl.disabled, true);
   assert.equal(await first, null);
   assert.deepEqual(calls, ["SPSF"]);
   assert.deepEqual(loading, [[unloaded.code, true], [unloaded.code, false]]);
   assert.equal(trigger.disabled, false);
+  assert.equal(retryControl.disabled, false);
   assert.equal(failures.length, 1);
   assert.equal(failures[0], unloaded.code);
 
-  const retried = await controller.open(unloaded.code, trigger);
+  const retried = await controller.open(unloaded.code, trigger, {
+    controls: [retryControl],
+  });
   assert.equal(retried.code, unloaded.code);
   assert.deepEqual(calls, ["SPSF", "SPSF"]);
 });

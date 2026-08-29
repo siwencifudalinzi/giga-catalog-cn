@@ -122,6 +122,48 @@ export function resetFavoriteProgressiveCounters(
   return visible;
 }
 
+/** Keep asynchronous resource cleanup scoped to the generation that started it. */
+export function createResourceLoadTracker() {
+  let generation = 0;
+  let nextId = 0;
+  const active = new Set();
+  return {
+    begin(control = null) {
+      const token = {
+        control,
+        generation,
+        id: ++nextId,
+        closed: false,
+      };
+      active.add(token);
+      return token;
+    },
+    end(token) {
+      if (!token || token.closed) return false;
+      token.closed = true;
+      active.delete(token);
+      if (token.generation !== generation) return false;
+      return true;
+    },
+    nextGeneration() {
+      const stale = [...active];
+      active.clear();
+      for (const token of stale) token.closed = true;
+      generation += 1;
+      return stale;
+    },
+    isControlBusy(control) {
+      return [...active].some((token) => token.control === control);
+    },
+    get activeCount() {
+      return active.size;
+    },
+    get generation() {
+      return generation;
+    },
+  };
+}
+
 function visibleRuntimeVideos(videos, visibleCount) {
   const items = Array.isArray(videos) ? videos : [];
   const count = Number.isInteger(visibleCount)
@@ -182,6 +224,37 @@ export async function activateSearchResources({
 
 export function tagRetryAction() {
   return { action: "retry-tags" };
+}
+
+/** Retry a tag load and refresh whichever tag-aware view is still active. */
+export function createTagRetryHandler({
+  ensureTags,
+  getQuery,
+  getView,
+  renderSearch,
+  renderTags,
+} = {}) {
+  let pending = null;
+  return {
+    retry(control) {
+      if (pending) return pending;
+      const task = (async () => {
+        const ready = await ensureTags?.(control);
+        if (!ready) return false;
+        if (String(getQuery?.() ?? "").trim()) {
+          renderSearch?.();
+        } else if (getView?.() === "tags") {
+          renderTags?.();
+        }
+        return true;
+      })();
+      const settled = task.finally(() => {
+        if (pending === settled) pending = null;
+      });
+      pending = settled;
+      return pending;
+    },
+  };
 }
 
 /** Load search and tag resources with one shared in-flight operation. */
@@ -264,6 +337,10 @@ export function detailRetryAction(code) {
   return normalized ? { action: "retry-detail", code: normalized } : null;
 }
 
+export function resolveDetailDialogTrigger(primary, fallback) {
+  return primary ?? fallback ?? null;
+}
+
 /** Open recent entries without a shard; hydrate search-only entries from their declared series. */
 export async function hydrateDetailVideo({ code, loader, store, pending, signal } = {}) {
   const normalizedCode = normalizePublicCode(code) || code;
@@ -302,19 +379,31 @@ export function createDetailHydrationController({
   onFailure,
 } = {}) {
   const active = pending instanceof Map ? pending : new Map();
-  const open = (code, trigger, { signal } = {}) => {
+  const triggersByCode = new Map();
+  const open = (code, trigger, { signal, controls = [] } = {}) => {
     const normalizedCode = normalizePublicCode(code) || code;
     if (!normalizedCode) return Promise.resolve(null);
     const existing = active.get(normalizedCode);
-    if (existing) return existing;
+    if (existing) {
+      const triggers = triggersByCode.get(normalizedCode);
+      for (const control of [trigger, ...controls]) {
+        if (!control || !triggers) continue;
+        triggers.add(control);
+        control.disabled = true;
+        control.setAttribute?.("aria-busy", "true");
+      }
+      return existing;
+    }
+    const triggers = new Set([trigger, ...controls].filter(Boolean));
+    triggersByCode.set(normalizedCode, triggers);
     const task = (async () => {
       const setTriggerLoading = (activeLoading) => {
-        if (trigger) {
-          trigger.disabled = activeLoading;
+        for (const control of triggers) {
+          control.disabled = activeLoading;
           if (activeLoading) {
-            trigger.setAttribute?.("aria-busy", "true");
+            control.setAttribute?.("aria-busy", "true");
           } else {
-            trigger.removeAttribute?.("aria-busy");
+            control.removeAttribute?.("aria-busy");
           }
         }
         onLoading?.(normalizedCode, activeLoading, trigger);
@@ -334,6 +423,7 @@ export function createDetailHydrationController({
         return null;
       } finally {
         setTriggerLoading(false);
+        triggersByCode.delete(normalizedCode);
       }
     })();
     active.set(normalizedCode, task);
@@ -848,9 +938,11 @@ function startApplication() {
     searchError: null,
     searchAborted: false,
     searchLoad: null,
+    resourceLoads: createResourceLoadTracker(),
     tagsReady: false,
     tagError: null,
     tagLoad: null,
+    tagRetry: null,
     detailHydration: null,
     detailOpenPromises: new Map(),
     activeDialogCode: null,
@@ -1472,7 +1564,10 @@ function startApplication() {
   }
 
   function renderTagLoadError() {
-    removeResourceError("tags");
+    const existing = ui.main.querySelector('[data-resource-error="tags"]');
+    if (existing) {
+      return existing;
+    }
     const panel = createElement(
       "div",
       "empty-state empty-state--compact inline-load-error",
@@ -1490,6 +1585,10 @@ function startApplication() {
   function renderDetailHydrationError(code) {
     const action = detailRetryAction(code);
     if (!action) return;
+    const existing = ui.main.querySelector('[data-resource-error="detail"]');
+    if (existing?.dataset.code === action.code) {
+      return existing;
+    }
     removeResourceError("detail");
     const panel = createElement(
       "div",
@@ -1511,7 +1610,9 @@ function startApplication() {
     if (!state.store) {
       return;
     }
-    ui.main.removeAttribute("aria-busy");
+    if (state.resourceLoads.activeCount === 0) {
+      ui.main.removeAttribute("aria-busy");
+    }
     document.body.dataset.view = state.query ? "search" : state.view;
     if (state.query) {
       if (state.searchReady && state.tagsReady) {
@@ -1523,7 +1624,11 @@ function startApplication() {
       if (state.tagsReady) {
         renderTagView();
       } else {
-        void ensureTagCatalog(options.activationControl);
+        void ensureTagCatalog(options.activationControl).then((ready) => {
+          if (ready && state.view === "tags" && !state.query) {
+            renderTagView();
+          }
+        });
       }
     } else if (state.view === "all") {
       renderAllSeriesView();
@@ -1547,21 +1652,41 @@ function startApplication() {
   }
 
   function setResourceLoading(control, label) {
+    const token = state.resourceLoads.begin(control);
     ui.main.setAttribute("aria-busy", "true");
     if (control) {
       control.disabled = true;
       control.setAttribute?.("aria-busy", "true");
     }
     ui.connectionStatus.textContent = label;
+    return token;
   }
 
-  function clearResourceLoading(control) {
-    ui.main.removeAttribute("aria-busy");
-    if (control) {
+  function clearResourceLoading(token) {
+    if (!state.resourceLoads.end(token)) return;
+    const control = token.control;
+    if (control && !state.resourceLoads.isControlBusy(control)) {
       control.disabled = false;
       control.removeAttribute?.("aria-busy");
     }
+    if (state.resourceLoads.activeCount === 0) {
+      ui.main.removeAttribute("aria-busy");
+    }
     if (state.store) ui.connectionStatus.textContent = "数据已就绪";
+  }
+
+  function advanceResourceLoadGeneration() {
+    const stale = state.resourceLoads.nextGeneration();
+    for (const token of stale) {
+      if (token.control) {
+        token.control.disabled = false;
+        token.control.removeAttribute?.("aria-busy");
+      }
+    }
+    if (stale.length) {
+      ui.main.removeAttribute("aria-busy");
+      if (state.store) ui.connectionStatus.textContent = "数据已就绪";
+    }
   }
 
   async function ensureSearchCatalog(control = ui.search) {
@@ -1571,7 +1696,7 @@ function startApplication() {
     }
     if (state.searchLoad) return state.searchLoad;
     const load = (async () => {
-      setResourceLoading(control, "读取搜索索引");
+      const loadToken = setResourceLoading(control, "读取搜索索引");
       state.searchAborted = false;
       try {
         await activateSearchResources({
@@ -1594,7 +1719,7 @@ function startApplication() {
         }
         return false;
       } finally {
-        clearResourceLoading(control);
+        clearResourceLoading(loadToken);
       }
     })();
     state.searchLoad = load;
@@ -1621,15 +1746,13 @@ function startApplication() {
     if (state.tagsReady) return true;
     if (state.tagLoad) {
       if (control) {
-        state.tagLoad.controls?.add(control);
-        setResourceLoading(control, "读取中文标签");
+        const loadToken = setResourceLoading(control, "读取中文标签");
+        state.tagLoad.tokens?.add(loadToken);
       }
       return state.tagLoad;
     }
-    const controls = new Set(control ? [control] : []);
+    const tokens = new Set([setResourceLoading(control, "读取中文标签")]);
     const load = (async () => {
-      removeResourceError("tags");
-      setResourceLoading(control, "读取中文标签");
       try {
         let resourcesReady = false;
         if (!state.searchReady) {
@@ -1662,7 +1785,6 @@ function startApplication() {
           state.tagError = null;
         }
         removeResourceError("tags");
-        if (state.view === "tags" && !state.query) renderTagView();
         if (ui.videoDialog.open && state.activeDialogCode) {
           void openVideoDialog(state.activeDialogCode, state.dialogTrigger).catch(() => {});
         }
@@ -1677,12 +1799,12 @@ function startApplication() {
         }
         return false;
       } finally {
-        for (const candidate of controls) {
-          clearResourceLoading(candidate);
+        for (const loadToken of tokens) {
+          clearResourceLoading(loadToken);
         }
       }
     })();
-    load.controls = controls;
+    load.tokens = tokens;
     state.tagLoad = load;
     try {
       return await load;
@@ -1694,7 +1816,7 @@ function startApplication() {
   async function ensureSeriesCatalog(code) {
     if (state.store.getSeries(code)) return state.store.getSeries(code);
     const selector = document.querySelector(`[data-action="select-series"][data-series="${code}"]`);
-    setResourceLoading(selector, `读取 ${code} 系列`);
+    const loadToken = setResourceLoading(selector, `读取 ${code} 系列`);
     try {
       state.store.installSeries(await state.loader.ensureSeries(code, {
         signal: state.fetchController?.signal,
@@ -1707,12 +1829,15 @@ function startApplication() {
       if (error?.name !== "AbortError") showToast(`${code} 系列载入失败；请重试。`);
       return null;
     } finally {
-      clearResourceLoading(selector);
+      clearResourceLoading(loadToken);
     }
   }
 
   function activateRuntimeBootstrap(bootstrap, { cached }) {
     const priorGeneration = state.generation;
+    if (priorGeneration !== bootstrap.generation) {
+      advanceResourceLoadGeneration();
+    }
     activateBootstrap({ bootstrap, loader: state.loader, state });
     if (priorGeneration !== bootstrap.generation) {
       state.searchReady = false;
@@ -1739,6 +1864,17 @@ function startApplication() {
       onFailure: (code) => {
         renderDetailHydrationError(code);
         showToast("详情暂时无法打开，请重试。");
+      },
+    });
+    state.tagRetry = createTagRetryHandler({
+      ensureTags: (control) => ensureTagCatalog(control),
+      getQuery: () => state.query,
+      getView: () => state.view,
+      renderSearch: () => {
+        if (state.query) renderSearchView();
+      },
+      renderTags: () => {
+        if (state.view === "tags" && !state.query) renderTagView();
       },
     });
     state.detailOpenPromises.clear();
@@ -2087,11 +2223,11 @@ function startApplication() {
     return actions;
   }
 
-  async function openVideoDialog(code, trigger) {
+  async function openVideoDialog(code, trigger, { controls = [] } = {}) {
     const key = detailRetryAction(code)?.code || code;
     const existing = state.detailOpenPromises.get(key);
     if (existing) return existing;
-    const task = openVideoDialogOnce(code, trigger);
+    const task = openVideoDialogOnce(code, trigger, controls);
     state.detailOpenPromises.set(key, task);
     try {
       return await task;
@@ -2102,9 +2238,10 @@ function startApplication() {
     }
   }
 
-  async function openVideoDialogOnce(code, trigger) {
+  async function openVideoDialogOnce(code, trigger, controls = []) {
     const video = await (state.detailHydration?.open(code, trigger, {
       signal: state.fetchController?.signal,
+      controls,
     }) ??
       createDetailHydrationController({
         loader: state.loader,
@@ -2119,7 +2256,10 @@ function startApplication() {
           renderDetailHydrationError(publicCode);
           showToast("详情暂时无法打开，请重试。");
         },
-      }).open(code, trigger, { signal: state.fetchController?.signal }));
+      }).open(code, trigger, {
+        signal: state.fetchController?.signal,
+        controls,
+      }));
     if (!video) {
       return;
     }
@@ -2393,13 +2533,15 @@ function startApplication() {
       void loadRuntimeCatalog();
     } else if (action === "retry-tags") {
       state.tagError = null;
-      void ensureTagCatalog(control);
+      void (state.tagRetry?.retry(control) ?? ensureTagCatalog(control)).catch(() => {});
     } else if (action === "retry-detail") {
       const code = detailRetryAction(control.dataset.code)?.code;
       if (!code) return;
-      const trigger = [...document.querySelectorAll('[data-action="open-video"]')]
-        .find((candidate) => candidate.dataset.code === code) ?? control;
-      void openVideoDialog(code, trigger).catch(() => {});
+      const card = [...document.querySelectorAll('[data-action="open-video"]')]
+        .find((candidate) => candidate.dataset.code === code);
+      const trigger = resolveDetailDialogTrigger(card, control);
+      const controls = card ? [control] : [];
+      void openVideoDialog(code, trigger, { controls }).catch(() => {});
     } else if (action === "back-top") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (action === "close-toast") {
