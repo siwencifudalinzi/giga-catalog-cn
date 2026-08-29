@@ -186,6 +186,36 @@ class RuntimeCatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "recent_limit must be a positive integer"):
             build_runtime_v3(self._catalog(), recent_limit=0)
 
+    def test_v3_preserves_every_public_video_field_and_rejects_unknown_fields(self):
+        catalog = self._catalog()
+        video = catalog["series"][0]["videos"][0]
+        video.update({
+            "productId": 123,
+            "previewBase": "https://example.test/spsf-1/sample/",
+            "previewCount": 3,
+        })
+        bundle = build_runtime_v3(catalog)
+        shard_video = next(
+            payload["series"]["videos"][0]
+            for path, payload in bundle.files
+            if path.endswith("/series/spsf.json")
+        )
+        search_video = next(
+            item for item in bundle.files[0][1]["videos"] if item["code"] == "SPSF-1"
+        )
+        for field in (
+            "code", "number", "title", "actors", "releaseDate", "cover",
+            "productId", "previewBase", "previewCount", "links",
+        ):
+            self.assertIn(field, shard_video)
+            self.assertEqual(shard_video[field], video[field])
+            self.assertEqual(search_video[field], video[field])
+
+        drifted = self._catalog()
+        drifted["series"][0]["videos"][0]["privateUrl"] = "https://private.example/secret"
+        with self.assertRaisesRegex(ValueError, "unknown video field.*privateUrl"):
+            build_runtime_v3(drifted)
+
     def test_splits_tags_from_core_without_mutating_the_full_catalog(self):
         full = {
             "schemaVersion": 1,

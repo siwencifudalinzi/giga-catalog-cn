@@ -75,7 +75,9 @@ export function progressiveLoadMoreLabel(nextVisible) {
   return `加载更多，显示至 ${new Intl.NumberFormat("zh-CN").format(count)} 部`;
 }
 
-export function runtimeCatalogStatus({ cached = false, online = true } = {}) {
+export function runtimeCatalogStatus({ cached = false, online = true, refreshOutcome = null } = {}) {
+  if (refreshOutcome === "success") return "数据已就绪";
+  if (refreshOutcome === "failed" && cached) return "离线使用已缓存目录";
   if (cached) return online === false ? "离线使用已缓存目录" : "已显示缓存，正在检查更新";
   return "数据已就绪";
 }
@@ -229,6 +231,26 @@ export async function activateSearchResources({
   const tags = await loader?.ensureTags?.({ signal });
   store?.installTags?.(tags);
   return { search, tags };
+}
+
+/** Render canonical search fields immediately, then enhance with localized tags. */
+export async function activateSearchWithOptionalTags({
+  ensureSearch,
+  ensureTags,
+  renderSearch,
+  onTagsReady,
+  onTagsError,
+} = {}) {
+  const search = await ensureSearch?.();
+  renderSearch?.(search);
+  if (typeof ensureTags !== "function") return search;
+  try {
+    const tags = await ensureTags();
+    if (tags) onTagsReady?.(tags);
+  } catch (error) {
+    onTagsError?.(error);
+  }
+  return search;
 }
 
 export function tagRetryAction() {
@@ -1750,10 +1772,22 @@ function startApplication() {
   }
 
   async function activateSearchView(control = ui.search) {
-    if (!state.searchReady || !state.tagsReady) {
-      if (!await ensureTagCatalog(control)) return false;
+    if (!state.searchReady) {
+      const ready = await ensureSearchCatalog(control);
+      if (!ready) return false;
     }
-    if (state.query) renderSearchView();
+    await activateSearchWithOptionalTags({
+      ensureSearch: async () => state.searchReady,
+      ensureTags: state.tagsReady
+        ? null
+        : () => ensureTagCatalog(control),
+      renderSearch: () => {
+        if (state.query) renderSearchView();
+      },
+      onTagsReady: () => {
+        if (state.query) renderSearchView();
+      },
+    });
     return true;
   }
 
@@ -1929,6 +1963,14 @@ function startApplication() {
         signal: state.fetchController.signal,
         onCached: (bootstrap) => activateRuntimeBootstrap(bootstrap, { cached: true }),
         onFresh: (bootstrap) => activateRuntimeBootstrap(bootstrap, { cached: false }),
+        onRefresh: (outcome) => {
+          if (!state.store || outcome?.generation !== state.generation) return;
+          ui.connectionStatus.textContent = runtimeCatalogStatus({
+            cached: outcome.outcome === "failed",
+            online: outcome.outcome !== "failed",
+            refreshOutcome: outcome.outcome,
+          });
+        },
       });
     } catch (error) {
       if (error?.name !== "AbortError") {

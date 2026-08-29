@@ -178,6 +178,63 @@ test("start does not activate or cache the same generation twice", async () => {
   assert.equal(cache.calls.filter((item) => item.startsWith("putBootstrap:")).length, 0);
 });
 
+test("same-generation refresh reports an explicit successful outcome", async () => {
+  const value = bootstrap("a".repeat(64));
+  const outcomes = [];
+  const loader = createRuntimeLoader({
+    cache: memoryCache(value),
+    bootstrapUrl: "bootstrap.json",
+    fetcher: async () => response(value),
+  });
+
+  await loader.start({
+    onRefresh(outcome) { outcomes.push(outcome); },
+  });
+
+  assert.deepEqual(outcomes, [{ generation: value.generation, outcome: "success" }]);
+});
+
+test("cached startup reports a failed refresh without exposing the network error", async () => {
+  const value = bootstrap("a".repeat(64));
+  const outcomes = [];
+  const loader = createRuntimeLoader({
+    cache: memoryCache(value),
+    bootstrapUrl: "https://private.example/secret-bootstrap?token=abc",
+    fetcher: async () => { throw new Error("fetch failed https://private.example/secret?token=abc"); },
+  });
+
+  const result = await loader.start({
+    onRefresh(outcome) { outcomes.push(outcome); },
+  });
+
+  assert.equal(result.generation, value.generation);
+  assert.deepEqual(outcomes, [{ generation: value.generation, outcome: "failed" }]);
+  assert.doesNotMatch(JSON.stringify(outcomes), /private\.example|token=abc/u);
+});
+
+test("a stale bootstrap response cannot callback over a newer active generation", async () => {
+  const oldValue = bootstrap("a".repeat(64));
+  const newValue = bootstrap("b".repeat(64));
+  const network = deferred();
+  const seen = [];
+  const loader = createRuntimeLoader({
+    cache: memoryCache(),
+    bootstrapUrl: "bootstrap.json",
+    fetcher: async () => network.promise,
+  });
+
+  const started = loader.start({
+    onFresh(item) { seen.push(["fresh", item.generation]); },
+    onRefresh(outcome) { seen.push(["refresh", outcome.generation, outcome.outcome]); },
+  });
+  loader.setBootstrap(newValue);
+  network.resolve(response(oldValue));
+
+  const result = await started;
+  assert.equal(result.generation, newValue.generation);
+  assert.deepEqual(seen, []);
+});
+
 test("an invalid network bootstrap leaves the valid cached generation intact", async () => {
   const oldBootstrap = bootstrap("a".repeat(64));
   const invalid = bootstrap("b".repeat(64));

@@ -17,6 +17,25 @@ TAG_VIDEO_FIELDS = (
     "tagsSource",
 )
 
+# V3 runtime records intentionally expose only the canonical public video
+# contract. Tag bookkeeping is accepted above because it is split out below;
+# every other source field must fail closed so schema drift cannot leak private
+# data into generated artifacts.
+PUBLIC_VIDEO_FIELDS = frozenset(
+    {
+        "code",
+        "number",
+        "title",
+        "actors",
+        "releaseDate",
+        "cover",
+        "productId",
+        "previewBase",
+        "previewCount",
+        "links",
+    }
+)
+
 _SERIES_CODE_RE = re.compile(r"[A-Z0-9]+")
 _GENERATION_TOKEN = "{generation}"
 
@@ -78,9 +97,15 @@ def _compact_bytes(value: object) -> bytes:
 
 def _core_video(video: Mapping[str, object]) -> dict:
     """Copy a video while keeping tag data in the dedicated V3 tag artifact."""
-    core = copy.deepcopy(dict(video))
-    for field in TAG_VIDEO_FIELDS:
-        core.pop(field, None)
+    unknown = set(video) - PUBLIC_VIDEO_FIELDS - set(TAG_VIDEO_FIELDS)
+    if unknown:
+        fields = ", ".join(sorted(str(field) for field in unknown))
+        raise ValueError(f"unknown video field(s): {fields}")
+    core = {
+        field: copy.deepcopy(video[field])
+        for field in PUBLIC_VIDEO_FIELDS
+        if field in video
+    }
     return core
 
 

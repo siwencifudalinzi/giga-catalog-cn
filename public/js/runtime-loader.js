@@ -167,7 +167,7 @@ export function createRuntimeLoader({
     return callerPromise(entry, signal);
   }
 
-  async function start({ signal, onCached, onFresh } = {}) {
+  async function start({ signal, onCached, onFresh, onRefresh } = {}) {
     const network = fetchBootstrap(signal);
     const cached = cachePromise.then(async (runtimeCache) => {
       try {
@@ -183,8 +183,16 @@ export function createRuntimeLoader({
       onCached?.(cachedValue);
     }
     const networkResult = await Promise.allSettled([network]);
-    const networkValue = networkResult[0].status === "fulfilled" ? networkResult[0].value : null;
+    const networkOutcome = networkResult[0];
+    const networkValue = networkOutcome.status === "fulfilled" ? networkOutcome.value : null;
     if (networkValue) {
+      // A caller may activate a newer generation while revalidation is in
+      // flight. Never let that older response replace it or emit callbacks.
+      if (activeBootstrap
+        && activeBootstrap.generation !== networkValue.generation
+        && activeBootstrap.generation !== cachedValue?.generation) {
+        return activeBootstrap;
+      }
       const sameGeneration = cachedValue?.generation === networkValue.generation
         || activeBootstrap?.generation === networkValue.generation;
       if (!sameGeneration) {
@@ -198,10 +206,14 @@ export function createRuntimeLoader({
         }
         onFresh?.(networkValue);
       }
+      onRefresh?.({ generation: networkValue.generation, outcome: "success" });
       return networkValue;
     }
-    if (cachedValue) return cachedValue;
-    if (networkResult.status === "rejected") throw networkResult.reason;
+    if (cachedValue) {
+      onRefresh?.({ generation: cachedValue.generation, outcome: "failed" });
+      return cachedValue;
+    }
+    if (networkOutcome.status === "rejected") throw networkOutcome.reason;
     throw new Error("目录数据不可用");
   }
 

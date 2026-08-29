@@ -53,6 +53,8 @@ test("cached and offline runtime states use exact accessible production copy", (
     runtimeCatalogStatus({ cached: true, online: false }),
     "离线使用已缓存目录",
   );
+  assert.equal(runtimeCatalogStatus({ cached: true, refreshOutcome: "success" }), "数据已就绪");
+  assert.equal(runtimeCatalogStatus({ cached: true, refreshOutcome: "failed" }), "离线使用已缓存目录");
   assert.equal(runtimeCatalogStatus({ cached: false, online: true }), "数据已就绪");
 
   const html = readFileSync(
@@ -287,6 +289,18 @@ test("runtime activation fetches the tag index before rendering tag-aware search
   });
   assert.deepEqual(loader.calls, ["series:SPSF", "search", "tags"]);
   assert.deepEqual(render.calls.at(-1).videos.map((video) => video.code), ["SPSF-61"]);
+});
+
+test("search renders basic results before a failed tag enhancement and keeps retry state", async () => {
+  const events = [];
+  const result = await runtimeApplication.activateSearchWithOptionalTags({
+    ensureSearch: async () => ({ videos: [{ code: "SPSF-61" }] }),
+    ensureTags: async () => { throw new Error("tags unavailable"); },
+    renderSearch: () => events.push("search"),
+    onTagsError: () => events.push("tag-error"),
+  });
+  assert.deepEqual(result, { videos: [{ code: "SPSF-61" }] });
+  assert.deepEqual(events, ["search", "tag-error"]);
 });
 
 test("production search activation matches Chinese and Japanese tag names after tag installation", async () => {
