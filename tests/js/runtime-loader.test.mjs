@@ -235,6 +235,29 @@ test("a stale bootstrap response cannot callback over a newer active generation"
   assert.deepEqual(seen, []);
 });
 
+test("a failed refresh for cached generation cannot resolve or callback after activation changes", async () => {
+  const cachedValue = bootstrap("a".repeat(64));
+  const activeValue = bootstrap("b".repeat(64));
+  const network = deferred();
+  const outcomes = [];
+  const loader = createRuntimeLoader({
+    cache: memoryCache(cachedValue),
+    bootstrapUrl: "bootstrap.json",
+    fetcher: async () => network.promise,
+  });
+
+  const started = loader.start({
+    onRefresh(outcome) { outcomes.push(outcome); },
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  loader.setBootstrap(activeValue);
+  network.reject(new Error("offline"));
+
+  const result = await started;
+  assert.equal(result.generation, activeValue.generation);
+  assert.deepEqual(outcomes, []);
+});
+
 test("an invalid network bootstrap leaves the valid cached generation intact", async () => {
   const oldBootstrap = bootstrap("a".repeat(64));
   const invalid = bootstrap("b".repeat(64));

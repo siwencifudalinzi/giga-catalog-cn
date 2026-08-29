@@ -210,6 +210,9 @@ export function createRuntimeLoader({
       return networkValue;
     }
     if (cachedValue) {
+      if (activeBootstrap && activeBootstrap.generation !== cachedValue.generation) {
+        return activeBootstrap;
+      }
       onRefresh?.({ generation: cachedValue.generation, outcome: "failed" });
       return cachedValue;
     }

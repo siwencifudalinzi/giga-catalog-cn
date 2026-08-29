@@ -241,14 +241,20 @@ export async function activateSearchWithOptionalTags({
   onTagsReady,
   onTagsError,
 } = {}) {
+  const tagsTask = typeof ensureTags === "function"
+    ? Promise.resolve()
+      .then(() => ensureTags())
+      .then((tags) => ({ ok: true, tags }), (error) => ({ ok: false, error }))
+    : null;
   const search = await ensureSearch?.();
   renderSearch?.(search);
-  if (typeof ensureTags !== "function") return search;
-  try {
-    const tags = await ensureTags();
-    if (tags) onTagsReady?.(tags);
-  } catch (error) {
-    onTagsError?.(error);
+  if (tagsTask) {
+    const result = await tagsTask;
+    if (result.ok) {
+      if (result.tags) onTagsReady?.(result.tags);
+    } else {
+      onTagsError?.(result.error);
+    }
   }
   return search;
 }
@@ -1732,9 +1738,6 @@ function startApplication() {
 
   async function ensureSearchCatalog(control = ui.search) {
     if (state.searchReady) return true;
-    if (state.tagLoad) {
-      return state.tagLoad.then(() => state.searchReady);
-    }
     if (state.searchLoad) return state.searchLoad;
     const load = (async () => {
       const loadToken = setResourceLoading(control, "读取搜索索引");
@@ -1807,36 +1810,18 @@ function startApplication() {
     const tokens = new Set([setResourceLoading(control, "读取中文标签")]);
     const load = (async () => {
       try {
-        let resourcesReady = false;
         if (!state.searchReady) {
-          if (state.searchLoad) {
-            const searchReady = await state.searchLoad;
-            if (!searchReady) {
-              if (!state.searchAborted) renderTagLoadError();
-              return false;
-            }
-          } else {
-            await activateSearchResources({
-              loader: state.loader,
-              store: state.store,
-              signal: state.fetchController?.signal,
-            });
-            state.searchReady = true;
-            state.tagsReady = true;
-            state.searchError = null;
-            state.searchAborted = false;
-            state.tagError = null;
-            removeResourceError("tags");
-            resourcesReady = true;
+          const searchReady = await ensureSearchCatalog(control);
+          if (!searchReady) {
+            if (!state.searchAborted) renderTagLoadError();
+            return false;
           }
         }
-        if (!resourcesReady && !state.tagsReady) {
-          state.store.installTags(await state.loader.ensureTags({
-            signal: state.fetchController?.signal,
-          }));
-          state.tagsReady = true;
-          state.tagError = null;
-        }
+        state.store.installTags(await state.loader.ensureTags({
+          signal: state.fetchController?.signal,
+        }));
+        state.tagsReady = true;
+        state.tagError = null;
         removeResourceError("tags");
         if (ui.videoDialog.open && state.activeDialogCode) {
           void openVideoDialog(state.activeDialogCode, state.dialogTrigger).catch(() => {});

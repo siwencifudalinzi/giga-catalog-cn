@@ -303,6 +303,29 @@ test("search renders basic results before a failed tag enhancement and keeps ret
   assert.deepEqual(events, ["search", "tag-error"]);
 });
 
+test("search/tag readiness starts tags independently and renders when shared search resolves", async () => {
+  let resolveSearch;
+  let rejectTags;
+  let tagsStarted = false;
+  const search = new Promise((resolve) => { resolveSearch = resolve; });
+  const tags = new Promise((_, reject) => { rejectTags = reject; });
+  const events = [];
+  const activation = runtimeApplication.activateSearchWithOptionalTags({
+    ensureSearch: () => search,
+    ensureTags: () => { tagsStarted = true; return tags; },
+    renderSearch: (payload) => events.push(["search", payload.videos[0].code]),
+    onTagsError: () => events.push(["tag-error"]),
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(tagsStarted, true);
+  resolveSearch({ videos: [{ code: "SPSF-61" }] });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(events, [["search", "SPSF-61"]]);
+  rejectTags(new Error("tags unavailable"));
+  await activation;
+  assert.deepEqual(events, [["search", "SPSF-61"], ["tag-error"]]);
+});
+
 test("production search activation matches Chinese and Japanese tag names after tag installation", async () => {
   const tagged = runtimeVideo(62, { tagIds: [7] });
   const loader = runtimeLoader({
