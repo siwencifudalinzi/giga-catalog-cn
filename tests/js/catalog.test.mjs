@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createCatalogModel } from "../../public/js/catalog.js";
+import {
+  createCatalogModel,
+  normalizeText,
+  normalizeVideoCode,
+} from "../../public/js/catalog.js";
+
+test("catalog normalization helpers remain public for the V3 runtime layer", () => {
+  assert.equal(normalizeText(" ＳＰＳＦ  1 "), "spsf 1");
+  assert.equal(normalizeVideoCode(" spsf_001 "), "SPSF-1");
+});
 
 test("catalog search and filters resolve normalized official tags", () => {
   const model = createCatalogModel({

@@ -24,13 +24,13 @@ function deepFreeze(value) {
   return Object.freeze(value);
 }
 
-function normalizeText(value) {
+export function normalizeText(value) {
   return typeof value === "string"
     ? value.normalize("NFKC").trim().replace(/\s+/gu, " ").toLowerCase()
     : "";
 }
 
-function normalizeVideoCode(value) {
+export function normalizeVideoCode(value) {
   if (typeof value !== "string") {
     return null;
   }
