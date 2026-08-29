@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { fileURLToPath } from "node:url";
+import { readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -146,6 +148,21 @@ test("runtime store installs generation-bound shards and search records", () => 
   store.installSearch(parseSearchPayload(validSearch(), bootstrap));
   assert.deepEqual(store.search("女战士").map((value) => value.code), ["SPSF-1"]);
   assert.equal(store.getVideo("spsf_2").code, "SPSF-2");
+});
+
+test("every generated V3 series artifact parses against its bootstrap summary", () => {
+  const dataRoot = new URL("../../public/data/", import.meta.url);
+  const bootstrap = parseBootstrap(JSON.parse(
+    readFileSync(new URL("catalog-bootstrap.json", dataRoot), "utf8"),
+  ));
+  const seriesRoot = new URL(`runtime/g/${bootstrap.generation}/series/`, dataRoot);
+  const files = readdirSync(fileURLToPath(seriesRoot)).filter((name) => name.endsWith(".json"));
+  assert.equal(files.length, bootstrap.series.length);
+  for (const summary of bootstrap.series) {
+    const payload = JSON.parse(readFileSync(new URL(summary.artifact, dataRoot), "utf8"));
+    const parsed = parseSeriesPayload(payload, bootstrap, summary.code);
+    assert.equal(parsed.series.artifact, summary.artifact);
+  }
 });
 
 test("parsers reject malformed schemas, generations, metadata, paths, and data boundaries", () => {

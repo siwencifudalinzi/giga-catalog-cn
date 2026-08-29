@@ -1,97 +1,87 @@
 # GIGA Catalog Speed V3 release preparation evidence
 
-Date: 2026-08-29 (Asia/Shanghai)
+Date: 2026-08-30 (Asia/Shanghai)
 Branch: `codex/catalog-speed-v3`
-Baseline/source commit: `532e953e8bf65aedf45173b37d1bd97d536e542d`
-Release commit: the commit containing this report (`chore: prepare catalog speed v3 release`)
+Task 7 baseline: `532e953e8bf65aedf45173b37d1bd97d536e542d`
+Prior preparation commit: `40504025ec27ada50e513e95afe12f8b8b0b9c74`
+Fix/release commit: pending (`fix: make runtime catalog consumable`)
 
-## Scope and artifact evidence
+## Fix round and generated artifact evidence
 
-`py scripts/build_runtime_catalog.py` completed twice from the checked-in
-`public/data/catalog.json` without network mutation. Both runs produced
-generation `153b8fd971118ffee6aebd78127aba323de00e7ce620b7213ae8bf0871402fcf`;
-SHA-256 comparison of all 140 generated files was byte-identical and the
-second run produced no additional Git diff.
+The first release attempt exposed two real-browser blockers: generated shard
+payloads lacked `series.artifact`, and the loader fetched logical
+`runtime/g/...` paths from the site root instead of the public `/data/` base.
+The fix round added generation-token artifact fields to each shard, replaced
+the token during binding, and validates every shard artifact against the
+bootstrap summary. The loader now accepts only the exact generation-bound
+logical path grammar, keeps that logical path as the cache key, and fetches it
+under the fixed module data base (`/data/runtime/g/...`). A narrow mobile
+breakpoint stacks/wraps the header, retains 44px controls, and removes the
+20rem HTML minimum-width constraint for narrow viewports.
 
-| Artifact | Observed result |
+`py scripts/build_runtime_catalog.py` was run twice. Both runs produced
+generation `ebdab7b6c52031aa730681eb8924edbf8ce8021cf5d37765528621b74779fde1`
+with 139 runtime JSON files (search, tags, and 137 series shards). The second
+run produced the same 140-file current generation/bootstrap byte hash
+(`20f4413b2b315a6037d8519641f5e2a67c170f6830fd68ef9ca7671d11aa64bfb`); the
+builder only pruned the superseded prior generation directory.
+
+| Artifact gate | Measured result |
 | --- | --- |
-| `catalog-bootstrap.json` | 40,601 bytes; schema 3; exactly 24 `recentVideos` |
-| Runtime generation | 139 JSON files: search, tags, and 137 series shards |
-| Canonical coverage | 3,793/3,793 video codes, no missing/extra/duplicate; shard records equal `catalog-core.json` records |
-| Search coverage | 3,793/3,793 video records |
-| Tags | 733 definitions and 3,721 assignments; generation metadata matches bootstrap |
-| Bootstrap totals | 3,793 videos, 137 series, 2,955 linked videos |
+| Bootstrap | 40,601 bytes; schema 3; exactly 24 `recentVideos` |
+| Series | 137 summaries and 137/137 shard `series.artifact` values; every value exactly matches its bootstrap summary |
+| Canonical coverage | 3,793/3,793 videos; no missing, extra, or duplicate shard records |
+| Search | 3,793/3,793 video records |
+| Tags | 733 definitions and 3,721 assignments |
+| Totals | 3,793 videos, 137 series, 2,955 linked videos |
 
-The release verifier preparation command passed:
-
-```text
-py scripts/release.py prepare --source-commit 532e953e8bf65aedf45173b37d1bd97d536e542d
-```
-
-It produced a valid manifest covering every local public file. The temporary
-`public/giga-release.json` was removed afterward because it is not a planned
-Task 7 commit file. The static scan found no token/key/authorization/bearer or
-private-url match. The two case-insensitive `Jwt` matches are legacy provider
-enum values in `public/data/resolved-links.json`, not credentials or tokens.
+The Python builder assertion and the JS integration test read the current
+generated files rather than fixtures; `parseSeriesPayload` passed for all 137
+shards. The release verifier preparation passed with source commit
+`40504025ec27ada50e513e95afe12f8b8b0b9c74` and validated every local public
+file. Its temporary `public/giga-release.json` was removed because it is not a
+planned Task 7 commit file.
 
 ## Regression and refresh gates
 
 - `py -m unittest discover -s tests/python -p "test_*.py" -v`: **276 passed**, 1 Windows symlink-permission skip.
-- `node --test`: **107 passed**, 0 failed/skipped.
+- `node --test`: **110 passed**, 0 failed/skipped.
 - `py scripts/refresh.py --mode incremental --dry-run`: **DRY RUN UNCHANGED**, 3,793 videos / 137 series / 2,955 linked, diagnostics 0.
 - `py scripts/refresh.py --mode links-only --dry-run`: **DRY RUN UNCHANGED**, 3,793 videos / 137 series / 2,955 linked, diagnostics 0.
 - `git diff --check`: passed.
+- Static V3/JS secret scan: no token/key/authorization/bearer/private-url matches. The broad `jwt` term has two benign substring matches inside opaque legacy Streamtape IDs in the pre-existing `public/data/resolved-links.json`; no credential or token value was found.
 
 ## Local browser measurements
 
-The local static server was `py -m http.server 8000 --directory public`, and
-the real Playwright CLI browser used Chromium. Initial navigation was checked
-at each requested viewport:
+The local server was `py -m http.server 8000 --directory public`, tested with
+the real Chromium Playwright CLI browser. Each initial navigation mounted 24
+cards and requested only bootstrap plus the shell/module/CSS/featured-cover
+assets; no core, search, tags, or series shard was requested.
 
-| Viewport | `scrollWidth - clientWidth` | Initial video cards | Initial data requests | Console/errors |
-| ---: | ---: | ---: | --- | --- |
-| 320 | 0 px | 24 | bootstrap + shell/module/CSS/featured-cover assets; no core/search/tags/shard | 0 before interaction |
-| 390 | 0 px | 24 | bootstrap + shell/module/CSS/featured-cover assets; no core/search/tags/shard | 0 before interaction |
-| 768 | 0 px | 24 | bootstrap + shell/module/CSS/featured-cover assets; no core/search/tags/shard | 0 before interaction |
-| 1440 | 0 px | 24 | bootstrap + shell/module/CSS/featured-cover assets; no core/search/tags/shard | 0 before interaction |
+| Viewport | Overflow (`scrollWidth - clientWidth`) | Initial cards | Console errors / failed requests |
+| ---: | ---: | ---: | --- |
+| 320px | 0px | 24 | 0 / 0 |
+| 390px | 0px | 24 | 0 / 0 |
+| 768px | 0px | 24 | 0 / 0 |
+| 1440px | 0px | 24 | 0 / 0 |
 
-Measured bootstrap resource data at the initial desktop run was 40,901 bytes
-transferred and 40,601 decoded bytes. The request list contained
-`/data/catalog-bootstrap.json` and `/data/featured-covers.json`, but no
-`catalog-core.json`, `catalog-tags.json`, `search.json`, or series shard.
+Five fresh local navigations measured DOMContentLoaded at **13.3, 15.0,
+16.2, 14.8, 12.3ms** (median **14.8ms**). These local measurements are not
+a production comparison; the design baseline remains the 2026-08-29 sampled
+production result of approximately 3.8–3.9 seconds. After cache population,
+the delayed-bootstrap (1,500ms) reload showed 24 usable cards in **60ms**,
+within the 500ms requirement.
 
-Five fresh local navigations measured `DOMContentLoaded` at 39.0, 42.6, 40.0,
-37.1, and 43.5 ms (median **40.0 ms**). These local timings are not a
-production comparison; the design baseline remains the 2026-08-29 production
-measurement of approximately 3.8–3.9 seconds and 1.7–2.5 seconds sampled
-document TTFB. After populating IndexedDB, a reload with the bootstrap network
-response delayed by 1,500 ms still showed 24 cards at 400 ms (`elapsedMs`: 425)
-while background revalidation continued.
-
-## Required 390px interaction checks and blockers
-
-The initial 390px view rendered 24 cards and showed the expected cached-state
-copy (`已显示缓存，正在检查更新`) after cache population. The following two
-release blockers prevent claiming the remaining lazy-flow gates:
-
-1. The generated bootstrap declares `runtime/g/<generation>/search.json` and
-   `runtime/g/<generation>/series/spsf.json`, while the public files are served
-   under `data/runtime/g/<generation>/...`. `public/js/runtime-loader.js` passes
-   those paths directly to `fetch`, so real browser requests returned 404:
-   `http://127.0.0.1:8000/runtime/g/.../search.json` and
-   `.../series/spsf.json`. `SPSF-61` search and SPSF activation therefore did
-   not complete; Playwright recorded 2 console errors. Unit fixtures currently
-   use the root-relative `runtime/g/...` paths and do not catch this deployed
-   directory mismatch.
-2. With `prefers-reduced-motion: reduce` emulated, the page matched the media
-   query and remained at 24 cards. At 200% effective zoom on 390px, however,
-   measured `scrollWidth` was 435px versus a 390px client width (45px
-   horizontal overflow), originating in the header search/tools row.
-
-Because of these blockers, load-more-to-48 plus focus retention, successful
-`SPSF-61` search, shard-only series loading, and mismatched-bootstrap cache
-retention could not be honestly recorded as passing in the real browser. They
-remain required rechecks after the path and responsive-layout fixes.
+At 390px, typing `SPSF-61` produced exactly one result and requested search and
+tags at `/data/runtime/g/.../search.json` and `/data/runtime/g/.../tags.json`.
+Opening SPSF requested exactly one series shard,
+`/data/runtime/g/.../series/spsf.json`; no other series shard was requested.
+The series view grew from 24 to 48 cards after Load More and focus remained on
+the load-more button. A deliberately schema-mismatched bootstrap response
+left the valid cached generation rendered with 24 cards; the expected parser
+diagnostic was recorded, with no cache replacement. Reduced-motion emulation
+matched its media query. At 200% effective zoom on 390px, all measured header
+controls remained at least 44 CSS px touch size and overflow was **0px**.
 
 ## Compatibility, security, rollback, and deployment boundary
 
@@ -99,12 +89,12 @@ The canonical public URL, complete `catalog.json`, 11:30 Asia/Shanghai refresh
 schedule, link data, external-only playback classification, and private-data
 boundary are unchanged. V3 artifacts contain only validated public catalog
 records and generation metadata. No service worker, resolver, proxy, private
-URL, credential, or deployment secret was added.
+URL, credential, or deployment secret was added. Logical runtime paths are
+not accepted as arbitrary absolute/external fetch targets; only the validated
+generation-bound grammar resolves under the public data base.
 
-Production has **not** been verified. Verification must wait for the default
-branch deployment and the two blockers above to be fixed and rechecked. The
-rollback is the normal deployment workflow after reverting the integration
-commit:
+Production has **not** been verified. Verification must wait for the approved
+default-branch deployment and the production release verifier. Rollback is:
 
 ```powershell
 git revert <merge-commit>

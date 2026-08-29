@@ -176,19 +176,21 @@ def _build_v3_templates(
     shard_templates = []
     for record in series_records:
         summary = copy.deepcopy(record["summary"])
-        summary["artifact"] = (
+        artifact = (
             f"runtime/g/{_GENERATION_TOKEN}/series/{summary['code'].lower()}.json"
         )
+        summary["artifact"] = artifact
         bootstrap_series.append(summary)
         shard_templates.append(
             (
-                f"runtime/g/{_GENERATION_TOKEN}/series/{record['summary']['code'].lower()}.json",
+                artifact,
                 {
                     "schemaVersion": 3,
                     "generation": _GENERATION_TOKEN,
                     "generatedAt": copy.deepcopy(catalog.get("generatedAt")),
                     "series": {
                         **copy.deepcopy(record["summary"]),
+                        "artifact": artifact,
                         "videos": copy.deepcopy(record["videos"]),
                     },
                 },
@@ -252,6 +254,10 @@ def _bind_generation(templates: Mapping[str, object], identity: str):
         bound_path = path.replace(_GENERATION_TOKEN, identity)
         bound_payload = copy.deepcopy(payload)
         bound_payload["generation"] = identity
+        if isinstance(bound_payload.get("series"), dict):
+            bound_payload["series"]["artifact"] = bound_payload["series"]["artifact"].replace(
+                _GENERATION_TOKEN, identity
+            )
         files.append((bound_path, bound_payload))
     return bootstrap, files
 
@@ -374,6 +380,8 @@ def _validate_runtime_v3(
         if summary.get("artifact") != expected_artifact:
             raise ValueError(f"series artifact mismatch: {code}")
         shard = payloads[expected_artifact]["series"]
+        if shard.get("artifact") != expected_artifact:
+            raise ValueError(f"series shard artifact mismatch: {code}")
         shard_videos = shard.get("videos")
         if shard.get("code") != code or shard.get("count") != len(shard_videos or []):
             raise ValueError(f"series shard count mismatch: {code}")

@@ -115,6 +115,20 @@ test("catalog cache and progressive controls have responsive accessible states",
   );
 });
 
+test("narrow zoomed headers wrap without clipping touch controls", () => {
+  const css = readFileSync(
+    new URL("../../public/css/style.css", import.meta.url),
+    "utf8",
+  );
+  const narrowCascade = css.match(
+    /@media\s*\(max-width:\s*23\.74rem\)[\s\S]*?(?=\n@media|$)/u,
+  )?.[0] ?? "";
+  assert.match(narrowCascade, /\.app-header__main\s*\{[\s\S]*?display:\s*flex;/u);
+  assert.match(narrowCascade, /\.header-tools\s*\{[\s\S]*?flex-wrap:\s*wrap;/u);
+  assert.match(css, /\.search-box\s*\{[\s\S]*?max-width:\s*100%;/u);
+  assert.match(css, /\.header-control\s*\{[\s\S]*?min-width:\s*44px;/u);
+});
+
 import {
   UI_STORAGE_KEY,
   applyRenderFocus,

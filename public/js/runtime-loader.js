@@ -6,6 +6,20 @@ import {
 } from "./runtime-catalog.js";
 import { unavailableCatalogCache } from "./catalog-cache.js";
 
+const PUBLIC_DATA_BASE = new URL("../data/", import.meta.url);
+const RUNTIME_ARTIFACT_RE = /^runtime\/g\/[0-9a-f]{64}\/(?:search|tags|series\/[a-z0-9]+)\.json$/u;
+
+function runtimeFetchPath(logicalPath) {
+  if (typeof logicalPath !== "string" || !RUNTIME_ARTIFACT_RE.test(logicalPath)) {
+    throw new Error("运行目录路径无效");
+  }
+  const resolved = new URL(logicalPath, PUBLIC_DATA_BASE);
+  if (resolved.protocol === "file:") {
+    return `/data/${logicalPath}`;
+  }
+  return resolved.pathname;
+}
+
 function abortError() {
   if (typeof DOMException === "function") return new DOMException("The operation was aborted", "AbortError");
   const error = new Error("The operation was aborted");
@@ -131,7 +145,7 @@ export function createRuntimeLoader({
         if (typeof fetcher !== "function") throw new Error("fetch 不可用");
         let response;
         try {
-          response = await fetcher(path, {
+          response = await fetcher(runtimeFetchPath(path), {
             headers: { Accept: "application/json" },
             cache: "no-cache",
             signal: controller.signal,

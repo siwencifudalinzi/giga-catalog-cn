@@ -212,12 +212,30 @@ test("concurrent series callers share an exact-path fetch and cache the parsed p
   const first = loader.ensureSeries("SPSF", {});
   const second = loader.ensureSeries("SPSF", {});
   await new Promise((resolve) => setImmediate(resolve));
-  assert.deepEqual(urls, [value.series[0].artifact]);
+  assert.deepEqual(urls, [`/data/${value.series[0].artifact}`]);
   network.resolve(response(seriesPayload(value)));
 
   assert.deepEqual(await first, seriesPayload(value));
   assert.deepEqual(await second, seriesPayload(value));
   assert.deepEqual(await cache.artifact(value.generation, value.series[0].artifact), seriesPayload(value));
+});
+
+test("runtime artifact fetches resolve logical paths beneath the public data base", async () => {
+  const value = bootstrap("a".repeat(64));
+  const cache = memoryCache();
+  const urls = [];
+  const loader = createRuntimeLoader({
+    cache,
+    fetcher(url) {
+      urls.push(String(url));
+      return response(seriesPayload(value));
+    },
+  });
+  loader.setBootstrap(value);
+  await loader.ensureSeries("SPSF");
+  assert.equal(new URL(urls[0], "http://catalog.test/").pathname,
+    `/data/${value.series[0].artifact}`);
+  assert.doesNotMatch(urls[0], /^(?:https?:|file:|\/runtime\/)/u);
 });
 
 test("an aborted caller does not cancel the shared fetch or poison its cached result", async () => {
@@ -255,7 +273,7 @@ test("a generation change aborts all old artifact callers and discards late old 
     cache,
     fetcher(url, options) {
       const pending = deferred();
-      requests.set(url, { pending, signal: options.signal });
+      requests.set(String(url).replace(/^\/data\//u, ""), { pending, signal: options.signal });
       return pending.promise;
     },
   });

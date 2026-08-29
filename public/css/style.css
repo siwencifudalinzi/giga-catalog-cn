@@ -1715,6 +1715,9 @@ body[data-view="tags"] .series-rail {
     grid-column: 1 / -1;
     grid-row: 2;
     height: 2.75rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .search-box__hint {
@@ -1723,6 +1726,9 @@ body[data-view="tags"] .series-rail {
 
   .header-tools {
     gap: 0.35rem;
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
   }
 
   .mobile-catalog-button {
@@ -1936,6 +1942,38 @@ body[data-view="tags"] .series-rail {
 }
 
 @media (max-width: 23.74rem) {
+  html {
+    min-width: 0;
+  }
+
+  .app-header__main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .brand {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .header-tools {
+    flex: 0 1 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    order: 3;
+    flex: 0 1 100%;
+    min-width: 0;
+  }
+
+  .header-control {
+    min-width: 44px;
+  }
+
   .brand {
     width: 2.2rem;
   }

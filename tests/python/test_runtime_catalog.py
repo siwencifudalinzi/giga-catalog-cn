@@ -125,6 +125,14 @@ class RuntimeCatalogTests(unittest.TestCase):
         self.assertEqual(tags["assignments"], [["NEWS-1", [10]], ["SPSF-1", [10]]])
         shard = bundle.files[2][1]
         self.assertEqual(shard["series"]["code"], "NEWS")
+        self.assertEqual(
+            shard["series"]["artifact"],
+            prefix + "series/news.json",
+        )
+        self.assertEqual(
+            shard["series"]["artifact"],
+            next(item["artifact"] for item in bundle.bootstrap["series"] if item["code"] == "NEWS"),
+        )
         self.assertEqual([video["code"] for video in shard["series"]["videos"]], ["NEWS-1"])
 
     def test_v3_is_deterministic_and_covers_canonical_videos(self):
