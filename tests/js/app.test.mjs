@@ -77,6 +77,7 @@ function runtimeVideo(number, overrides = {}) {
 function runtimeStore({ recent = [], search = [] } = {}) {
   const series = new Map();
   let searchVideos = search;
+  let tags = new Map();
   return {
     getRecentVideos: () => recent,
     getSeries: (code) => series.get(code) ?? null,
@@ -84,7 +85,15 @@ function runtimeStore({ recent = [], search = [] } = {}) {
       return recent.concat(searchVideos).find((video) => video.code === code) ?? null;
     },
     search(query) {
-      return searchVideos.filter((video) => video.code.includes(query));
+      const needle = String(query ?? "").toLowerCase();
+      return searchVideos.filter((video) => [
+        video.code,
+        video.title,
+        ...(video.tagIds ?? []).flatMap((id) => {
+          const tag = tags.get(id);
+          return tag ? [tag.nameZh, tag.nameJa] : [];
+        }),
+      ].some((value) => String(value ?? "").toLowerCase().includes(needle)));
     },
     installSeries(payload) {
       series.set(payload.series.code, payload.series);
@@ -92,11 +101,13 @@ function runtimeStore({ recent = [], search = [] } = {}) {
     installSearch(payload) {
       searchVideos = payload.videos;
     },
-    installTags() {},
+    installTags(payload) {
+      tags = new Map((payload?.tags ?? []).map((tag) => [tag.id, tag]));
+    },
   };
 }
 
-function runtimeLoader({ series = [], search = [] } = {}) {
+function runtimeLoader({ series = [], search = [], tags = [] } = {}) {
   return {
     calls: [],
     setBootstrap(bootstrap) {
@@ -112,7 +123,7 @@ function runtimeLoader({ series = [], search = [] } = {}) {
     },
     async ensureTags() {
       this.calls.push("tags");
-      return { tags: [], assignments: [] };
+      return { tags, assignments: [] };
     },
   };
 }
@@ -160,7 +171,7 @@ test("load-more labels announce the next visible count", () => {
   );
 });
 
-test("runtime activation fetches only the series and search resources that its view needs", async () => {
+test("runtime activation fetches the tag index before rendering tag-aware search results", async () => {
   assert.equal(typeof runtimeApplication.activateSeries, "function");
   assert.equal(typeof runtimeApplication.activateSearch, "function");
   const render = { calls: [], render(value) { this.calls.push(value); } };
@@ -187,8 +198,156 @@ test("runtime activation fetches only the series and search resources that its v
     store,
     render: (value) => render.render(value),
   });
-  assert.deepEqual(loader.calls, ["series:SPSF", "search"]);
+  assert.deepEqual(loader.calls, ["series:SPSF", "search", "tags"]);
   assert.deepEqual(render.calls.at(-1).videos.map((video) => video.code), ["SPSF-61"]);
+});
+
+test("production search activation matches Chinese and Japanese tag names after tag installation", async () => {
+  const tagged = runtimeVideo(62, { tagIds: [7] });
+  const loader = runtimeLoader({
+    search: [tagged],
+    tags: [{ id: 7, nameZh: "战士", nameJa: "戦士", group: "character" }],
+  });
+  const store = runtimeStore({ search: [tagged] });
+  const renders = [];
+
+  for (const query of ["战士", "戦士"]) {
+    await runtimeApplication.activateSearch({
+      query,
+      loader,
+      store,
+      render: (value) => renders.push(value),
+    });
+    assert.deepEqual(renders.at(-1).videos.map((video) => video.code), ["SPSF-62"]);
+  }
+  assert.deepEqual(loader.calls, ["search", "tags", "search", "tags"]);
+});
+
+test("view activation resets its target progressive context and favorite changes reset both groups", () => {
+  assert.equal(typeof runtimeApplication.resetViewProgressiveCounter, "function");
+  assert.equal(typeof runtimeApplication.resetFavoriteProgressiveCounters, "function");
+  const visible = {
+    recent: 48,
+    search: 48,
+    tags: 48,
+    series: { SPSF: 48 },
+    favorites: { 1: 48, 2: 48 },
+  };
+
+  runtimeApplication.resetViewProgressiveCounter(visible, "recent");
+  runtimeApplication.resetViewProgressiveCounter(visible, "all", "SPSF");
+  runtimeApplication.resetViewProgressiveCounter(visible, "favorites");
+  runtimeApplication.resetFavoriteProgressiveCounters(visible, 2, 0);
+
+  assert.equal(visible.recent, 24);
+  assert.equal(visible.series.SPSF, 24);
+  assert.equal(visible.favorites[1], 24);
+  assert.equal(visible.favorites[2], 24);
+});
+
+test("detail hydration deduplicates pending opens and retries after a bounded failure", async () => {
+  assert.equal(typeof runtimeApplication.createDetailHydrationController, "function");
+  assert.deepEqual(runtimeApplication.detailRetryAction("spsf-61"), {
+    action: "retry-detail",
+    code: "SPSF-61",
+  });
+  assert.equal(runtimeApplication.detailRetryAction("https://private.example/secret"), null);
+  const unloaded = runtimeVideo(61);
+  const store = runtimeStore({ search: [unloaded] });
+  const calls = [];
+  let attempts = 0;
+  const loader = {
+    async ensureSeries(code) {
+      attempts += 1;
+      calls.push(code);
+      if (attempts === 1) throw new Error("https://private.example/secret-url");
+      return { series: { code, videos: [unloaded] } };
+    },
+  };
+  const failures = [];
+  const loading = [];
+  const trigger = {
+    disabled: false,
+    setAttribute() {},
+    removeAttribute() {},
+  };
+  const controller = runtimeApplication.createDetailHydrationController({
+    loader,
+    store,
+    onLoading: (code, active) => loading.push([code, active]),
+    onFailure: (code) => failures.push(code),
+  });
+
+  const first = controller.open(unloaded.code, trigger);
+  const duplicate = controller.open(unloaded.code, trigger);
+  assert.equal(first, duplicate);
+  assert.equal(trigger.disabled, true);
+  assert.equal(await first, null);
+  assert.deepEqual(calls, ["SPSF"]);
+  assert.deepEqual(loading, [[unloaded.code, true], [unloaded.code, false]]);
+  assert.equal(trigger.disabled, false);
+  assert.equal(failures.length, 1);
+  assert.equal(failures[0], unloaded.code);
+
+  const retried = await controller.open(unloaded.code, trigger);
+  assert.equal(retried.code, unloaded.code);
+  assert.deepEqual(calls, ["SPSF", "SPSF"]);
+});
+
+test("tag resource activation is deduplicated and exposes a public retry action", async () => {
+  assert.equal(typeof runtimeApplication.createTagActivationController, "function");
+  assert.equal(typeof runtimeApplication.tagRetryAction, "function");
+  const store = runtimeStore();
+  let attempts = 0;
+  const loader = {
+    async ensureSearch() {
+      return { videos: [] };
+    },
+    async ensureTags() {
+      attempts += 1;
+      if (attempts === 1) throw new Error("private tag source");
+      return { tags: ["日本語"], assignments: [] };
+    },
+  };
+  const controller = runtimeApplication.createTagActivationController({
+    loader,
+    store,
+  });
+  const first = controller.ensure();
+  const duplicate = controller.ensure();
+  await assert.rejects(first, /private tag source/u);
+  await assert.rejects(duplicate, /private tag source/u);
+  assert.deepEqual(runtimeApplication.tagRetryAction(), {
+    action: "retry-tags",
+  });
+  await controller.ensure();
+  assert.equal(attempts, 2);
+});
+
+test("aborted detail hydration restores its trigger without exposing a retry error", async () => {
+  const unloaded = runtimeVideo(63);
+  const store = runtimeStore({ search: [unloaded] });
+  const trigger = {
+    disabled: false,
+    setAttribute() {},
+    removeAttribute() {},
+  };
+  const failures = [];
+  const controller = runtimeApplication.createDetailHydrationController({
+    loader: {
+      async ensureSeries() {
+        const error = new Error("aborted");
+        error.name = "AbortError";
+        throw error;
+      },
+    },
+    store,
+    onFailure: (code) => failures.push(code),
+  });
+
+  assert.equal(await controller.open(unloaded.code, trigger), null);
+  assert.equal(trigger.disabled, false);
+  assert.deepEqual(failures, []);
 });
 
 test("runtime activation keeps startup lazy and hydrates only non-recent detail results", async () => {

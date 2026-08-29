@@ -83,6 +83,11 @@ export function resetProgressiveCounter(visible, change = {}) {
     visible.search = RESULT_WINDOW_SIZE;
   }
   if (change.view === "tags") visible.tags = RESULT_WINDOW_SIZE;
+  if (change.view === "favorites") {
+    visible.favorites ??= {};
+    visible.favorites[1] = RESULT_WINDOW_SIZE;
+    visible.favorites[2] = RESULT_WINDOW_SIZE;
+  }
   if (change.series) {
     visible.series ??= {};
     visible.series[change.series] = RESULT_WINDOW_SIZE;
@@ -90,6 +95,29 @@ export function resetProgressiveCounter(visible, change = {}) {
   if (change.favoriteState === 1 || change.favoriteState === 2) {
     visible.favorites ??= {};
     visible.favorites[change.favoriteState] = RESULT_WINDOW_SIZE;
+  }
+  return visible;
+}
+
+/** Reset the window for the view that has just become active. */
+export function resetViewProgressiveCounter(visible, view, seriesCode = "") {
+  if (view === "all") {
+    const code = String(seriesCode ?? "").trim().toUpperCase();
+    if (code) resetProgressiveCounter(visible, { series: code });
+    return visible;
+  }
+  resetProgressiveCounter(visible, { view });
+  return visible;
+}
+
+/** A favorite transition invalidates both groups that may contain the video. */
+export function resetFavoriteProgressiveCounters(
+  visible,
+  previousState,
+  nextState,
+) {
+  for (const favoriteState of [previousState, nextState]) {
+    resetProgressiveCounter(visible, { favoriteState });
   }
   return visible;
 }
@@ -128,12 +156,55 @@ export async function activateSeries({
   store,
   render,
   visibleCount = RESULT_WINDOW_SIZE,
+  signal,
 } = {}) {
-  const payload = await loader?.ensureSeries?.(code);
+  const payload = await loader?.ensureSeries?.(code, { signal });
   store?.installSeries?.(payload);
   const series = store?.getSeries?.(code);
   renderActivatedVideos(render, "series", series?.videos, visibleCount, { code });
   return series ?? null;
+}
+
+/** Load the indexes required for search results, including both localized tag names. */
+export async function activateSearchResources({
+  loader,
+  store,
+  signal,
+  includeTags = true,
+} = {}) {
+  const search = await loader?.ensureSearch?.({ signal });
+  store?.installSearch?.(search);
+  if (!includeTags) return { search, tags: null };
+  const tags = await loader?.ensureTags?.({ signal });
+  store?.installTags?.(tags);
+  return { search, tags };
+}
+
+export function tagRetryAction() {
+  return { action: "retry-tags" };
+}
+
+/** Load search and tag resources with one shared in-flight operation. */
+export function createTagActivationController({ loader, store } = {}) {
+  let pending = null;
+  return {
+    ensure({ signal, searchReady = false } = {}) {
+      if (pending) return pending;
+      pending = (async () => {
+        if (!searchReady) {
+          const search = await loader?.ensureSearch?.({ signal });
+          store?.installSearch?.(search);
+        }
+        const tags = await loader?.ensureTags?.({ signal });
+        store?.installTags?.(tags);
+        return tags;
+      })();
+      pending = pending.finally(() => {
+        pending = null;
+      });
+      return pending;
+    },
+  };
 }
 
 export async function activateSearch({
@@ -142,13 +213,13 @@ export async function activateSearch({
   store,
   render,
   visibleCount = RESULT_WINDOW_SIZE,
+  signal,
 } = {}) {
   const seriesCode = runtimeSeriesFromQuery(query);
   if (seriesCode) {
-    await loader?.ensureSeries?.(seriesCode);
+    await loader?.ensureSeries?.(seriesCode, { signal });
   }
-  const payload = await loader?.ensureSearch?.();
-  store?.installSearch?.(payload);
+  await activateSearchResources({ loader, store, signal });
   const videos = store?.search?.(query) ?? [];
   renderActivatedVideos(render, "search", videos, visibleCount, { query });
   return videos;
@@ -160,8 +231,9 @@ export async function activateFavorites({
   render,
   favorites = [],
   visibleCount = RESULT_WINDOW_SIZE,
+  signal,
 } = {}) {
-  const payload = await loader?.ensureSearch?.();
+  const payload = await loader?.ensureSearch?.({ signal });
   store?.installSearch?.(payload);
   const videos = Array.isArray(favorites)
     ? favorites.map((item) => store?.getVideo?.(item.code ?? item)).filter(Boolean)
@@ -175,28 +247,107 @@ export async function activateTags({
   store,
   render,
   visibleCount = RESULT_WINDOW_SIZE,
+  signal,
 } = {}) {
-  const search = await loader?.ensureSearch?.();
-  store?.installSearch?.(search);
-  const tags = await loader?.ensureTags?.();
-  store?.installTags?.(tags);
+  await activateSearchResources({ loader, store, signal });
   renderActivatedVideos(render, "tags", [], visibleCount);
   return store;
 }
 
+function normalizePublicCode(value) {
+  const code = String(value ?? "").normalize("NFKC").trim().toUpperCase();
+  return /^[A-Z][A-Z0-9]*-[0-9]{1,4}$/u.test(code) ? code : "";
+}
+
+export function detailRetryAction(code) {
+  const normalized = normalizePublicCode(code);
+  return normalized ? { action: "retry-detail", code: normalized } : null;
+}
+
 /** Open recent entries without a shard; hydrate search-only entries from their declared series. */
-export async function hydrateDetailVideo({ code, loader, store } = {}) {
-  let video = store?.getVideo?.(code) ?? null;
-  if (!video) return null;
-  const isRecent = (store?.getRecentVideos?.() ?? []).some(
-    (item) => item?.code === video.code,
-  );
-  if (!isRecent && video.series && !store?.getSeries?.(video.series)) {
-    const payload = await loader?.ensureSeries?.(video.series);
-    store?.installSeries?.(payload);
-    video = store?.getVideo?.(code) ?? video;
+export async function hydrateDetailVideo({ code, loader, store, pending, signal } = {}) {
+  const normalizedCode = normalizePublicCode(code) || code;
+  const run = async () => {
+    let video = store?.getVideo?.(normalizedCode) ?? null;
+    if (!video) return null;
+    const isRecent = (store?.getRecentVideos?.() ?? []).some(
+      (item) => item?.code === video.code,
+    );
+    if (!isRecent && video.series && !store?.getSeries?.(video.series)) {
+      const payload = await loader?.ensureSeries?.(video.series, { signal });
+      store?.installSeries?.(payload);
+      video = store?.getVideo?.(normalizedCode) ?? video;
+    }
+    return video;
+  };
+  if (!(pending instanceof Map)) return run();
+  const key = normalizedCode;
+  const existing = pending.get(key);
+  if (existing) return existing;
+  const task = run();
+  pending.set(key, task);
+  try {
+    return await task;
+  } finally {
+    if (pending.get(key) === task) pending.delete(key);
   }
-  return video;
+}
+
+/** Coordinate one detail open, keeping failures out of unhandled-rejection reporting. */
+export function createDetailHydrationController({
+  loader,
+  store,
+  pending = new Map(),
+  onLoading,
+  onFailure,
+} = {}) {
+  const active = pending instanceof Map ? pending : new Map();
+  const open = (code, trigger, { signal } = {}) => {
+    const normalizedCode = normalizePublicCode(code) || code;
+    if (!normalizedCode) return Promise.resolve(null);
+    const existing = active.get(normalizedCode);
+    if (existing) return existing;
+    const task = (async () => {
+      const setTriggerLoading = (activeLoading) => {
+        if (trigger) {
+          trigger.disabled = activeLoading;
+          if (activeLoading) {
+            trigger.setAttribute?.("aria-busy", "true");
+          } else {
+            trigger.removeAttribute?.("aria-busy");
+          }
+        }
+        onLoading?.(normalizedCode, activeLoading, trigger);
+      };
+      setTriggerLoading(true);
+      try {
+        return await hydrateDetailVideo({
+          code: normalizedCode,
+          loader,
+          store,
+          signal,
+        });
+      } catch (error) {
+        if (error?.name !== "AbortError") {
+          onFailure?.(normalizedCode, trigger);
+        }
+        return null;
+      } finally {
+        setTriggerLoading(false);
+      }
+    })();
+    active.set(normalizedCode, task);
+    void task.then(
+      () => {
+        if (active.get(normalizedCode) === task) active.delete(normalizedCode);
+      },
+      () => {
+        if (active.get(normalizedCode) === task) active.delete(normalizedCode);
+      },
+    );
+    return task;
+  };
+  return { pending: active, open };
 }
 
 export function activateBootstrap({
@@ -695,8 +846,13 @@ function startApplication() {
     tagSort: "newest",
     searchReady: false,
     searchError: null,
+    searchAborted: false,
+    searchLoad: null,
     tagsReady: false,
     tagError: null,
+    tagLoad: null,
+    detailHydration: null,
+    detailOpenPromises: new Map(),
     activeDialogCode: null,
   };
 
@@ -1311,23 +1467,63 @@ function startApplication() {
     refreshDeferredCovers();
   }
 
-  function renderCurrentView(options) {
+  function removeResourceError(resource) {
+    ui.main.querySelector(`[data-resource-error="${resource}"]`)?.remove();
+  }
+
+  function renderTagLoadError() {
+    removeResourceError("tags");
+    const panel = createElement(
+      "div",
+      "empty-state empty-state--compact inline-load-error",
+      "标签索引暂时无法载入，现有内容仍可浏览。",
+    );
+    panel.dataset.resourceError = "tags";
+    panel.setAttribute("role", "alert");
+    const retry = createElement("button", "button button--quiet", "重新载入标签");
+    retry.type = "button";
+    retry.dataset.action = tagRetryAction().action;
+    panel.append(retry);
+    ui.main.prepend(panel);
+  }
+
+  function renderDetailHydrationError(code) {
+    const action = detailRetryAction(code);
+    if (!action) return;
+    removeResourceError("detail");
+    const panel = createElement(
+      "div",
+      "empty-state empty-state--compact inline-load-error detail-hydration-error",
+      `${action.code} 详情暂时无法打开，请重试。`,
+    );
+    panel.dataset.resourceError = "detail";
+    panel.dataset.code = action.code;
+    panel.setAttribute("role", "alert");
+    const retry = createElement("button", "button button--quiet", "重试");
+    retry.type = "button";
+    retry.dataset.action = action.action;
+    retry.dataset.code = action.code;
+    panel.append(retry);
+    ui.main.prepend(panel);
+  }
+
+  function renderCurrentView(options = {}) {
     if (!state.store) {
       return;
     }
     ui.main.removeAttribute("aria-busy");
     document.body.dataset.view = state.query ? "search" : state.view;
     if (state.query) {
-      if (state.searchReady) {
+      if (state.searchReady && state.tagsReady) {
         renderSearchView();
       } else {
-        void ensureSearchCatalog();
+        void activateSearchView(ui.search);
       }
     } else if (state.view === "tags") {
       if (state.tagsReady) {
         renderTagView();
       } else {
-        void ensureTagCatalog();
+        void ensureTagCatalog(options.activationControl);
       }
     } else if (state.view === "all") {
       renderAllSeriesView();
@@ -1337,7 +1533,11 @@ function startApplication() {
       if (state.searchReady) {
         renderFavoritesView();
       } else {
-        void ensureSearchCatalog();
+        void ensureSearchCatalog(ui.search).then((ready) => {
+          if (ready && state.view === "favorites" && !state.query) {
+            renderCurrentView();
+          }
+        });
       }
     } else {
       renderRecentView();
@@ -1347,62 +1547,147 @@ function startApplication() {
   }
 
   function setResourceLoading(control, label) {
-    if (control) control.disabled = true;
+    ui.main.setAttribute("aria-busy", "true");
+    if (control) {
+      control.disabled = true;
+      control.setAttribute?.("aria-busy", "true");
+    }
     ui.connectionStatus.textContent = label;
   }
 
   function clearResourceLoading(control) {
-    if (control) control.disabled = false;
+    ui.main.removeAttribute("aria-busy");
+    if (control) {
+      control.disabled = false;
+      control.removeAttribute?.("aria-busy");
+    }
     if (state.store) ui.connectionStatus.textContent = "数据已就绪";
   }
 
-  async function ensureSearchCatalog() {
+  async function ensureSearchCatalog(control = ui.search) {
     if (state.searchReady) return true;
-    setResourceLoading(ui.search, "读取搜索索引");
+    if (state.tagLoad) {
+      return state.tagLoad.then(() => state.searchReady);
+    }
+    if (state.searchLoad) return state.searchLoad;
+    const load = (async () => {
+      setResourceLoading(control, "读取搜索索引");
+      state.searchAborted = false;
+      try {
+        await activateSearchResources({
+          loader: state.loader,
+          store: state.store,
+          signal: state.fetchController?.signal,
+          includeTags: false,
+        });
+        state.searchReady = true;
+        state.searchError = null;
+        state.searchAborted = false;
+        return true;
+      } catch (error) {
+        if (error?.name !== "AbortError") {
+          state.searchError = error;
+          state.searchAborted = false;
+          showToast("搜索索引载入失败；请再次搜索重试。");
+        } else {
+          state.searchAborted = true;
+        }
+        return false;
+      } finally {
+        clearResourceLoading(control);
+      }
+    })();
+    state.searchLoad = load;
     try {
-      state.store.installSearch(await state.loader.ensureSearch({
-        signal: state.fetchController?.signal,
-      }));
-      state.searchReady = true;
-      state.searchError = null;
-      if (state.query || state.view === "favorites" || state.view === "tags") {
-        renderCurrentView();
-      }
-      return true;
-    } catch (error) {
-      if (error?.name !== "AbortError") {
-        state.searchError = error;
-        showToast("搜索索引载入失败；请再次搜索重试。");
-      }
-      return false;
+      return await load;
     } finally {
-      clearResourceLoading(ui.search);
+      if (state.searchLoad === load) state.searchLoad = null;
     }
   }
 
-  async function ensureTagCatalog() {
+  async function activateSearchView(control = ui.search) {
+    if (!state.searchReady || !state.tagsReady) {
+      if (!await ensureTagCatalog(control)) return false;
+    }
+    if (state.query) renderSearchView();
+    return true;
+  }
+
+  function findTagTabControl() {
+    return document.querySelector('[data-action="switch-view"][data-view="tags"]');
+  }
+
+  async function ensureTagCatalog(control = findTagTabControl()) {
     if (state.tagsReady) return true;
-    setResourceLoading(null, "读取中文标签");
+    if (state.tagLoad) {
+      if (control) {
+        state.tagLoad.controls?.add(control);
+        setResourceLoading(control, "读取中文标签");
+      }
+      return state.tagLoad;
+    }
+    const controls = new Set(control ? [control] : []);
+    const load = (async () => {
+      removeResourceError("tags");
+      setResourceLoading(control, "读取中文标签");
+      try {
+        let resourcesReady = false;
+        if (!state.searchReady) {
+          if (state.searchLoad) {
+            const searchReady = await state.searchLoad;
+            if (!searchReady) {
+              if (!state.searchAborted) renderTagLoadError();
+              return false;
+            }
+          } else {
+            await activateSearchResources({
+              loader: state.loader,
+              store: state.store,
+              signal: state.fetchController?.signal,
+            });
+            state.searchReady = true;
+            state.tagsReady = true;
+            state.searchError = null;
+            state.searchAborted = false;
+            state.tagError = null;
+            removeResourceError("tags");
+            resourcesReady = true;
+          }
+        }
+        if (!resourcesReady && !state.tagsReady) {
+          state.store.installTags(await state.loader.ensureTags({
+            signal: state.fetchController?.signal,
+          }));
+          state.tagsReady = true;
+          state.tagError = null;
+        }
+        removeResourceError("tags");
+        if (state.view === "tags" && !state.query) renderTagView();
+        if (ui.videoDialog.open && state.activeDialogCode) {
+          void openVideoDialog(state.activeDialogCode, state.dialogTrigger).catch(() => {});
+        }
+        return true;
+      } catch (error) {
+        if (error?.name !== "AbortError") {
+          state.tagError = error;
+          renderTagLoadError();
+          showToast("标签索引载入失败；再次打开标签页可重试。");
+        } else {
+          state.searchAborted = true;
+        }
+        return false;
+      } finally {
+        for (const candidate of controls) {
+          clearResourceLoading(candidate);
+        }
+      }
+    })();
+    load.controls = controls;
+    state.tagLoad = load;
     try {
-      if (!await ensureSearchCatalog()) return false;
-      state.store.installTags(await state.loader.ensureTags({
-        signal: state.fetchController?.signal,
-      }));
-      state.tagsReady = true;
-      state.tagError = null;
-      if (state.view === "tags") renderCurrentView();
-      if (ui.videoDialog.open && state.activeDialogCode) {
-        void openVideoDialog(state.activeDialogCode, state.dialogTrigger);
-      }
-      return true;
-    } catch (error) {
-      if (error?.name !== "AbortError") {
-        state.tagError = error;
-        showToast("标签索引载入失败；再次打开标签页可重试。");
-      }
-      return false;
+      return await load;
     } finally {
-      clearResourceLoading(null);
+      if (state.tagLoad === load) state.tagLoad = null;
     }
   }
 
@@ -1432,10 +1717,31 @@ function startApplication() {
     if (priorGeneration !== bootstrap.generation) {
       state.searchReady = false;
       state.searchError = null;
+      state.searchAborted = false;
+      state.searchLoad = null;
       state.tagsReady = false;
       state.tagError = null;
+      state.tagLoad = null;
       state.mountedSeries = null;
     }
+    state.detailHydration = createDetailHydrationController({
+      loader: state.loader,
+      store: state.store,
+      onLoading: (code, active, trigger) => {
+        if (!trigger) return;
+        trigger.disabled = active;
+        if (active) {
+          trigger.setAttribute?.("aria-busy", "true");
+        } else {
+          trigger.removeAttribute?.("aria-busy");
+        }
+      },
+      onFailure: (code) => {
+        renderDetailHydrationError(code);
+        showToast("详情暂时无法打开，请重试。");
+      },
+    });
+    state.detailOpenPromises.clear();
     persistPreferences();
     updateSummary();
     renderSeriesNavigation();
@@ -1485,19 +1791,37 @@ function startApplication() {
     ui.search.value = "";
     ui.searchClear.hidden = true;
     state.view = "all";
+    resetViewProgressiveCounter(
+      state.visible,
+      state.view,
+      state.preferences.selectedSeries,
+    );
     state.preferences.selectedSeries = code;
+    resetViewProgressiveCounter(state.visible, state.view, code);
     persistPreferences();
     renderCurrentView({ focusMain: true });
     await ensureSeriesCatalog(code);
   }
 
-  function clearSearch({ focus = false, focusMain = false } = {}) {
+  function clearSearch({
+    focus = false,
+    focusMain = false,
+    activationControl = null,
+    resetView = false,
+  } = {}) {
     window.clearTimeout(state.searchTimer);
     state.query = "";
     resetProgressiveCounter(state.visible, { query: "" });
+    if (resetView) {
+      resetViewProgressiveCounter(
+        state.visible,
+        state.view,
+        state.preferences.selectedSeries,
+      );
+    }
     ui.search.value = "";
     ui.searchClear.hidden = true;
-    renderCurrentView({ focusMain });
+    renderCurrentView({ focusMain, activationControl });
     if (focus) {
       ui.search.focus();
     }
@@ -1764,16 +2088,44 @@ function startApplication() {
   }
 
   async function openVideoDialog(code, trigger) {
-    const video = await hydrateDetailVideo({
-      code,
-      loader: state.loader,
-      store: state.store,
-    });
+    const key = detailRetryAction(code)?.code || code;
+    const existing = state.detailOpenPromises.get(key);
+    if (existing) return existing;
+    const task = openVideoDialogOnce(code, trigger);
+    state.detailOpenPromises.set(key, task);
+    try {
+      return await task;
+    } finally {
+      if (state.detailOpenPromises.get(key) === task) {
+        state.detailOpenPromises.delete(key);
+      }
+    }
+  }
+
+  async function openVideoDialogOnce(code, trigger) {
+    const video = await (state.detailHydration?.open(code, trigger, {
+      signal: state.fetchController?.signal,
+    }) ??
+      createDetailHydrationController({
+        loader: state.loader,
+        store: state.store,
+        onLoading: (publicCode, active) => {
+          if (!trigger) return;
+          trigger.disabled = active;
+          if (active) trigger.setAttribute?.("aria-busy", "true");
+          else trigger.removeAttribute?.("aria-busy");
+        },
+        onFailure: (publicCode) => {
+          renderDetailHydrationError(publicCode);
+          showToast("详情暂时无法打开，请重试。");
+        },
+      }).open(code, trigger, { signal: state.fetchController?.signal }));
     if (!video) {
       return;
     }
+    removeResourceError("detail");
     disconnectPreviewObserver();
-    state.activeDialogCode = code;
+    state.activeDialogCode = video.code;
     state.dialogTrigger = trigger ?? document.activeElement;
     const layout = createElement("div", "detail-layout");
     const coverFrame = createElement("figure", "detail-cover-frame");
@@ -1900,9 +2252,13 @@ function startApplication() {
     const action = control.dataset.action;
     if (action === "switch-view") {
       state.view = control.dataset.view;
-      clearSearch({ focusMain: true });
+      clearSearch({
+        focusMain: true,
+        activationControl: control,
+        resetView: true,
+      });
     } else if (action === "clear-search") {
-      clearSearch({ focus: true });
+      clearSearch({ focus: true, resetView: true });
     } else if (action === "toggle-theme") {
       state.preferences.theme =
         state.preferences.theme === "dark" ? "light" : "dark";
@@ -1948,14 +2304,20 @@ function startApplication() {
       resetProgressiveCounter(state.visible, { series: code });
       mountSeriesWindow(code);
     } else if (action === "open-video") {
-      void openVideoDialog(control.dataset.code, control);
-      if (!state.tagsReady) void ensureTagCatalog();
+      void openVideoDialog(control.dataset.code, control).catch(() => {});
+      if (!state.tagsReady) void ensureTagCatalog(findTagTabControl());
     } else if (action === "close-dialog") {
       closeVideoDialog();
     } else if (action === "copy-code") {
       void copyCode(control.dataset.code);
     } else if (action === "cycle-favorite") {
+      const previousState = Number.parseInt(control.dataset.favoriteState, 10);
       const nextState = favorites.cycle(control.dataset.code);
+      resetFavoriteProgressiveCounters(
+        state.visible,
+        Number.isInteger(previousState) ? previousState : 0,
+        nextState,
+      );
       control.dataset.favoriteState = String(nextState);
       control.textContent = FAVORITE_PRESENTATION[nextState].label;
       updateFavoriteCount();
@@ -2031,7 +2393,13 @@ function startApplication() {
       void loadRuntimeCatalog();
     } else if (action === "retry-tags") {
       state.tagError = null;
-      void ensureTagCatalog();
+      void ensureTagCatalog(control);
+    } else if (action === "retry-detail") {
+      const code = detailRetryAction(control.dataset.code)?.code;
+      if (!code) return;
+      const trigger = [...document.querySelectorAll('[data-action="open-video"]')]
+        .find((candidate) => candidate.dataset.code === code) ?? control;
+      void openVideoDialog(code, trigger).catch(() => {});
     } else if (action === "back-top") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (action === "close-toast") {
@@ -2115,7 +2483,10 @@ function startApplication() {
         event.preventDefault();
         const target = tabs[targetIndex];
         state.view = target.dataset.view;
-        clearSearch();
+        clearSearch({
+          activationControl: target,
+          resetView: true,
+        });
         target.focus();
         return;
       }
@@ -2130,7 +2501,7 @@ function startApplication() {
       !ui.seriesDrawer.open &&
       (state.query || ui.search.value)
     ) {
-      clearSearch({ focus: true });
+      clearSearch({ focus: true, resetView: true });
     }
   });
 
