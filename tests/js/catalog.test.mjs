@@ -50,6 +50,7 @@ import {
   normalizeFeaturedCovers,
   unmountSeries,
 } from "../../public/js/render.js";
+import * as renderModule from "../../public/js/render.js";
 
 function catalogFixture() {
   return {
@@ -433,7 +434,10 @@ test("series mounting defaults to real products and creates slots only when expl
   );
 
   const slotContainer = containerFixture();
-  const slotWindow = mountSeries(slotContainer, series, { mode: "slots" });
+  const slotWindow = mountSeries(slotContainer, series, {
+    mode: "slots",
+    visibleCount: 100,
+  });
 
   assert.equal(classCount(slotContainer.innerHTML, "video-card"), 2);
   assert.equal(classCount(slotContainer.innerHTML, "empty-slot"), 97);
@@ -453,7 +457,10 @@ test("zero suffix videos sort first and survive explicit slot rendering", () => 
   );
 
   const slotContainer = containerFixture();
-  const slotWindow = mountSeries(slotContainer, series, { mode: "slots" });
+  const slotWindow = mountSeries(slotContainer, series, {
+    mode: "slots",
+    visibleCount: 100,
+  });
   assert.equal(classCount(slotContainer.innerHTML, "video-card"), 2);
   assert.equal(classCount(slotContainer.innerHTML, "empty-slot"), 98);
   assert.equal(slotWindow.total, 100);
@@ -484,6 +491,7 @@ test("a missing zero number derives from its canonical code in slot mode", () =>
 
   const window = mountSeries(container, seriesFixture([missingNumber]), {
     mode: "slots",
+    visibleCount: 100,
   });
 
   assert.equal(classCount(container.innerHTML, "video-card"), 1);
@@ -497,7 +505,7 @@ test("null boolean and malformed declared numbers never masquerade as zero", () 
     const window = mountSeries(
       container,
       seriesFixture([videoFixture(0, { number: declared })]),
-      { mode: "slots" },
+      { mode: "slots", visibleCount: 100 },
     );
 
     assert.equal(classCount(container.innerHTML, "video-card"), 0, String(declared));
@@ -521,41 +529,58 @@ test("search and favorite result grids never honor slot-mode requests", () => {
   }
 });
 
-test("sets above 250 items mount a 100-item page window", () => {
-  const videos = Array.from({ length: 251 }, (_, index) =>
-    videoFixture(index + 1),
-  );
+test("progressive result windows show 24 cards and advance in fixed increments", () => {
+  assert.equal(typeof renderModule.resolveProgressiveWindow, "function");
+  const videos = Array.from({ length: 60 }, (_, index) => videoFixture(index + 1));
   const container = containerFixture();
-  const firstWindow = mountSeries(container, seriesFixture(videos), {
-    limit: 500,
+  const firstWindow = renderSearchResults(container, videos, {
+    visibleCount: 24,
   });
 
-  assert.equal(classCount(container.innerHTML, "video-card"), 100);
+  assert.equal(classCount(container.innerHTML, "video-card"), 24);
   assert.deepEqual(
     {
-      start: firstWindow.start,
-      end: firstWindow.end,
       rendered: firstWindow.rendered,
       total: firstWindow.total,
       hasMore: firstWindow.hasMore,
-      nextStart: firstWindow.nextStart,
+      nextVisible: firstWindow.nextVisible,
     },
     {
-      start: 0,
-      end: 100,
-      rendered: 100,
-      total: 251,
+      rendered: 24,
+      total: 60,
       hasMore: true,
-      nextStart: 100,
+      nextVisible: 48,
     },
   );
 
-  const secondWindow = mountSeries(container, seriesFixture(videos), {
-    start: firstWindow.nextStart,
+  const secondWindow = renderSearchResults(container, videos, {
+    visibleCount: 48,
   });
-  assert.equal(classCount(container.innerHTML, "video-card"), 100);
-  assert.equal(secondWindow.start, 100);
-  assert.equal(secondWindow.end, 200);
+  assert.equal(classCount(container.innerHTML, "video-card"), 48);
+  assert.equal(secondWindow.rendered, 48);
+  assert.equal(secondWindow.nextVisible, 60);
+});
+
+test("release-state badges compare dates to the supplied catalog generation date", () => {
+  const container = containerFixture();
+
+  renderSearchResults(
+    container,
+    [
+      videoFixture(1, { releaseDate: "2026-09-11" }),
+      videoFixture(2, { releaseDate: "2026-08-28" }),
+    ],
+    { asOfDate: "2026-08-29" },
+  );
+
+  assert.match(
+    container.innerHTML,
+    /data-code="SPSF-1"[\s\S]*?<span class="video-release-state">预告<\/span>/u,
+  );
+  assert.doesNotMatch(
+    container.innerHTML.match(/data-code="SPSF-2"[\s\S]*?<\/article>/u)?.[0] ?? "",
+    /video-release-state/u,
+  );
 });
 
 test("video cards escape content, prioritize the first row, and show link badges", () => {

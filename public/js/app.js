@@ -1,16 +1,18 @@
-import { createCatalogModel } from "./catalog.js";
 import {
   derivePreviewUrls,
   mountSeries,
   normalizeFeaturedCovers,
   observeDeferredCovers,
   optimizedCoverUrl,
+  RESULT_WINDOW_SIZE,
   renderSearchResults,
   renderSeriesShell,
   unmountSeries,
 } from "./render.js";
 import { createFavoritesStore, getFavoriteVideos } from "./favorites.js";
-import { createLazyTagLoader } from "./runtime-tags.js";
+import { openCatalogCache } from "./catalog-cache.js";
+import { createRuntimeCatalogStore } from "./runtime-catalog.js";
+import { createRuntimeLoader } from "./runtime-loader.js";
 import {
   createResolvedLinkLoader,
   resolveLinkTarget,
@@ -20,7 +22,6 @@ export const UI_STORAGE_KEY = "giga_catalog_ui_v1";
 
 const SEARCH_DELAY_MS = 180;
 const FEATURED_COVERS_TIMEOUT_MS = 2000;
-const RECENT_SERIES_COUNT = 6;
 const PREVIEW_BATCH_SIZE = 4;
 const loadResolvedLinks = createResolvedLinkLoader();
 const PROVIDERS = Object.freeze([
@@ -36,6 +37,208 @@ const FAVORITE_PRESENTATION = Object.freeze({
 });
 const COVER_FALLBACK =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='480' viewBox='0 0 320 480'%3E%3Crect width='320' height='480' fill='%23192536'/%3E%3Cpath d='M78 198h164v84H78z' fill='none' stroke='%239cabbb' stroke-width='4'/%3E%3Cpath d='m96 264 38-38 28 26 24-20 38 32' fill='none' stroke='%239cabbb' stroke-width='4'/%3E%3C/svg%3E";
+
+export function createProgressiveCounters(seriesCodes = []) {
+  const series = {};
+  for (const rawCode of Array.isArray(seriesCodes) ? seriesCodes : []) {
+    const code = String(rawCode ?? "").trim().toUpperCase();
+    if (code) series[code] = RESULT_WINDOW_SIZE;
+  }
+  return {
+    recent: RESULT_WINDOW_SIZE,
+    series,
+    search: RESULT_WINDOW_SIZE,
+    tags: RESULT_WINDOW_SIZE,
+    favorites: { 1: RESULT_WINDOW_SIZE, 2: RESULT_WINDOW_SIZE },
+  };
+}
+
+export function increaseVisibleCount(
+  current,
+  total,
+  increment = RESULT_WINDOW_SIZE,
+) {
+  const safeTotal = Number.isInteger(total) && total >= 0 ? total : 0;
+  const safeCurrent = Number.isInteger(current) && current >= 0
+    ? current
+    : RESULT_WINDOW_SIZE;
+  const safeIncrement = Number.isInteger(increment) && increment > 0
+    ? increment
+    : RESULT_WINDOW_SIZE;
+  return Math.min(safeTotal, Math.max(RESULT_WINDOW_SIZE, safeCurrent) + safeIncrement);
+}
+
+export function progressiveLoadMoreLabel(nextVisible) {
+  const count = Number.isInteger(nextVisible) && nextVisible >= 0
+    ? nextVisible
+    : RESULT_WINDOW_SIZE;
+  return `加载更多，显示至 ${new Intl.NumberFormat("zh-CN").format(count)} 部`;
+}
+
+/** Reset only the visibility counter for the context whose inputs changed. */
+export function resetProgressiveCounter(visible, change = {}) {
+  if (!visible || typeof visible !== "object") return visible;
+  if (change.view === "recent") visible.recent = RESULT_WINDOW_SIZE;
+  if (change.view === "search" || Object.hasOwn(change, "query")) {
+    visible.search = RESULT_WINDOW_SIZE;
+  }
+  if (change.view === "tags") visible.tags = RESULT_WINDOW_SIZE;
+  if (change.series) {
+    visible.series ??= {};
+    visible.series[change.series] = RESULT_WINDOW_SIZE;
+  }
+  if (change.favoriteState === 1 || change.favoriteState === 2) {
+    visible.favorites ??= {};
+    visible.favorites[change.favoriteState] = RESULT_WINDOW_SIZE;
+  }
+  return visible;
+}
+
+function visibleRuntimeVideos(videos, visibleCount) {
+  const items = Array.isArray(videos) ? videos : [];
+  const count = Number.isInteger(visibleCount)
+    ? Math.max(RESULT_WINDOW_SIZE, visibleCount)
+    : RESULT_WINDOW_SIZE;
+  return items.slice(0, count);
+}
+
+function runtimeSeriesFromQuery(query) {
+  const match = String(query ?? "")
+    .trim()
+    .toUpperCase()
+    .match(/^([A-Z][A-Z0-9]*)[-_\s]+\d+$/u);
+  return match?.[1] ?? null;
+}
+
+function renderActivatedVideos(render, context, videos, visibleCount, extra = {}) {
+  const allVideos = Array.isArray(videos) ? videos : [];
+  return render?.({
+    context,
+    videos: visibleRuntimeVideos(allVideos, visibleCount),
+    allVideos,
+    total: allVideos.length,
+    visibleCount,
+    ...extra,
+  });
+}
+
+export async function activateSeries({
+  code,
+  loader,
+  store,
+  render,
+  visibleCount = RESULT_WINDOW_SIZE,
+} = {}) {
+  const payload = await loader?.ensureSeries?.(code);
+  store?.installSeries?.(payload);
+  const series = store?.getSeries?.(code);
+  renderActivatedVideos(render, "series", series?.videos, visibleCount, { code });
+  return series ?? null;
+}
+
+export async function activateSearch({
+  query,
+  loader,
+  store,
+  render,
+  visibleCount = RESULT_WINDOW_SIZE,
+} = {}) {
+  const seriesCode = runtimeSeriesFromQuery(query);
+  if (seriesCode) {
+    await loader?.ensureSeries?.(seriesCode);
+  }
+  const payload = await loader?.ensureSearch?.();
+  store?.installSearch?.(payload);
+  const videos = store?.search?.(query) ?? [];
+  renderActivatedVideos(render, "search", videos, visibleCount, { query });
+  return videos;
+}
+
+export async function activateFavorites({
+  loader,
+  store,
+  render,
+  favorites = [],
+  visibleCount = RESULT_WINDOW_SIZE,
+} = {}) {
+  const payload = await loader?.ensureSearch?.();
+  store?.installSearch?.(payload);
+  const videos = Array.isArray(favorites)
+    ? favorites.map((item) => store?.getVideo?.(item.code ?? item)).filter(Boolean)
+    : [];
+  renderActivatedVideos(render, "favorites", videos, visibleCount);
+  return videos;
+}
+
+export async function activateTags({
+  loader,
+  store,
+  render,
+  visibleCount = RESULT_WINDOW_SIZE,
+} = {}) {
+  const search = await loader?.ensureSearch?.();
+  store?.installSearch?.(search);
+  const tags = await loader?.ensureTags?.();
+  store?.installTags?.(tags);
+  renderActivatedVideos(render, "tags", [], visibleCount);
+  return store;
+}
+
+/** Open recent entries without a shard; hydrate search-only entries from their declared series. */
+export async function hydrateDetailVideo({ code, loader, store } = {}) {
+  let video = store?.getVideo?.(code) ?? null;
+  if (!video) return null;
+  const isRecent = (store?.getRecentVideos?.() ?? []).some(
+    (item) => item?.code === video.code,
+  );
+  if (!isRecent && video.series && !store?.getSeries?.(video.series)) {
+    const payload = await loader?.ensureSeries?.(video.series);
+    store?.installSeries?.(payload);
+    video = store?.getVideo?.(code) ?? video;
+  }
+  return video;
+}
+
+export function activateBootstrap({
+  bootstrap,
+  loader,
+  state,
+  createStore = createRuntimeCatalogStore,
+  render,
+} = {}) {
+  const store = createStore(bootstrap);
+  const generationChanged = state?.generation !== bootstrap?.generation;
+  if (state) {
+    const summaries = Array.isArray(bootstrap?.series) ? bootstrap.series : [];
+    state.store = store;
+    state.bootstrap = bootstrap;
+    state.generation = bootstrap?.generation ?? null;
+    if (generationChanged || !state.visible) {
+      state.visible = createProgressiveCounters(summaries.map((item) => item.code));
+    } else {
+      state.visible.series ??= {};
+      for (const item of summaries) {
+        const code = String(item?.code ?? "").trim().toUpperCase();
+        if (code && !Number.isInteger(state.visible.series[code])) {
+          state.visible.series[code] = RESULT_WINDOW_SIZE;
+        }
+      }
+    }
+    const selected = state.preferences?.selectedSeries;
+    if (state.preferences && !summaries.some((item) => item.code === selected)) {
+      state.preferences.selectedSeries = summaries[0]?.code ?? "";
+    }
+  }
+  loader?.setBootstrap?.(bootstrap);
+  renderActivatedVideos(
+    render,
+    "recent",
+    store.getRecentVideos(),
+    state?.visible?.recent,
+    { asOfDate: bootstrap?.generatedAt?.slice(0, 10) },
+  );
+  return store;
+}
 
 export function tabKeyTargetIndex(key, currentIndex, tabCount) {
   if (
@@ -85,6 +288,7 @@ export function bindDebouncedSearchInput({
     state.searchTimer = setTimer(() => {
       state.query = input.value.trim();
       state.searchStart = 0;
+      resetProgressiveCounter(state.visible, { query: state.query });
       render();
     }, delayMs);
   });
@@ -100,6 +304,7 @@ export function clearActiveSearch({
   state.searchTimer = null;
   state.query = "";
   state.searchStart = 0;
+  resetProgressiveCounter(state.visible, { query: "" });
   input.value = "";
   clearButton.hidden = true;
 }
@@ -460,14 +665,16 @@ function startApplication() {
   );
   const favorites = createFavoritesStore(globalThis.localStorage);
   const state = {
-    model: null,
-    payload: null,
+    store: null,
+    bootstrap: null,
+    loader: null,
+    generation: null,
     featuredCovers: new Map(),
     view: "recent",
     query: "",
     mountedSeries: null,
-    searchStart: 0,
-    favoriteStarts: { 1: 0, 2: 0 },
+    visible: createProgressiveCounters(),
+    progressFocus: null,
     preferences,
     fetchController: null,
     searchTimer: null,
@@ -486,10 +693,10 @@ function startApplication() {
     tagMatch: "all",
     tagSearch: "",
     tagSort: "newest",
-    tagStart: 0,
+    searchReady: false,
+    searchError: null,
     tagsReady: false,
     tagError: null,
-    ensureTags: null,
     activeDialogCode: null,
   };
 
@@ -543,35 +750,12 @@ function startApplication() {
       '<section class="state-panel loading-panel" aria-labelledby="loading-title">',
       '<span class="state-kicker">正在整理展柜</span>',
       '<h2 id="loading-title">载入影片目录…</h2>',
-      '<p>只挂载首个系列，完整数据在内存中建立索引。</p>',
+      '<p>先载入最新目录，其余内容按需读取。</p>',
       '<div class="skeleton-grid" aria-hidden="true">',
       '<span class="skeleton-card"></span><span class="skeleton-card"></span>',
       '<span class="skeleton-card"></span><span class="skeleton-card"></span>',
       "</div></section>",
     ].join("");
-  }
-
-  function renderTagLoadState(error = null) {
-    ui.main.setAttribute("aria-busy", String(!error));
-    const panel = createElement("section", `state-panel ${error ? "error-panel" : "loading-panel"}`);
-    panel.append(
-      createElement("span", "state-kicker", error ? "标签暂不可用" : "按需加载"),
-      createElement("h2", "", error ? "标签载入失败" : "正在载入中文标签…"),
-      createElement(
-        "p",
-        "",
-        error
-          ? "影片目录仍可正常浏览，可以重新载入标签。"
-          : "基础目录已经就绪，只在需要时下载标签索引。",
-      ),
-    );
-    if (error) {
-      const retry = createElement("button", "button button--primary", "重新载入标签");
-      retry.type = "button";
-      retry.dataset.action = "retry-tags";
-      panel.append(retry);
-    }
-    ui.main.replaceChildren(panel);
   }
 
   function renderLoadError(error) {
@@ -603,7 +787,7 @@ function startApplication() {
   }
 
   function updateSummary() {
-    const metadata = state.model.metadata;
+    const metadata = state.store.metadata;
     const totals = metadata.totals ?? {};
     const counts = metadata.refresh?.counts ?? {};
     ui.summaryVideos.textContent = formatNumber(totals.videos);
@@ -624,8 +808,17 @@ function startApplication() {
     }
   }
 
+  function seriesSummaries() {
+    return [...(state.store?.getSeriesSummaries?.() ?? [])].sort(
+      (left, right) =>
+        String(right.latestReleaseDate ?? "").localeCompare(
+          String(left.latestReleaseDate ?? ""),
+        ) || String(left.code).localeCompare(String(right.code)),
+    );
+  }
+
   function renderSeriesNavigation() {
-    const series = state.model.getRecentSeries();
+    const series = seriesSummaries();
     const buildList = (container) => {
       const fragment = document.createDocumentFragment();
       for (const item of series) {
@@ -642,7 +835,7 @@ function startApplication() {
           createElement(
             "span",
             "series-index__count",
-            `${formatNumber(item.count ?? item.videos.length)} 部`,
+            `${formatNumber(item.count)} 部`,
           ),
         );
         fragment.append(button);
@@ -670,41 +863,38 @@ function startApplication() {
     }
   }
 
-  function appendPagination(container, metadata, context) {
-    if (!metadata.hasPrevious && !metadata.hasMore) {
-      return;
-    }
-    const nav = createElement("nav", "pagination");
-    nav.setAttribute("aria-label", "分页");
+  function appendLoadMore(container, metadata, context) {
+    const nav = createElement("div", "pagination");
+    nav.setAttribute("aria-label", "显示更多影片");
     const status = createElement(
       "span",
-      "pagination__status",
-      `${formatNumber(metadata.start + 1)}–${formatNumber(metadata.end)} / ${formatNumber(metadata.total)}`,
+      "pagination__status progressive-status",
+      `已显示 ${formatNumber(metadata.rendered)} / ${formatNumber(metadata.total)} 部`,
     );
-    const previous = createElement("button", "button button--quiet", "上一段");
-    previous.type = "button";
-    previous.disabled = !metadata.hasPrevious;
-    previous.dataset.action = context.action;
-    previous.dataset.start = String(metadata.previousStart);
-    if (context.series) {
-      previous.dataset.series = context.series;
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    let more = null;
+    if (metadata.hasMore) {
+      more = createElement("button", "button button--quiet load-more", "加载更多");
+      more.type = "button";
+      more.dataset.action = "load-more";
+      more.dataset.context = context;
+      more.dataset.nextVisible = String(metadata.nextVisible);
+      more.setAttribute("aria-label", progressiveLoadMoreLabel(metadata.nextVisible));
+      nav.append(status, more);
+    } else {
+      nav.append(status);
     }
-    if (context.favoriteState) {
-      previous.dataset.favoriteState = String(context.favoriteState);
-    }
-    const next = createElement("button", "button button--quiet", "下一段");
-    next.type = "button";
-    next.disabled = !metadata.hasMore;
-    next.dataset.action = context.action;
-    next.dataset.start = String(metadata.nextStart);
-    if (context.series) {
-      next.dataset.series = context.series;
-    }
-    if (context.favoriteState) {
-      next.dataset.favoriteState = String(context.favoriteState);
-    }
-    nav.append(previous, status, next);
     container.append(nav);
+    if (state.progressFocus === context) {
+      if (more) {
+        more.focus();
+      } else {
+        status.tabIndex = -1;
+        status.focus();
+      }
+      state.progressFocus = null;
+    }
   }
 
   function findSeriesMount(code) {
@@ -720,8 +910,8 @@ function startApplication() {
     }
   }
 
-  function mountSeriesWindow(code, start = 0) {
-    const series = state.model.getSeries(code);
+  function mountSeriesWindow(code) {
+    const series = state.store.getSeries(code);
     const container = findSeriesMount(code);
     if (!series || !container) {
       return;
@@ -730,9 +920,10 @@ function startApplication() {
     const mode = state.preferences.slots[code] ? "slots" : "real-only";
     const metadata = mountSeries(container, series, {
       mode,
-      start,
+      visibleCount: state.visible.series[code] ?? RESULT_WINDOW_SIZE,
       featuredCovers: state.featuredCovers,
-      tagLookup: (tagId) => state.model.getTag(tagId),
+      tagLookup: (tagId) => state.store.getTag(tagId),
+      asOfDate: state.bootstrap?.generatedAt?.slice(0, 10),
     });
     const toolbar = createElement("div", "series-controls");
     const modeButton = createElement(
@@ -753,10 +944,7 @@ function startApplication() {
     );
     toolbar.append(modeButton, windowNote);
     container.prepend(toolbar);
-    appendPagination(container, metadata, {
-      action: "page-series",
-      series: code,
-    });
+    appendLoadMore(container, metadata, `series:${code}`);
     const toggle = ui.main.querySelector(
       `[data-action="mount-series"][data-series="${code}"]`,
     );
@@ -782,13 +970,13 @@ function startApplication() {
   }
 
   function renderRecentView() {
-    const recent = state.model.getRecentSeries(RECENT_SERIES_COUNT);
+    const recent = state.store.getRecentVideos();
     const fragment = document.createDocumentFragment();
     fragment.append(
       renderViewHeading(
         "RECENT EDITIONS",
         "最近更新",
-        "先陈列六个最近系列，只展开第一组影片，保持页面轻快。",
+        "先载入最新目录，其余内容按需读取。",
       ),
     );
     if (!recent.length) {
@@ -796,18 +984,26 @@ function startApplication() {
       ui.main.replaceChildren(fragment);
       return;
     }
-    const shells = createElement("div", "recent-series");
-    shells.innerHTML = recent.map((series) => renderSeriesShell(series)).join("");
-    fragment.append(shells);
+    const container = createElement("div", "result-section");
+    fragment.append(container);
     ui.main.replaceChildren(fragment);
     state.mountedSeries = null;
-    mountSeriesWindow(recent[0].code);
+    const metadata = renderSearchResults(container, recent, {
+      context: "recent",
+      visibleCount: state.visible.recent,
+      tagLookup: (tagId) => state.store.getTag(tagId),
+      asOfDate: state.bootstrap?.generatedAt?.slice(0, 10),
+      emptyMessage: "目录中暂无影片。",
+    });
+    appendLoadMore(container, metadata, "recent");
+    refreshDeferredCovers();
   }
 
   function renderAllSeriesView() {
-    const allSeries = state.model.getRecentSeries();
-    const selected =
-      state.model.getSeries(state.preferences.selectedSeries) ?? allSeries[0] ?? null;
+    const allSeries = seriesSummaries();
+    const selected = allSeries.find(
+      (item) => item.code === state.preferences.selectedSeries,
+    ) ?? allSeries[0] ?? null;
     const fragment = document.createDocumentFragment();
     fragment.append(
       renderViewHeading(
@@ -826,11 +1022,13 @@ function startApplication() {
     fragment.append(shell);
     ui.main.replaceChildren(fragment);
     state.mountedSeries = null;
-    mountSeriesWindow(selected.code);
+    if (state.store.getSeries(selected.code)) {
+      mountSeriesWindow(selected.code);
+    }
   }
 
   function renderSearchView() {
-    const results = state.model.search(state.query);
+    const results = state.store.search(state.query);
     const fragment = document.createDocumentFragment();
     fragment.append(
       renderViewHeading(
@@ -844,19 +1042,20 @@ function startApplication() {
     ui.main.replaceChildren(fragment);
     state.mountedSeries = null;
     const metadata = renderSearchResults(container, results, {
-      start: state.searchStart,
+      visibleCount: state.visible.search,
       featuredCovers: state.featuredCovers,
       emptyMessage: "没有匹配的影片，试试番号、标题、演员、系列名或标签。",
-      tagLookup: (tagId) => state.model.getTag(tagId),
+      tagLookup: (tagId) => state.store.getTag(tagId),
+      asOfDate: state.bootstrap?.generatedAt?.slice(0, 10),
     });
-    appendPagination(container, metadata, { action: "page-results" });
+    appendLoadMore(container, metadata, "search");
     refreshDeferredCovers();
   }
 
   function renderFavoritesView() {
     const entries = getFavoriteVideos(
       favorites.getAll(),
-      (code) => state.model.getVideo(code),
+      (code) => state.store.getVideo(code),
     );
     const fragment = document.createDocumentFragment();
     fragment.append(
@@ -879,6 +1078,7 @@ function startApplication() {
       refreshDeferredCovers();
       return;
     }
+    const groups = [];
     for (const favoriteState of [1, 2]) {
       const videos = entries
         .filter((entry) => entry.state === favoriteState)
@@ -895,19 +1095,20 @@ function startApplication() {
       const container = createElement("div", "favorite-group__grid");
       section.append(heading, container);
       fragment.append(section);
-      const metadata = renderSearchResults(container, videos, {
-        context: "favorites",
-        start: state.favoriteStarts[favoriteState],
-        featuredCovers: state.featuredCovers,
-        tagLookup: (tagId) => state.model.getTag(tagId),
-      });
-      appendPagination(container, metadata, {
-        action: "page-favorites",
-        favoriteState,
-      });
+      groups.push({ container, favoriteState, videos });
     }
     ui.main.replaceChildren(fragment);
     state.mountedSeries = null;
+    for (const { container, favoriteState, videos } of groups) {
+      const metadata = renderSearchResults(container, videos, {
+        context: "favorites",
+        visibleCount: state.visible.favorites[favoriteState],
+        featuredCovers: state.featuredCovers,
+        tagLookup: (tagId) => state.store.getTag(tagId),
+        asOfDate: state.bootstrap?.generatedAt?.slice(0, 10),
+      });
+      appendLoadMore(container, metadata, `favorites:${favoriteState}`);
+    }
     refreshDeferredCovers();
   }
 
@@ -927,7 +1128,7 @@ function startApplication() {
     } else if (current === "include") {
       state.tagExclude.add(tagId);
     }
-    state.tagStart = 0;
+    resetProgressiveCounter(state.visible, { view: "tags" });
   }
 
   function createTagChip(tag) {
@@ -974,6 +1175,12 @@ function startApplication() {
       );
     }
     return sorted;
+  }
+
+  function findRuntimeTags(query) {
+    const needle = String(query ?? "").normalize("NFKC").trim().toLowerCase();
+    return state.store.getTags().filter((tag) => !needle || [tag.nameZh, tag.nameJa]
+      .some((name) => String(name).normalize("NFKC").toLowerCase().includes(needle)));
   }
 
   function renderTagView() {
@@ -1031,11 +1238,11 @@ function startApplication() {
     selected.setAttribute("aria-live", "polite");
     const selectionParts = [];
     for (const tagId of [...state.tagInclude].sort((a, b) => a - b)) {
-      const tag = state.model.getTag(tagId);
+      const tag = state.store.getTag(tagId);
       if (tag) selectionParts.push(`+ ${tag.nameZh}`);
     }
     for (const tagId of [...state.tagExclude].sort((a, b) => a - b)) {
-      const tag = state.model.getTag(tagId);
+      const tag = state.store.getTag(tagId);
       if (tag) selectionParts.push(`− ${tag.nameZh}`);
     }
     selected.textContent = selectionParts.length
@@ -1044,11 +1251,11 @@ function startApplication() {
     fragment.append(selected);
 
     const matchingIds = state.tagSearch
-      ? new Set(state.model.searchTags(state.tagSearch).map((tag) => tag.id))
+      ? new Set(findRuntimeTags(state.tagSearch).map((tag) => tag.id))
       : null;
     const groups = createElement("div", "tag-groups");
     for (const [group, title] of [["genre", "类型与玩法"], ["character", "角色与造型"]]) {
-      const tags = state.model
+      const tags = state.store
         .getTags(group)
         .filter((tag) => !matchingIds || matchingIds.has(tag.id));
       const section = createElement("section", "tag-group");
@@ -1073,7 +1280,7 @@ function startApplication() {
       );
     } else {
       const videos = sortTagResults(
-        state.model.filterByTags({
+        state.store.filterByTags({
           include: [...state.tagInclude],
           exclude: [...state.tagExclude],
           match: state.tagMatch,
@@ -1088,12 +1295,13 @@ function startApplication() {
       ui.main.replaceChildren(fragment);
       state.mountedSeries = null;
       const metadata = renderSearchResults(grid, videos, {
-        start: state.tagStart,
+        visibleCount: state.visible.tags,
         context: "tags",
-        tagLookup: (tagId) => state.model.getTag(tagId),
+        tagLookup: (tagId) => state.store.getTag(tagId),
+        asOfDate: state.bootstrap?.generatedAt?.slice(0, 10),
         emptyMessage: "没有同时满足条件的影片。",
       });
-      appendPagination(grid, metadata, { action: "page-tag-results" });
+      appendLoadMore(grid, metadata, "tags");
       refreshDeferredCovers();
       return;
     }
@@ -1104,25 +1312,33 @@ function startApplication() {
   }
 
   function renderCurrentView(options) {
-    if (!state.model) {
+    if (!state.store) {
       return;
     }
     ui.main.removeAttribute("aria-busy");
     document.body.dataset.view = state.query ? "search" : state.view;
     if (state.query) {
-      renderSearchView();
-      if (!state.tagsReady && !state.tagError) void ensureTagCatalog();
+      if (state.searchReady) {
+        renderSearchView();
+      } else {
+        void ensureSearchCatalog();
+      }
     } else if (state.view === "tags") {
       if (state.tagsReady) {
         renderTagView();
       } else {
-        renderTagLoadState(state.tagError);
-        if (!state.tagError) void ensureTagCatalog();
+        void ensureTagCatalog();
       }
     } else if (state.view === "all") {
       renderAllSeriesView();
+      const code = state.preferences.selectedSeries;
+      if (code && !state.store.getSeries(code)) void ensureSeriesCatalog(code);
     } else if (state.view === "favorites") {
-      renderFavoritesView();
+      if (state.searchReady) {
+        renderFavoritesView();
+      } else {
+        void ensureSearchCatalog();
+      }
     } else {
       renderRecentView();
     }
@@ -1130,88 +1346,126 @@ function startApplication() {
     applyRenderFocus(ui.main, options);
   }
 
-  function configureTagLoader() {
-    state.tagsReady = false;
-    state.tagError = null;
-    state.ensureTags = createLazyTagLoader({
-      getCore: () => state.payload,
-      loadPayload: async () => {
-        const response = await fetch(
-          new URL("../data/catalog-tags.json", import.meta.url),
-          {
-            headers: { Accept: "application/json" },
-            signal: state.fetchController?.signal,
-          },
-        );
-        if (!response.ok) {
-          throw new Error(`标签请求失败（HTTP ${response.status}）`);
-        }
-        return response.json();
-      },
-      onHydrated: (payload) => {
-        state.payload = payload;
-        state.model = createCatalogModel(payload);
-        state.tagsReady = true;
-        state.tagError = null;
-      },
-    });
+  function setResourceLoading(control, label) {
+    if (control) control.disabled = true;
+    ui.connectionStatus.textContent = label;
+  }
+
+  function clearResourceLoading(control) {
+    if (control) control.disabled = false;
+    if (state.store) ui.connectionStatus.textContent = "数据已就绪";
+  }
+
+  async function ensureSearchCatalog() {
+    if (state.searchReady) return true;
+    setResourceLoading(ui.search, "读取搜索索引");
+    try {
+      state.store.installSearch(await state.loader.ensureSearch({
+        signal: state.fetchController?.signal,
+      }));
+      state.searchReady = true;
+      state.searchError = null;
+      if (state.query || state.view === "favorites" || state.view === "tags") {
+        renderCurrentView();
+      }
+      return true;
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        state.searchError = error;
+        showToast("搜索索引载入失败；请再次搜索重试。");
+      }
+      return false;
+    } finally {
+      clearResourceLoading(ui.search);
+    }
   }
 
   async function ensureTagCatalog() {
     if (state.tagsReady) return true;
+    setResourceLoading(null, "读取中文标签");
     try {
-      await state.ensureTags?.();
-      if (state.query || state.view === "tags") renderCurrentView();
+      if (!await ensureSearchCatalog()) return false;
+      state.store.installTags(await state.loader.ensureTags({
+        signal: state.fetchController?.signal,
+      }));
+      state.tagsReady = true;
+      state.tagError = null;
+      if (state.view === "tags") renderCurrentView();
       if (ui.videoDialog.open && state.activeDialogCode) {
-        openVideoDialog(state.activeDialogCode, state.dialogTrigger);
+        void openVideoDialog(state.activeDialogCode, state.dialogTrigger);
       }
       return true;
     } catch (error) {
-      if (error?.name === "AbortError") return false;
-      state.tagError = error;
-      if (!state.query && state.view === "tags") {
-        renderTagLoadState(error);
-        updateTabs();
+      if (error?.name !== "AbortError") {
+        state.tagError = error;
+        showToast("标签索引载入失败；再次打开标签页可重试。");
       }
       return false;
+    } finally {
+      clearResourceLoading(null);
     }
   }
 
-  async function loadCatalog() {
+  async function ensureSeriesCatalog(code) {
+    if (state.store.getSeries(code)) return state.store.getSeries(code);
+    const selector = document.querySelector(`[data-action="select-series"][data-series="${code}"]`);
+    setResourceLoading(selector, `读取 ${code} 系列`);
+    try {
+      state.store.installSeries(await state.loader.ensureSeries(code, {
+        signal: state.fetchController?.signal,
+      }));
+      if (state.view === "all" && state.preferences.selectedSeries === code) {
+        renderCurrentView();
+      }
+      return state.store.getSeries(code);
+    } catch (error) {
+      if (error?.name !== "AbortError") showToast(`${code} 系列载入失败；请重试。`);
+      return null;
+    } finally {
+      clearResourceLoading(selector);
+    }
+  }
+
+  function activateRuntimeBootstrap(bootstrap, { cached }) {
+    const priorGeneration = state.generation;
+    activateBootstrap({ bootstrap, loader: state.loader, state });
+    if (priorGeneration !== bootstrap.generation) {
+      state.searchReady = false;
+      state.searchError = null;
+      state.tagsReady = false;
+      state.tagError = null;
+      state.mountedSeries = null;
+    }
+    persistPreferences();
+    updateSummary();
+    renderSeriesNavigation();
+    renderCurrentView();
+    ui.connectionStatus.textContent = cached ? "已载入缓存目录" : "数据已就绪";
+  }
+
+  async function loadRuntimeCatalog() {
     state.fetchController?.abort();
     state.fetchController = new AbortController();
     renderLoading();
     ui.connectionStatus.textContent =
       navigator.onLine === false ? "离线" : "同步目录";
     try {
-      const catalogRequest = fetch(new URL("../data/catalog-core.json", import.meta.url), {
-        headers: { Accept: "application/json" },
-        signal: state.fetchController.signal,
+      const cache = openCatalogCache(globalThis.indexedDB);
+      state.loader = createRuntimeLoader({
+        fetcher: globalThis.fetch,
+        cache,
       });
-      const featuredCoversRequest = loadFeaturedCovers(fetch, {
+      void loadFeaturedCovers(globalThis.fetch, {
         signal: state.fetchController.signal,
+      }).then((covers) => {
+        state.featuredCovers = covers;
+        if (state.store) renderCurrentView();
       });
-      const response = await catalogRequest;
-      if (!response.ok) {
-        throw new Error(`目录请求失败（HTTP ${response.status}）`);
-      }
-      const payload = await response.json();
-      if (!isRecord(payload) || !Array.isArray(payload.series)) {
-        throw new Error("目录数据结构无效");
-      }
-      state.featuredCovers = await featuredCoversRequest;
-      state.payload = payload;
-      state.model = createCatalogModel(payload);
-      configureTagLoader();
-      const fallbackSeries = state.model.getRecentSeries(1)[0]?.code ?? "";
-      if (!state.model.getSeries(state.preferences.selectedSeries)) {
-        state.preferences.selectedSeries = fallbackSeries;
-        persistPreferences();
-      }
-      updateSummary();
-      renderSeriesNavigation();
-      renderCurrentView();
-      ui.connectionStatus.textContent = "数据已就绪";
+      await state.loader.start({
+        signal: state.fetchController.signal,
+        onCached: (bootstrap) => activateRuntimeBootstrap(bootstrap, { cached: true }),
+        onFresh: (bootstrap) => activateRuntimeBootstrap(bootstrap, { cached: false }),
+      });
     } catch (error) {
       if (error?.name !== "AbortError") {
         renderLoadError(error);
@@ -1221,24 +1475,26 @@ function startApplication() {
     }
   }
 
-  function selectSeries(code) {
-    if (!state.model?.getSeries(code)) {
+  async function selectSeries(code) {
+    if (!seriesSummaries().some((item) => item.code === code)) {
       return;
     }
     state.query = "";
-    state.searchStart = 0;
+    resetProgressiveCounter(state.visible, { query: "" });
+    resetProgressiveCounter(state.visible, { series: code });
     ui.search.value = "";
     ui.searchClear.hidden = true;
     state.view = "all";
     state.preferences.selectedSeries = code;
     persistPreferences();
     renderCurrentView({ focusMain: true });
+    await ensureSeriesCatalog(code);
   }
 
   function clearSearch({ focus = false, focusMain = false } = {}) {
     window.clearTimeout(state.searchTimer);
     state.query = "";
-    state.searchStart = 0;
+    resetProgressiveCounter(state.visible, { query: "" });
     ui.search.value = "";
     ui.searchClear.hidden = true;
     renderCurrentView({ focusMain });
@@ -1460,7 +1716,7 @@ function startApplication() {
 
   function createOfficialTagSection(video) {
     const assigned = Array.isArray(video.tagIds)
-      ? video.tagIds.map((tagId) => state.model.getTag(tagId)).filter(Boolean)
+      ? video.tagIds.map((tagId) => state.store.getTag(tagId)).filter(Boolean)
       : [];
     if (!assigned.length) {
       return null;
@@ -1507,8 +1763,12 @@ function startApplication() {
     return actions;
   }
 
-  function openVideoDialog(code, trigger) {
-    const video = state.model?.getVideo(code);
+  async function openVideoDialog(code, trigger) {
+    const video = await hydrateDetailVideo({
+      code,
+      loader: state.loader,
+      store: state.store,
+    });
     if (!video) {
       return;
     }
@@ -1661,7 +1921,7 @@ function startApplication() {
     } else if (action === "close-drawer") {
       closeDrawer();
     } else if (action === "select-series") {
-      selectSeries(control.dataset.series);
+      void selectSeries(control.dataset.series);
       closeDrawer();
     } else if (action === "mount-series") {
       const code = control.dataset.series;
@@ -1675,16 +1935,21 @@ function startApplication() {
         state.mountedSeries = null;
         refreshDeferredCovers();
       } else {
-        mountSeriesWindow(code);
+        if (state.store.getSeries(code)) {
+          mountSeriesWindow(code);
+        } else {
+          void ensureSeriesCatalog(code);
+        }
       }
     } else if (action === "toggle-slots") {
       const code = control.dataset.series;
       state.preferences.slots[code] = !state.preferences.slots[code];
       persistPreferences();
-      mountSeriesWindow(code, 0);
+      resetProgressiveCounter(state.visible, { series: code });
+      mountSeriesWindow(code);
     } else if (action === "open-video") {
-      openVideoDialog(control.dataset.code, control);
-      if (!state.tagsReady && !state.tagError) void ensureTagCatalog();
+      void openVideoDialog(control.dataset.code, control);
+      if (!state.tagsReady) void ensureTagCatalog();
     } else if (action === "close-dialog") {
       closeVideoDialog();
     } else if (action === "copy-code") {
@@ -1706,26 +1971,26 @@ function startApplication() {
       ui.search.value = actor;
       ui.searchClear.hidden = !actor;
       state.query = actor.trim();
-      state.searchStart = 0;
+      resetProgressiveCounter(state.visible, { query: state.query });
       renderCurrentView();
       ui.search.focus();
     } else if (action === "cycle-tag") {
       const tagId = Number.parseInt(control.dataset.tagId, 10);
-      if (state.model.getTag(tagId)) {
+      if (state.store.getTag(tagId)) {
         cycleTagSelection(tagId);
         renderTagView();
       }
     } else if (action === "clear-tags") {
       state.tagInclude.clear();
       state.tagExclude.clear();
-      state.tagStart = 0;
+      resetProgressiveCounter(state.visible, { view: "tags" });
       renderTagView();
     } else if (action === "select-detail-tag") {
       const tagId = Number.parseInt(control.dataset.tagId, 10);
-      if (state.model.getTag(tagId)) {
+      if (state.store.getTag(tagId)) {
         state.tagInclude.add(tagId);
         state.tagExclude.delete(tagId);
-        state.tagStart = 0;
+        resetProgressiveCounter(state.visible, { view: "tags" });
         state.view = "tags";
         clearActiveSearch({
           state,
@@ -1735,27 +2000,37 @@ function startApplication() {
         closeVideoDialog();
         renderCurrentView({ focusMain: true });
       }
-    } else if (action === "page-series") {
-      mountSeriesWindow(
-        control.dataset.series,
-        Number.parseInt(control.dataset.start, 10) || 0,
-      );
-    } else if (action === "page-results") {
-      state.searchStart = Number.parseInt(control.dataset.start, 10) || 0;
-      renderSearchView();
-    } else if (action === "page-favorites") {
-      const favoriteState = Number.parseInt(control.dataset.favoriteState, 10);
-      state.favoriteStarts[favoriteState] =
-        Number.parseInt(control.dataset.start, 10) || 0;
-      renderFavoritesView();
-    } else if (action === "page-tag-results") {
-      state.tagStart = Number.parseInt(control.dataset.start, 10) || 0;
-      renderTagView();
+    } else if (action === "load-more") {
+      const context = control.dataset.context;
+      const nextVisible = Number.parseInt(control.dataset.nextVisible, 10);
+      if (!Number.isInteger(nextVisible) || nextVisible < RESULT_WINDOW_SIZE) {
+        return;
+      }
+      state.progressFocus = context;
+      if (context === "recent") {
+        state.visible.recent = nextVisible;
+        renderRecentView();
+      } else if (context === "search") {
+        state.visible.search = nextVisible;
+        renderSearchView();
+      } else if (context === "tags") {
+        state.visible.tags = nextVisible;
+        renderTagView();
+      } else if (context.startsWith("series:")) {
+        const code = context.slice("series:".length);
+        state.visible.series[code] = nextVisible;
+        mountSeriesWindow(code);
+      } else if (context.startsWith("favorites:")) {
+        const favoriteState = Number.parseInt(context.slice("favorites:".length), 10);
+        if (favoriteState === 1 || favoriteState === 2) {
+          state.visible.favorites[favoriteState] = nextVisible;
+          renderFavoritesView();
+        }
+      }
     } else if (action === "retry") {
-      void loadCatalog();
+      void loadRuntimeCatalog();
     } else if (action === "retry-tags") {
       state.tagError = null;
-      renderTagLoadState();
       void ensureTagCatalog();
     } else if (action === "back-top") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1796,7 +2071,7 @@ function startApplication() {
   document.addEventListener("input", (event) => {
     if (event.target?.id === "tag-directory-search") {
       state.tagSearch = event.target.value;
-      state.tagStart = 0;
+      resetProgressiveCounter(state.visible, { view: "tags" });
       renderTagView();
       const replacement = document.querySelector("#tag-directory-search");
       replacement?.focus();
@@ -1807,13 +2082,13 @@ function startApplication() {
   document.addEventListener("change", (event) => {
     if (event.target?.id === "tag-match-mode") {
       state.tagMatch = event.target.value === "any" ? "any" : "all";
-      state.tagStart = 0;
+      resetProgressiveCounter(state.visible, { view: "tags" });
       renderTagView();
     } else if (event.target?.id === "tag-result-sort") {
       state.tagSort = ["newest", "oldest", "code"].includes(event.target.value)
         ? event.target.value
         : "newest";
-      state.tagStart = 0;
+      resetProgressiveCounter(state.visible, { view: "tags" });
       renderTagView();
     }
   });
@@ -1822,7 +2097,7 @@ function startApplication() {
     event.preventDefault();
     window.clearTimeout(state.searchTimer);
     state.query = ui.search.value.trim();
-    state.searchStart = 0;
+    resetProgressiveCounter(state.visible, { query: state.query });
     renderCurrentView();
   });
 
@@ -1894,7 +2169,7 @@ function startApplication() {
     showToast("网络已断开，已载入的目录仍可浏览");
   });
   window.addEventListener("online", () => {
-    ui.connectionStatus.textContent = state.model ? "数据已就绪" : "网络已恢复";
+    ui.connectionStatus.textContent = state.store ? "数据已就绪" : "网络已恢复";
     showToast("网络已恢复");
   });
 
@@ -1908,7 +2183,7 @@ function startApplication() {
   applyPreferences();
   updateFavoriteCount();
   ui.searchClear.hidden = true;
-  void loadCatalog();
+  void loadRuntimeCatalog();
 }
 
 if (typeof document !== "undefined") {

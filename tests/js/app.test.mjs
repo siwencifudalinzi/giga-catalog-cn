@@ -11,19 +11,36 @@ test("the public shell exposes an accessible official tag index tab", () => {
   assert.match(html, />\s*标签索引\s*</u);
 });
 
-test("startup uses the compact core and keeps tags on the lazy path", () => {
+test("startup preloads only the bootstrap and its V3 module graph", () => {
   const source = readFileSync(
     new URL("../../public/js/app.js", import.meta.url),
     "utf8",
   );
-  assert.match(source, /data\/catalog-core\.json/u);
-  assert.match(source, /data\/catalog-tags\.json/u);
-  assert.doesNotMatch(source, /data\/catalog\.json/u);
-  assert.match(source, /createLazyTagLoader/u);
+  assert.match(source, /openCatalogCache/u);
+  assert.match(source, /createRuntimeCatalogStore/u);
+  assert.match(source, /createRuntimeLoader/u);
+  assert.doesNotMatch(source, /catalog-core\.json/u);
+  assert.doesNotMatch(source, /catalog-tags\.json/u);
   const html = readFileSync(
     new URL("../../public/index.html", import.meta.url),
     "utf8",
   );
+  assert.match(html, /rel="preload" href="data\/catalog-bootstrap\.json"/u);
+  assert.doesNotMatch(html, /catalog-core\.json/u);
+  assert.doesNotMatch(html, /catalog-search\.json/u);
+  assert.doesNotMatch(html, /catalog-tags\.json/u);
+  for (const module of [
+    "js/app.js",
+    "js/runtime-catalog.js",
+    "js/catalog-cache.js",
+    "js/runtime-loader.js",
+  ]) {
+    assert.equal(
+      (html.match(new RegExp(`rel="modulepreload" href="${module.replace(".", "\\.")}"`, "gu")) ?? []).length,
+      1,
+      module,
+    );
+  }
   assert.doesNotMatch(html, /resolved-links\.json/u);
 });
 
@@ -44,6 +61,218 @@ import {
   tabKeyTargetIndex,
   upgradeLinkGroups,
 } from "../../public/js/app.js";
+import * as runtimeApplication from "../../public/js/app.js";
+
+function runtimeVideo(number, overrides = {}) {
+  return {
+    code: `SPSF-${number}`,
+    series: "SPSF",
+    title: `Title ${number}`,
+    actors: [],
+    releaseDate: "2026-08-01",
+    ...overrides,
+  };
+}
+
+function runtimeStore({ recent = [], search = [] } = {}) {
+  const series = new Map();
+  let searchVideos = search;
+  return {
+    getRecentVideos: () => recent,
+    getSeries: (code) => series.get(code) ?? null,
+    getVideo(code) {
+      return recent.concat(searchVideos).find((video) => video.code === code) ?? null;
+    },
+    search(query) {
+      return searchVideos.filter((video) => video.code.includes(query));
+    },
+    installSeries(payload) {
+      series.set(payload.series.code, payload.series);
+    },
+    installSearch(payload) {
+      searchVideos = payload.videos;
+    },
+    installTags() {},
+  };
+}
+
+function runtimeLoader({ series = [], search = [] } = {}) {
+  return {
+    calls: [],
+    setBootstrap(bootstrap) {
+      this.bootstrap = bootstrap;
+    },
+    async ensureSeries(code) {
+      this.calls.push(`series:${code}`);
+      return { series: { code, videos: series } };
+    },
+    async ensureSearch() {
+      this.calls.push("search");
+      return { videos: search };
+    },
+    async ensureTags() {
+      this.calls.push("tags");
+      return { tags: [], assignments: [] };
+    },
+  };
+}
+
+test("progressive counters grow by one 24-card window and reset for changed contexts", () => {
+  assert.equal(typeof runtimeApplication.increaseVisibleCount, "function");
+  assert.deepEqual(
+    runtimeApplication.createProgressiveCounters(["spsf", "TGS"]),
+    {
+      recent: 24,
+      series: { SPSF: 24, TGS: 24 },
+      search: 24,
+      tags: 24,
+      favorites: { 1: 24, 2: 24 },
+    },
+  );
+  assert.equal(runtimeApplication.increaseVisibleCount(24, 60, 24), 48);
+  assert.equal(runtimeApplication.increaseVisibleCount(48, 60, 24), 60);
+  assert.equal(runtimeApplication.increaseVisibleCount(60, 60, 24), 60);
+
+  assert.equal(typeof runtimeApplication.resetProgressiveCounter, "function");
+  const visible = {
+    recent: 48,
+    search: 48,
+    tags: 48,
+    series: { SPSF: 48 },
+    favorites: { 1: 48, 2: 48 },
+  };
+  runtimeApplication.resetProgressiveCounter(visible, { view: "recent" });
+  runtimeApplication.resetProgressiveCounter(visible, { query: "SPSF" });
+  runtimeApplication.resetProgressiveCounter(visible, { series: "SPSF" });
+
+  assert.equal(visible.recent, 24);
+  assert.equal(visible.search, 24);
+  assert.equal(visible.series.SPSF, 24);
+  assert.equal(visible.tags, 48);
+  assert.equal(visible.favorites[1], 48);
+});
+
+test("load-more labels announce the next visible count", () => {
+  assert.equal(typeof runtimeApplication.progressiveLoadMoreLabel, "function");
+  assert.equal(
+    runtimeApplication.progressiveLoadMoreLabel(48),
+    "加载更多，显示至 48 部",
+  );
+});
+
+test("runtime activation fetches only the series and search resources that its view needs", async () => {
+  assert.equal(typeof runtimeApplication.activateSeries, "function");
+  assert.equal(typeof runtimeApplication.activateSearch, "function");
+  const render = { calls: [], render(value) { this.calls.push(value); } };
+  const seriesVideos = Array.from({ length: 30 }, (_, index) => runtimeVideo(index + 1));
+  const loader = runtimeLoader({
+    series: seriesVideos,
+    search: [runtimeVideo(61)],
+  });
+  const store = runtimeStore();
+
+  await runtimeApplication.activateSeries({
+    code: "SPSF",
+    loader,
+    store,
+    render: (value) => render.render(value),
+  });
+  assert.deepEqual(loader.calls, ["series:SPSF"]);
+  assert.equal(render.calls.at(-1).videos.length, 24);
+
+  loader.calls.length = 0;
+  await runtimeApplication.activateSearch({
+    query: "SPSF-61",
+    loader,
+    store,
+    render: (value) => render.render(value),
+  });
+  assert.deepEqual(loader.calls, ["series:SPSF", "search"]);
+  assert.deepEqual(render.calls.at(-1).videos.map((video) => video.code), ["SPSF-61"]);
+});
+
+test("runtime activation keeps startup lazy and hydrates only non-recent detail results", async () => {
+  assert.equal(typeof runtimeApplication.activateBootstrap, "function");
+  assert.equal(typeof runtimeApplication.activateFavorites, "function");
+  assert.equal(typeof runtimeApplication.activateTags, "function");
+  assert.equal(typeof runtimeApplication.hydrateDetailVideo, "function");
+  const recent = [runtimeVideo(1)];
+  const unloaded = runtimeVideo(61);
+  const bootstrap = {
+    generation: "a".repeat(64),
+    generatedAt: "2026-08-29T00:00:00Z",
+    series: [{ code: "SPSF" }],
+  };
+  const loader = runtimeLoader({ series: [unloaded], search: [unloaded] });
+  const store = runtimeStore({ recent });
+  const render = { calls: [], render(value) { this.calls.push(value); } };
+  const state = {
+    visible: {
+      recent: 48,
+      search: 48,
+      tags: 48,
+      series: { SPSF: 48 },
+      favorites: { 1: 48, 2: 48 },
+    },
+    preferences: { selectedSeries: "SPSF" },
+  };
+
+  runtimeApplication.activateBootstrap({
+    bootstrap,
+    loader,
+    state,
+    createStore: () => store,
+    render: (value) => render.render(value),
+  });
+  assert.deepEqual(loader.calls, []);
+  assert.equal(loader.bootstrap, bootstrap);
+  assert.equal(render.calls.at(-1).asOfDate, "2026-08-29");
+  assert.equal(state.visible.recent, 24);
+
+  await runtimeApplication.activateFavorites({
+    loader,
+    store,
+    render: (value) => render.render(value),
+    favorites: [],
+  });
+  assert.deepEqual(loader.calls, ["search"]);
+
+  loader.calls.length = 0;
+  await runtimeApplication.activateTags({
+    loader,
+    store,
+    render: (value) => render.render(value),
+  });
+  assert.deepEqual(loader.calls, ["search", "tags"]);
+
+  loader.calls.length = 0;
+  assert.equal(
+    await runtimeApplication.hydrateDetailVideo({
+      code: recent[0].code,
+      loader,
+      store,
+    }),
+    recent[0],
+  );
+  assert.deepEqual(loader.calls, []);
+
+  await runtimeApplication.activateSearch({
+    query: unloaded.code,
+    loader,
+    store,
+    render: (value) => render.render(value),
+  });
+  loader.calls.length = 0;
+  assert.equal(
+    (await runtimeApplication.hydrateDetailVideo({
+      code: unloaded.code,
+      loader,
+      store,
+    })).code,
+    unloaded.code,
+  );
+  assert.deepEqual(loader.calls, ["series:SPSF"]);
+});
 
 test("opening a detail tag clears global search before switching views", () => {
   const state = { query: "黑丝袜", searchStart: 100, searchTimer: 42 };

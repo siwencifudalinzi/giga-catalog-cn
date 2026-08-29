@@ -1,5 +1,4 @@
-const LARGE_SET_THRESHOLD = 250;
-const WINDOW_SIZE = 100;
+export const RESULT_WINDOW_SIZE = 24;
 const COVER_WIDTH = 320;
 const COVER_HEIGHT = 480;
 const DEFAULT_PREVIEW_BATCH = 4;
@@ -416,7 +415,7 @@ function renderTagPreview(video, tagLookup) {
 
 function renderVideoCard(
   video,
-  { priority = false, featuredCover = null, tagLookup = null } = {},
+  { priority = false, featuredCover = null, tagLookup = null, asOfDate = null } = {},
 ) {
   const code = String(video?.code ?? "").trim();
   const title = String(video?.title ?? "").trim() || code || "未命名影片";
@@ -442,6 +441,13 @@ function renderVideoCard(
     : "";
   const linkMarkup = renderLinkBadges(video?.links);
   const tagMarkup = renderTagPreview(video, tagLookup);
+  const releaseState =
+    typeof asOfDate === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/u.test(asOfDate) &&
+    typeof video?.releaseDate === "string" &&
+    video.releaseDate > asOfDate
+      ? '<span class="video-release-state">预告</span>'
+      : "";
 
   return [
     `<article class="video-card has-video" data-code="${escapeHtml(code)}">`,
@@ -449,6 +455,7 @@ function renderVideoCard(
     `<span class="video-cover-frame">${coverMarkup}</span>`,
     '<span class="video-card__meta">',
     `<span class="video-code">${escapeHtml(code)}</span>`,
+    releaseState,
     `<span class="video-title">${escapeHtml(title)}</span>`,
     actorMarkup,
     tagMarkup,
@@ -519,43 +526,31 @@ function makeSeriesItems(series, mode) {
   );
 }
 
-function resolveWindow(items, options = {}) {
-  const total = items.length;
-  const start = Math.min(
-    normalizeNonnegativeInteger(options.start),
-    total,
-  );
-  const defaultLimit = total > LARGE_SET_THRESHOLD ? WINDOW_SIZE : total;
-  const requestedLimit =
-    options.limit === undefined
-      ? defaultLimit
-      : normalizeNonnegativeInteger(options.limit, defaultLimit);
-  const pageSize =
-    total > LARGE_SET_THRESHOLD
-      ? Math.min(requestedLimit || WINDOW_SIZE, WINDOW_SIZE)
-      : requestedLimit;
-  const end = Math.min(start + pageSize, total);
+export function resolveProgressiveWindow(
+  items,
+  visibleCount = RESULT_WINDOW_SIZE,
+) {
+  const total = Array.isArray(items) ? items.length : 0;
+  const requested = Number.isInteger(visibleCount)
+    ? visibleCount
+    : RESULT_WINDOW_SIZE;
+  const end = Math.min(total, Math.max(RESULT_WINDOW_SIZE, requested));
   return {
-    items: items.slice(start, end),
-    start,
-    end,
+    items: items.slice(0, end),
+    rendered: end,
     total,
-    pageSize,
+    hasMore: end < total,
+    nextVisible: Math.min(total, end + RESULT_WINDOW_SIZE),
   };
 }
 
 function windowMetadata(window, mode) {
   return Object.freeze({
     mode,
-    start: window.start,
-    end: window.end,
-    rendered: window.items.length,
+    rendered: window.rendered,
     total: window.total,
-    pageSize: window.pageSize,
-    hasPrevious: window.start > 0,
-    hasMore: window.end < window.total,
-    previousStart: Math.max(0, window.start - window.pageSize),
-    nextStart: window.end,
+    hasMore: window.hasMore,
+    nextVisible: window.nextVisible,
   });
 }
 
@@ -579,6 +574,7 @@ function renderItems(window, options = {}) {
         priority,
         featuredCover: code ? featuredCovers.get(code) ?? null : null,
         tagLookup: options.tagLookup,
+        asOfDate: options.asOfDate,
       });
     })
     .join("");
@@ -635,7 +631,10 @@ export function mountSeries(container, series = {}, options = {}) {
     clearContainer(activeSeriesContainer);
   }
   const mode = options.mode === "slots" ? "slots" : "real-only";
-  const window = resolveWindow(makeSeriesItems(series, mode), options);
+  const window = resolveProgressiveWindow(
+    makeSeriesItems(series, mode),
+    options.visibleCount,
+  );
   const content = window.total
     ? `<div class="video-grid series-grid" data-mode="${mode}">${renderItems(
         window,
@@ -669,8 +668,10 @@ export function renderSearchResults(container, videos = [], options = {}) {
         .filter((video) => video && typeof video === "object")
         .map((video) => ({ video }))
     : [];
-  const window = resolveWindow(items, options);
-  const context = options.context === "favorites" ? "favorites" : "search";
+  const window = resolveProgressiveWindow(items, options.visibleCount);
+  const context = ["favorites", "tags", "recent"].includes(options.context)
+    ? options.context
+    : "search";
   const content = window.total
     ? `<div class="video-grid results-grid" data-view="${context}">${renderItems(
         window,

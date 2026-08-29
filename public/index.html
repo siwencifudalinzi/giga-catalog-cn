@@ -10,7 +10,7 @@
     >
     <title>GIGA Catalog · 影片目录</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <link rel="preload" href="data/catalog-core.json" as="fetch" crossorigin="anonymous" fetchpriority="high">
+    <link rel="preload" href="data/catalog-bootstrap.json" as="fetch" crossorigin="anonymous" fetchpriority="high">
     <link rel="preload" href="data/featured-covers.json" as="fetch" crossorigin="anonymous">
     <link rel="modulepreload" href="js/app.js">
     <link rel="modulepreload" href="js/catalog.js">
@@ -18,6 +18,9 @@
     <link rel="modulepreload" href="js/favorites.js">
     <link rel="modulepreload" href="js/tags.js">
     <link rel="modulepreload" href="js/runtime-tags.js">
+    <link rel="modulepreload" href="js/runtime-catalog.js">
+    <link rel="modulepreload" href="js/catalog-cache.js">
+    <link rel="modulepreload" href="js/runtime-loader.js">
     <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
@@ -201,7 +204,7 @@
         <section class="state-panel loading-panel" aria-labelledby="initial-loading">
           <span class="state-kicker">正在整理展柜</span>
           <h2 id="initial-loading">载入影片目录…</h2>
-          <p>正在建立轻量检索索引。</p>
+          <p>先载入最新目录，其余内容按需读取。</p>
         </section>
       </main>
     </div>
