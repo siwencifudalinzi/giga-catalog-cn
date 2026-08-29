@@ -170,6 +170,7 @@ test("parsers reject malformed schemas, generations, metadata, paths, and data b
 test("bootstrap rejects private, local, link-local, and credential-bearing HTTP(S) URLs", () => {
   for (const url of [
     "https://user:password@files.example/private",
+    "http://:@files.example/",
     "http://localhost/",
     "http://localhost./",
     "http://printer.local/",
@@ -177,6 +178,9 @@ test("bootstrap rejects private, local, link-local, and credential-bearing HTTP(
     "http://10.0.0.1/",
     "http://172.16.0.1/",
     "http://192.168.0.1/",
+    "http://192.0.0.1/",
+    "http://192.0.2.1/",
+    "http://198.51.100.1/",
     "http://169.254.0.1/",
     "http://[::1]/",
     "http://[fc00::1]/",
@@ -187,6 +191,15 @@ test("bootstrap rejects private, local, link-local, and credential-bearing HTTP(
     value.resources.subtitleDirectory.url = url;
     assertInvalid(() => parseBootstrap(value));
   }
+});
+
+test("bootstrap retains ordinary public IPv4 literals outside special-use ranges", () => {
+  const value = validBootstrap();
+  value.resources.subtitleDirectory.url = "https://192.0.1.5/file";
+  assert.equal(
+    parseBootstrap(value).resources.subtitleDirectory.url,
+    "https://192.0.1.5/file",
+  );
 });
 
 test("bootstrap and child payloads require real UTC RFC3339 generation timestamps", () => {

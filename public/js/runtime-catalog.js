@@ -75,14 +75,21 @@ function utcTimestamp(value, kind) {
 }
 
 function privateIpv4(parts) {
-  const [first, second] = parts;
+  const [first, second, third, fourth] = parts;
   return first === 0 || first === 10 || first === 127 || first >= 224
     || (first === 100 && second >= 64 && second <= 127)
     || (first === 169 && second === 254)
     || (first === 172 && second >= 16 && second <= 31)
     || (first === 192 && second === 168)
-    || (first === 192 && second === 0)
-    || (first === 198 && (second === 18 || second === 19));
+    || (first === 192 && second === 0 && third === 0 && ![9, 10].includes(fourth))
+    || (first === 192 && second === 0 && third === 2)
+    || (first === 192 && second === 31 && third === 196)
+    || (first === 192 && second === 52 && third === 193)
+    || (first === 192 && second === 88 && third === 99)
+    || (first === 192 && second === 175 && third === 48)
+    || (first === 198 && (second === 18 || second === 19))
+    || (first === 198 && second === 51 && third === 100)
+    || (first === 203 && second === 0 && third === 113);
 }
 
 function ipv4Parts(hostname) {
@@ -133,9 +140,12 @@ function publicHostname(hostname) {
 function safeHttpUrl(value, kind) {
   if (typeof value !== "string" || !value.trim() || /[\u0000-\u001f\u007f]/u.test(value)) fail(kind);
   try {
-    const parsed = new URL(value.trim());
+    const source = value.trim();
+    const authority = /^[a-z][a-z0-9+.-]*:\/\/([^/?#]*)/iu.exec(source)?.[1];
+    const parsed = new URL(source);
     if (!(["http:", "https:"].includes(parsed.protocol) && parsed.host)
-      || parsed.username || parsed.password || !publicHostname(parsed.hostname)) fail(kind);
+      || authority?.includes("@") || parsed.username || parsed.password
+      || !publicHostname(parsed.hostname)) fail(kind);
   } catch {
     fail(kind);
   }
