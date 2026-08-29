@@ -21,8 +21,17 @@ SOURCE_COMMIT = "a" * 40
 SITE_ID = "78c2aad4-65e1-4203-b0be-ce3a6bfdd244"
 PRODUCTION_URL = "https://giga-catalog-cn.netlify.app"
 FILE_HASHES = {
+    "data/catalog-bootstrap.json": (
+        "26b6cf5bd06d0f0a917aacef156feb4bbf07473c8b4729ecd2d31cd82ea22156"
+    ),
     "data/catalog.json": (
         "e5f1eb4d806641698a35efe20e098efd20d7d57a9b90ee69079d5bb650920726"
+    ),
+    "data/runtime/g/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/search.json": (
+        "ce887295279be34dcf24a773378243fc157838735473c32599fae735677b077c"
+    ),
+    "data/runtime/g/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/series/spsf.json": (
+        "db4b9276728c504df8fbccf9a8383062f7bb07337b1bef145195ff313b042382"
     ),
     "index.html": (
         "9a3e246041d3c27dc3645f79cb0d1eb41c277965614655d17119ed7498b956ec"
@@ -32,7 +41,7 @@ FILE_HASHES = {
     ),
 }
 PUBLIC_SHA256 = (
-    "9abea1a53d461af383276a5049808d15d728a56888d586b5fcdff9c21aa3100f"
+    "086be0b08957c1862e00976b39e4b027a74907f435b8aa4f59e6aa19b553d4e0"
 )
 NETLIFY_SHA256 = (
     "b6e54df8efa6da1f1f9ab07e59a6651f201ad68f0c008048ec349167f89c161c"
@@ -67,6 +76,15 @@ class ReleaseTestCase(unittest.TestCase):
         (self.public / "js").mkdir()
         (self.public / "index.html").write_bytes(b"home\n")
         (self.public / "data" / "catalog.json").write_bytes(b'{"ok":true}\n')
+        (self.public / "data" / "catalog-bootstrap.json").write_bytes(
+            b'{"generation":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}\n'
+        )
+        runtime_root = self.public / "data" / "runtime" / "g" / ("a" * 64)
+        (runtime_root / "series").mkdir(parents=True)
+        (runtime_root / "search.json").write_bytes(b'{"videos":[]}\n')
+        (runtime_root / "series" / "spsf.json").write_bytes(
+            b'{"series":{"code":"SPSF","videos":[]}}\n'
+        )
         (self.public / "js" / "app.js").write_bytes(b'console.log("ok")\n')
         self.manifest_path = (
             self.public / "giga-release.json"
@@ -88,6 +106,12 @@ class ReleaseTestCase(unittest.TestCase):
 
 
 class ManifestTests(ReleaseTestCase):
+    def test_manifest_requires_runtime_bootstrap(self):
+        self.assertIn("data/catalog-bootstrap.json", self.build_manifest()["files"])
+        (self.public / "data" / "catalog-bootstrap.json").unlink()
+        with self.assertRaisesRegex(release.ReleaseError, "catalog-bootstrap.json"):
+            self.build_manifest()
+
     def test_full_public_hash_is_deterministic_and_excludes_release_manifest(self):
         (self.public / ".nojekyll").write_bytes(b"")
         first = self.build_manifest()
@@ -273,7 +297,7 @@ class LiveReleaseTests(ReleaseTestCase):
 
     def full_routes(self, manifest=None):
         value = manifest if manifest is not None else self.build_manifest()
-        return {
+        routes = {
             "/giga-release.json": [
                 (
                     200,
@@ -328,6 +352,21 @@ class LiveReleaseTests(ReleaseTestCase):
             "/scripts/refresh.py": [(404, b"missing")],
             "/tests/python/test_refresh.py": [(404, b"missing")],
         }
+        for relative_path in value["files"]:
+            route = "/" + relative_path
+            if route not in routes:
+                routes[route] = [
+                    (
+                        200,
+                        (self.public / Path(relative_path)).read_bytes(),
+                        production_headers(
+                            "public, max-age=31536000, immutable"
+                            if relative_path.startswith("data/runtime/g/")
+                            else "public, max-age=300, must-revalidate"
+                        ),
+                    )
+                ]
+        return routes
 
     @staticmethod
     def replace_headers(routes, path, transform):
@@ -552,7 +591,7 @@ class LiveReleaseTests(ReleaseTestCase):
             wall_seconds=2,
         )
         routes = self.full_routes()
-        routes["/data/catalog.json"] = [chunked]
+        routes["/data/catalog-bootstrap.json"] = [chunked]
         with HttpFixture(routes) as fixture:
             result = release.compare_live_release(
                 self.build_manifest(),
@@ -826,6 +865,9 @@ class LiveReleaseTests(ReleaseTestCase):
             "/",
             "/index.html",
             "/data/catalog.json",
+            "/data/catalog-bootstrap.json",
+            "/data/runtime/g/" + "a" * 64 + "/search.json",
+            "/data/runtime/g/" + "a" * 64 + "/series/spsf.json",
             "/data/featured-covers.json",
             "/js/app.js",
             "/css/style.css",
@@ -835,6 +877,27 @@ class LiveReleaseTests(ReleaseTestCase):
             "/tests/python/test_refresh.py",
         ):
             self.assertIn(required, requested_paths)
+
+    def test_post_deploy_rejects_missing_altered_and_redirecting_runtime_shards(self):
+        manifest = self.build_manifest()
+        shard = "/data/runtime/g/" + "a" * 64 + "/series/spsf.json"
+        for label, response in (
+            ("missing", (404, b"missing")),
+            ("altered", (200, b"altered", production_headers("public, max-age=31536000, immutable"))),
+            ("redirecting", (302, b"", {"Location": "/elsewhere"})),
+        ):
+            with self.subTest(label=label):
+                routes = self.full_routes(manifest)
+                routes[shard] = [response]
+                with HttpFixture(routes) as fixture:
+                    result = release.verify_live_release(
+                        manifest,
+                        fixture.base_url,
+                        attempts=1,
+                        timeout=1,
+                        delay=0,
+                    )
+                self.assertNotEqual(result.state, "matching")
 
     def test_post_deploy_requires_missing_javascript_probe_to_return_404(self):
         manifest = self.build_manifest()

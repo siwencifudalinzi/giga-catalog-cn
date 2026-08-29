@@ -3,6 +3,7 @@
 import hashlib
 import http.client
 import json
+import fnmatch
 import re
 import socket
 import time
@@ -18,6 +19,7 @@ SCHEMA_VERSION = 1
 MANIFEST_RELATIVE_PATH = "giga-release.json"
 DEPLOY_CONTROL_PATHS = {".nojekyll"}
 CATALOG_RELATIVE_PATH = "data/catalog.json"
+BOOTSTRAP_RELATIVE_PATH = "data/catalog-bootstrap.json"
 HOME_RELATIVE_PATH = "index.html"
 MISSING_PROBE_RELATIVE_PATH = "js/__giga_release_probe_missing__.js"
 FEATURED_COVERS_RELATIVE_PATH = "data/featured-covers.json"
@@ -65,6 +67,8 @@ CACHE_POLICIES = {
     "": (0, True),
     HOME_RELATIVE_PATH: (0, True),
     CATALOG_RELATIVE_PATH: (300, True),
+    BOOTSTRAP_RELATIVE_PATH: (300, True),
+    "data/runtime/g/*": (31536000, False),
     FEATURED_COVERS_RELATIVE_PATH: (300, True),
     MANIFEST_RELATIVE_PATH: (None, False),
     "js/app.js": (3600, True),
@@ -475,17 +479,28 @@ def _verify_remote_files(
     for relative_path, headers in response_headers.items():
         _validate_security_headers(relative_path, headers)
     for relative_path, (max_age, must_revalidate) in CACHE_POLICIES.items():
-        headers = response_headers.get(relative_path)
-        if headers is None:
-            raise ReleaseError(
-                f"production policy resource was not verified: /{relative_path}"
+        if "*" in relative_path:
+            policy_resources = [
+                (path, headers)
+                for path, headers in response_headers.items()
+                if fnmatch.fnmatchcase(path, relative_path)
+            ]
+            if not policy_resources:
+                continue
+        else:
+            headers = response_headers.get(relative_path)
+            if headers is None:
+                raise ReleaseError(
+                    f"production policy resource was not verified: /{relative_path}"
+                )
+            policy_resources = [(relative_path, headers)]
+        for resource_path, headers in policy_resources:
+            _validate_cache_policy(
+                resource_path,
+                headers,
+                max_age=max_age,
+                must_revalidate=must_revalidate,
             )
-        _validate_cache_policy(
-            relative_path,
-            headers,
-            max_age=max_age,
-            must_revalidate=must_revalidate,
-        )
 
     for relative_path in PRIVATE_PROBE_RELATIVE_PATHS:
         private_status = _fetch_status(
@@ -800,6 +815,8 @@ def _validate_cache_policy(
         }
         if must_revalidate:
             expected_directives["must-revalidate"] = None
+        else:
+            expected_directives["immutable"] = None
     if directives != expected_directives:
         expected = ", ".join(
             name if value is None else f"{name}={value}"
@@ -1038,7 +1055,11 @@ def _validate_relative_path(value: object) -> None:
 
 
 def _require_endpoint_files(files: Mapping[str, str]) -> None:
-    for required in (HOME_RELATIVE_PATH, CATALOG_RELATIVE_PATH):
+    for required in (
+        HOME_RELATIVE_PATH,
+        CATALOG_RELATIVE_PATH,
+        BOOTSTRAP_RELATIVE_PATH,
+    ):
         if required not in files:
             raise ReleaseError(f"release manifest is missing required file: {required}")
 

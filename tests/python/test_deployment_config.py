@@ -407,6 +407,15 @@ class NetlifyConfigTests(unittest.TestCase):
         self.assertLessEqual(self._max_age(catalog_cache), 300)
         self.assertIn("must-revalidate", catalog_cache)
 
+        self.assertEqual(
+            self._header_values("/data/catalog-bootstrap.json")["Cache-Control"],
+            "public, max-age=300, must-revalidate",
+        )
+        self.assertEqual(
+            self._header_values("/data/runtime/g/*")["Cache-Control"],
+            "public, max-age=31536000, immutable",
+        )
+
         for path in ("/css/*", "/js/*"):
             asset_cache = self._header_values(path)["Cache-Control"]
             self.assertLessEqual(self._max_age(asset_cache), 3600)
@@ -465,25 +474,21 @@ class FrontendPerformanceHintTests(unittest.TestCase):
     def test_first_render_data_is_preloaded_once_with_matching_cors_mode(self):
         source = INDEX_PATH.read_text(encoding="utf-8")
         head = source.split("</head>", 1)[0]
-        for path in (
-            "data/catalog-core.json",
-            "data/featured-covers.json",
-        ):
-            with self.subTest(path=path):
-                pattern = (
-                    r'<link\s+rel="preload"\s+href="'
-                    + re.escape(path)
-                    + r'"\s+as="fetch"\s+crossorigin="anonymous"'
-                    + r'(?:\s+fetchpriority="high")?\s*>'
-                )
-                self.assertEqual(len(re.findall(pattern, head)), 1)
+        path = "data/catalog-bootstrap.json"
+        pattern = (
+            r'<link\s+rel="preload"\s+href="'
+            + re.escape(path)
+            + r'"\s+as="fetch"\s+crossorigin="anonymous"'
+            + r'\s+fetchpriority="high"\s*>'
+        )
+        self.assertEqual(len(re.findall(pattern, head)), 1)
 
     def test_catalog_preload_is_high_priority_and_module_graph_is_parallelized(self):
         source = INDEX_PATH.read_text(encoding="utf-8")
         head = source.split("</head>", 1)[0]
         self.assertRegex(
             head,
-            r'<link\s+rel="preload"\s+href="data/catalog-core\.json"\s+'
+            r'<link\s+rel="preload"\s+href="data/catalog-bootstrap\.json"\s+'
             r'as="fetch"\s+crossorigin="anonymous"\s+fetchpriority="high"\s*>',
         )
         for path in (
@@ -503,6 +508,15 @@ class FrontendPerformanceHintTests(unittest.TestCase):
                 self.assertEqual(len(re.findall(pattern, head)), 1)
         self.assertNotIn('href="data/catalog.json"', head)
         self.assertNotIn('href="data/catalog-tags.json"', head)
+        self.assertNotIn('href="data/catalog-core.json"', head)
+        self.assertNotIn('href="data/runtime/', head)
+        app_source = (REPOSITORY_ROOT / "public" / "js" / "app.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotRegex(
+            source + app_source,
+            r"\b(?:navigator\.)?serviceWorker\b|serviceWorker\.register",
+        )
 
 
 class LocalDeploymentStateTests(unittest.TestCase):

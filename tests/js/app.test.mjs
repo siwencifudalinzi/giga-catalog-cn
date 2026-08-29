@@ -44,6 +44,25 @@ test("startup preloads only the bootstrap and its V3 module graph", () => {
   assert.doesNotMatch(html, /resolved-links\.json/u);
 });
 
+test("catalog cache and progressive controls have responsive accessible states", () => {
+  const css = readFileSync(
+    new URL("../../public/css/style.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(css, /\.catalog-cache-state\s*\{/u);
+  assert.match(css, /\.load-more\s*\{/u);
+  assert.match(css, /\.progressive-status\s*\{/u);
+  assert.match(css, /\.load-more\s*\{[\s\S]*?min-height:\s*44px;/u);
+  assert.match(
+    css,
+    /@media\s*\(max-width:\s*47\.99rem\)[\s\S]*?\.pagination\s+\.load-more\s*\{[\s\S]*?width:\s*100%;/u,
+  );
+  assert.match(
+    css,
+    /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?scroll-behavior:\s*auto/u,
+  );
+});
+
 import {
   UI_STORAGE_KEY,
   applyRenderFocus,
