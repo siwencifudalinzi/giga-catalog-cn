@@ -75,6 +75,15 @@ export function progressiveLoadMoreLabel(nextVisible) {
   return `加载更多，显示至 ${new Intl.NumberFormat("zh-CN").format(count)} 部`;
 }
 
+export function runtimeCatalogStatus({ cached = false, online = true } = {}) {
+  if (cached) return online === false ? "离线使用已缓存目录" : "已显示缓存，正在检查更新";
+  return "数据已就绪";
+}
+
+export function runtimeLoadErrorMessage() {
+  return "目录加载失败，请稍后重试。";
+}
+
 /** Reset only the visibility counter for the context whose inputs changed. */
 export function resetProgressiveCounter(visible, change = {}) {
   if (!visible || typeof visible !== "object") return visible;
@@ -1025,7 +1034,7 @@ function startApplication() {
     const detail = createElement(
       "p",
       "error-detail",
-      error instanceof Error ? error.message : String(error),
+      runtimeLoadErrorMessage(),
     );
     const retry = createElement("button", "button button--primary", "重新载入");
     retry.type = "button";
@@ -1672,7 +1681,12 @@ function startApplication() {
     if (state.resourceLoads.activeCount === 0) {
       ui.main.removeAttribute("aria-busy");
     }
-    if (state.store) ui.connectionStatus.textContent = "数据已就绪";
+    if (state.store) {
+      ui.connectionStatus.textContent = runtimeCatalogStatus({
+        cached: navigator.onLine === false,
+        online: navigator.onLine !== false,
+      });
+    }
   }
 
   function advanceResourceLoadGeneration() {
@@ -1685,7 +1699,12 @@ function startApplication() {
     }
     if (stale.length) {
       ui.main.removeAttribute("aria-busy");
-      if (state.store) ui.connectionStatus.textContent = "数据已就绪";
+      if (state.store) {
+        ui.connectionStatus.textContent = runtimeCatalogStatus({
+          cached: navigator.onLine === false,
+          online: navigator.onLine !== false,
+        });
+      }
     }
   }
 
@@ -1882,7 +1901,10 @@ function startApplication() {
     updateSummary();
     renderSeriesNavigation();
     renderCurrentView();
-    ui.connectionStatus.textContent = cached ? "已载入缓存目录" : "数据已就绪";
+    ui.connectionStatus.textContent = runtimeCatalogStatus({
+      cached,
+      online: navigator.onLine !== false,
+    });
   }
 
   async function loadRuntimeCatalog() {
@@ -2678,7 +2700,10 @@ function startApplication() {
   });
 
   window.addEventListener("offline", () => {
-    ui.connectionStatus.textContent = "当前离线";
+    ui.connectionStatus.textContent = runtimeCatalogStatus({
+      cached: Boolean(state.store),
+      online: false,
+    });
     showToast("网络已断开，已载入的目录仍可浏览");
   });
   window.addEventListener("online", () => {

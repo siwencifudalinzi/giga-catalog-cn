@@ -44,6 +44,41 @@ test("startup preloads only the bootstrap and its V3 module graph", () => {
   assert.doesNotMatch(html, /resolved-links\.json/u);
 });
 
+test("cached and offline runtime states use exact accessible production copy", () => {
+  assert.equal(
+    runtimeCatalogStatus({ cached: true, online: true }),
+    "已显示缓存，正在检查更新",
+  );
+  assert.equal(
+    runtimeCatalogStatus({ cached: true, online: false }),
+    "离线使用已缓存目录",
+  );
+  assert.equal(runtimeCatalogStatus({ cached: false, online: true }), "数据已就绪");
+
+  const html = readFileSync(
+    new URL("../../public/index.html", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    html,
+    /id="connection-status"[^>]*class="[^"]*catalog-cache-state[^"]*"[^>]*role="status"[^>]*aria-live="polite"[^>]*aria-atomic="true"/u,
+  );
+});
+
+test("startup error copy never exposes an error message or source URL", () => {
+  const source = readFileSync(
+    new URL("../../public/js/app.js", import.meta.url),
+    "utf8",
+  );
+  const renderError = source.match(/function renderLoadError\([\s\S]*?\n  \}/u)?.[0] ?? "";
+  assert.ok(renderError);
+  assert.doesNotMatch(renderError, /error\.message|String\(error\)/u);
+  const hostile = new Error("fetch failed https://private.example/secret?token=abc");
+  const publicCopy = runtimeLoadErrorMessage(hostile);
+  assert.equal(publicCopy, "目录加载失败，请稍后重试。");
+  assert.doesNotMatch(publicCopy, /https:\/\/private\.example|token=abc/u);
+});
+
 test("catalog cache and progressive controls have responsive accessible states", () => {
   const css = readFileSync(
     new URL("../../public/css/style.css", import.meta.url),
@@ -76,6 +111,8 @@ import {
   loadFeaturedCovers,
   loadUiPreferences,
   normalizeSubtitleDirectoryResource,
+  runtimeCatalogStatus,
+  runtimeLoadErrorMessage,
   startPreviewProbeRequest,
   tabKeyTargetIndex,
   upgradeLinkGroups,

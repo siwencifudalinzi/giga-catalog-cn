@@ -66,7 +66,13 @@
         </form>
 
         <div class="header-tools" aria-label="显示设置">
-          <span id="connection-status" class="connection-status">
+          <span
+            id="connection-status"
+            class="connection-status catalog-cache-state"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             准备载入
           </span>
           <a

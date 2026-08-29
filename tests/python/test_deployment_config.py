@@ -510,8 +510,10 @@ class FrontendPerformanceHintTests(unittest.TestCase):
         self.assertNotIn('href="data/catalog-tags.json"', head)
         self.assertNotIn('href="data/catalog-core.json"', head)
         self.assertNotIn('href="data/runtime/', head)
-        app_source = (REPOSITORY_ROOT / "public" / "js" / "app.js").read_text(
-            encoding="utf-8"
+        self.assertNotRegex(head, r"(?i)search\.json|/series(?:/|\")")
+        app_source = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in sorted((REPOSITORY_ROOT / "public" / "js").glob("*.js"))
         )
         self.assertNotRegex(
             source + app_source,

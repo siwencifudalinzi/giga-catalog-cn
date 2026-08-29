@@ -959,6 +959,16 @@ class LiveReleaseTests(ReleaseTestCase):
             ("/index.html", "public, max-age=60", "max-age=0"),
             ("/data/catalog.json", "public, max-age=600", "max-age=300"),
             (
+                "/data/catalog-bootstrap.json",
+                "public, max-age=600",
+                "max-age=300",
+            ),
+            (
+                "/data/runtime/g/" + "a" * 64 + "/search.json",
+                "public, max-age=31536000",
+                "immutable",
+            ),
+            (
                 "/data/featured-covers.json",
                 "public, max-age=600",
                 "max-age=300",
