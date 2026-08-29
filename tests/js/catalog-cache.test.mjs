@@ -53,6 +53,27 @@ function searchPayload(value) {
   };
 }
 
+function seriesPayload(value) {
+  const item = video(value.generation);
+  delete item.series;
+  return {
+    schemaVersion: 3,
+    generation: value.generation,
+    generatedAt: value.generatedAt,
+    series: { ...value.series[0], videos: [item] },
+  };
+}
+
+function tagsPayload(value) {
+  return {
+    schemaVersion: 3,
+    generation: value.generation,
+    generatedAt: value.generatedAt,
+    tags: [{ id: 1, group: "genre", nameJa: "戦士", nameZh: "战士", count: 0 }],
+    assignments: [],
+  };
+}
+
 function request(result, transaction) {
   const value = { result, error: null, onsuccess: null, onerror: null };
   queueMicrotask(() => {
@@ -163,7 +184,7 @@ test("cache clones validated bootstrap and declared artifacts, then prunes old g
   cachedBootstrap.recentVideos[0].title = "mutated after read";
   assert.equal((await cache.getLatestBootstrap()).recentVideos[0].title, "女战士");
 
-  await cache.putArtifact(first.generation, "runtime/unapproved.json", { ignored: true });
+  await assert.rejects(cache.putArtifact(first.generation, "runtime/unapproved.json", { ignored: true }));
   assert.equal(await cache.getArtifact(first.generation, "runtime/unapproved.json"), null);
 
   await cache.putBootstrap(second);
@@ -172,6 +193,40 @@ test("cache clones validated bootstrap and declared artifacts, then prunes old g
   assert.equal(await cache.getArtifact(first.generation, first.artifacts.search), null);
   assert.equal((await cache.getLatestBootstrap()).generation, third.generation);
   cache.close();
+});
+
+test("putArtifact validates each declared shard before replacing an existing record", async () => {
+  const cache = await openCatalogCache(createFakeIndexedDB());
+  const value = bootstrap("e".repeat(64));
+  const search = searchPayload(value);
+  const tags = tagsPayload(value);
+  const series = seriesPayload(value);
+  await cache.putBootstrap(value);
+
+  await cache.putArtifact(value.generation, value.artifacts.search, search);
+  const invalidSearch = clone(search);
+  invalidSearch.schemaVersion = 2;
+  await assert.rejects(cache.putArtifact(value.generation, value.artifacts.search, invalidSearch));
+  assert.deepEqual(await cache.getArtifact(value.generation, value.artifacts.search), search);
+
+  await cache.putArtifact(value.generation, value.artifacts.tags, tags);
+  const invalidTags = clone(tags);
+  invalidTags.assignments = [["SPSF-1", [1]]];
+  await assert.rejects(cache.putArtifact(value.generation, value.artifacts.tags, invalidTags));
+  assert.deepEqual(await cache.getArtifact(value.generation, value.artifacts.tags), tags);
+
+  await cache.putArtifact(value.generation, value.series[0].artifact, series);
+  const invalidSeries = clone(series);
+  invalidSeries.series.code = "NEWS";
+  await assert.rejects(cache.putArtifact(value.generation, value.series[0].artifact, invalidSeries));
+  assert.deepEqual(await cache.getArtifact(value.generation, value.series[0].artifact), series);
+
+  search.videos[0].title = "mutated after write";
+  tags.tags[0].nameZh = "mutated after write";
+  series.series.videos[0].title = "mutated after write";
+  assert.equal((await cache.getArtifact(value.generation, value.artifacts.search)).videos[0].title, "女战士");
+  assert.equal((await cache.getArtifact(value.generation, value.artifacts.tags)).tags[0].nameZh, "战士");
+  assert.equal((await cache.getArtifact(value.generation, value.series[0].artifact)).series.videos[0].title, "女战士");
 });
 
 test("unavailable or failing IndexedDB produces a safe no-op cache without localStorage access", async () => {

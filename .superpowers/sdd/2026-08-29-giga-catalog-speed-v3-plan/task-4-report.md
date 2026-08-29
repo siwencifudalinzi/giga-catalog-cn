@@ -67,3 +67,41 @@ Result: 91 tests passed, 0 failed.
 ## Concerns
 
 No outstanding test failures or known Task 4 blockers. `app.js` still requires a later task to consume these new interfaces.
+
+## Review fix round 1 — cache artifact validation
+
+Finding addressed: `putArtifact` previously checked only the declared path, allowing an arbitrary payload to overwrite a valid approved artifact.
+
+### RED
+
+Added focused coverage for malformed search, tag, and series overwrites, preservation of the existing valid records, rejection of undeclared paths, and cloning of valid writes. Before the fix:
+
+```text
+node --test tests/js/catalog-cache.test.mjs tests/js/runtime-loader.test.mjs
+```
+
+Result: 8 passed, 2 failed. Both failures were the expected `Missing expected rejection` assertions for undeclared/malformed artifact writes.
+
+### GREEN
+
+`putArtifact` now parses the stored generation bootstrap, dispatches by exact declared path to `parseSearchPayload`, `parseTagPayload`, or `parseSeriesPayload` with the declared series code, and opens the write transaction only after validation. Unknown paths reject before any write.
+
+```text
+node --test tests/js/catalog-cache.test.mjs tests/js/runtime-loader.test.mjs
+```
+
+Result: 10 passed, 0 failed.
+
+```text
+node --test
+```
+
+Result: 92 passed, 0 failed.
+
+```text
+git diff --check
+```
+
+Result: passed.
+
+The fix was committed in the follow-up commit reported with this round.

@@ -1,4 +1,9 @@
-import { parseBootstrap } from "./runtime-catalog.js";
+import {
+  parseBootstrap,
+  parseSearchPayload,
+  parseSeriesPayload,
+  parseTagPayload,
+} from "./runtime-catalog.js";
 
 const DATABASE_NAME = "giga_catalog_runtime_v3";
 const DATABASE_VERSION = 1;
@@ -112,14 +117,25 @@ function createCache(db) {
     },
 
     async putArtifact(generation, path, payload) {
-      const bootstrap = await getRecord(db, BOOTSTRAPS, generation);
-      if (!bootstrap || !declaredPaths(bootstrap).includes(path)) return;
+      const storedBootstrap = await getRecord(db, BOOTSTRAPS, generation);
+      if (!storedBootstrap) throw new Error("未知目录 generation");
+      const bootstrap = parseBootstrap(storedBootstrap);
+      let parsed;
+      if (path === bootstrap.artifacts.search) {
+        parsed = parseSearchPayload(payload, bootstrap);
+      } else if (path === bootstrap.artifacts.tags) {
+        parsed = parseTagPayload(payload, bootstrap);
+      } else {
+        const summary = bootstrap.series.find((item) => item.artifact === path);
+        if (!summary) throw new Error("未声明的目录 artifact");
+        parsed = parseSeriesPayload(payload, bootstrap, summary.code);
+      }
       await transaction(db, [ARTIFACTS], "readwrite", (tx) => {
         tx.objectStore(ARTIFACTS).put({
           key: `${generation}:${path}`,
           generation,
           path,
-          payload: clone(payload),
+          payload: clone(parsed),
         });
       });
     },
