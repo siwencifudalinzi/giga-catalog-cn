@@ -22,7 +22,7 @@ function validBootstrap() {
     schemaVersion: 3,
     generation,
     generatedAt,
-    totals: { series: 1, videos: 2, linkedVideos: 1 },
+    totals: { series: 1, videos: 2, linkedVideos: 2 },
     refresh: { mode: "incremental", sourceComplete: true, counts: { added: 2 } },
     resources: {
       subtitleDirectory: { label: "SRT ENGSUB DOWNLOAD", url: "https://files.example/subtitles" },
@@ -90,6 +90,32 @@ function validSearch() {
   };
 }
 
+function multiBootstrap() {
+  const value = validBootstrap();
+  value.totals = { series: 2, videos: 3, linkedVideos: 3 };
+  value.series.push({
+    code: "NEWS",
+    count: 1,
+    firstReleaseDate: "2026-08-03",
+    latestReleaseDate: "2026-08-03",
+    artifact: `runtime/g/${generation}/series/news.json`,
+  });
+  const recent = video("NEWS-1", 1, "新闻");
+  recent.series = "NEWS";
+  recent.releaseDate = "2026-08-03";
+  value.recentVideos.push(recent);
+  return value;
+}
+
+function multiSearch() {
+  const value = validSearch();
+  const news = video("NEWS-1", 1, "新闻");
+  news.series = "NEWS";
+  news.releaseDate = "2026-08-03";
+  value.videos.push(news);
+  return value;
+}
+
 function validTags() {
   return {
     schemaVersion: 3,
@@ -139,6 +165,68 @@ test("parsers reject malformed schemas, generations, metadata, paths, and data b
   for (const buildCase of cases) {
     assertInvalid(buildCase());
   }
+});
+
+test("bootstrap rejects private, local, link-local, and credential-bearing HTTP(S) URLs", () => {
+  for (const url of [
+    "https://user:password@files.example/private",
+    "http://localhost/",
+    "http://localhost./",
+    "http://printer.local/",
+    "http://127.0.0.1/",
+    "http://10.0.0.1/",
+    "http://172.16.0.1/",
+    "http://192.168.0.1/",
+    "http://169.254.0.1/",
+    "http://[::1]/",
+    "http://[fc00::1]/",
+    "http://[fe80::1]/",
+    "http://[::ffff:127.0.0.1]/",
+  ]) {
+    const value = validBootstrap();
+    value.resources.subtitleDirectory.url = url;
+    assertInvalid(() => parseBootstrap(value));
+  }
+});
+
+test("bootstrap and child payloads require real UTC RFC3339 generation timestamps", () => {
+  for (const timestamp of [
+    "2026-02-30T00:00:00Z",
+    "2026-08-29T24:00:00Z",
+    "2026-08-29T00:00:00+00:00",
+    "2026-08-29",
+  ]) {
+    const bootstrap = validBootstrap();
+    bootstrap.generatedAt = timestamp;
+    assertInvalid(() => parseBootstrap(bootstrap));
+
+    const payload = validSearch();
+    payload.generatedAt = timestamp;
+    assertInvalid(() => parseSearchPayload(payload, bootstrap));
+  }
+});
+
+test("search validates each declared series and linked-video total before preserving store state", () => {
+  const bootstrap = parseBootstrap(validBootstrap());
+  const store = createRuntimeCatalogStore(bootstrap);
+  store.installSearch(validSearch());
+  const before = store.search("第二作").map((value) => value.code);
+
+  const wrongTotals = validBootstrap();
+  wrongTotals.totals.linkedVideos = 1;
+  assertInvalid(() => parseSearchPayload(validSearch(), parseBootstrap(wrongTotals)));
+
+  const omittedSeries = multiSearch();
+  omittedSeries.videos[2] = video("SPSF-3", 3, "第三作");
+  const multi = parseBootstrap(multiBootstrap());
+  assertInvalid(() => parseSearchPayload(omittedSeries, multi));
+
+  const missingLink = validSearch();
+  missingLink.videos[1].title = "不应安装";
+  delete missingLink.videos[1].links;
+  assertInvalid(() => store.installSearch(missingLink));
+  assert.deepEqual(store.search("第二作").map((value) => value.code), before);
+  assert.deepEqual(store.search("不应安装"), []);
 });
 
 test("tag installation validates against installed search videos and delegates filtering", () => {

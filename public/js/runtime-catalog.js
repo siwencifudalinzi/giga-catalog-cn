@@ -4,6 +4,7 @@ import { createTagIndex, filterVideosByTags } from "./tags.js";
 const GENERATION_RE = /^[0-9a-f]{64}$/u;
 const SERIES_RE = /^[A-Z][A-Z0-9]*$/u;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/u;
+const UTC_TIMESTAMP_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?Z$/u;
 
 export class RuntimeCatalogError extends Error {
   constructor(kind) {
@@ -58,11 +59,83 @@ function date(value, kind) {
   return value;
 }
 
+function utcTimestamp(value, kind) {
+  if (typeof value !== "string") fail(kind);
+  const match = UTC_TIMESTAMP_RE.exec(value);
+  if (!match) fail(kind);
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.valueOf())
+    || parsed.getUTCFullYear() !== Number(match[1])
+    || parsed.getUTCMonth() + 1 !== Number(match[2])
+    || parsed.getUTCDate() !== Number(match[3])
+    || parsed.getUTCHours() !== Number(match[4])
+    || parsed.getUTCMinutes() !== Number(match[5])
+    || parsed.getUTCSeconds() !== Number(match[6])) fail(kind);
+  return value;
+}
+
+function privateIpv4(parts) {
+  const [first, second] = parts;
+  return first === 0 || first === 10 || first === 127 || first >= 224
+    || (first === 100 && second >= 64 && second <= 127)
+    || (first === 169 && second === 254)
+    || (first === 172 && second >= 16 && second <= 31)
+    || (first === 192 && second === 168)
+    || (first === 192 && second === 0)
+    || (first === 198 && (second === 18 || second === 19));
+}
+
+function ipv4Parts(hostname) {
+  if (!/^\d{1,3}(?:\.\d{1,3}){3}$/u.test(hostname)) return null;
+  const parts = hostname.split(".").map(Number);
+  return parts.every((part) => part >= 0 && part <= 255) ? parts : null;
+}
+
+function ipv6Parts(hostname) {
+  const source = hostname.slice(1, -1).toLowerCase();
+  const halves = source.split("::");
+  if (halves.length > 2) return null;
+  const split = (value) => value ? value.split(":") : [];
+  const left = split(halves[0]);
+  const right = halves.length === 2 ? split(halves[1]) : [];
+  if (left.length + right.length > 8 || [...left, ...right].some((part) => !/^[0-9a-f]{1,4}$/u.test(part))) return null;
+  const parts = [...left, ...Array(8 - left.length - right.length).fill("0"), ...right];
+  return parts.length === 8 ? parts.map((part) => Number.parseInt(part, 16)) : null;
+}
+
+function privateIpv6(hostname) {
+  if (!(hostname.startsWith("[") && hostname.endsWith("]"))) return false;
+  const parts = ipv6Parts(hostname);
+  if (!parts) return true;
+  const zeros = parts.slice(0, 7).every((part) => part === 0);
+  if (parts.every((part) => part === 0) || (zeros && parts[7] === 1)) return true;
+  if ((parts[0] & 0xfe00) === 0xfc00 || (parts[0] & 0xffc0) === 0xfe80) return true;
+  const mapped = parts.slice(0, 5).every((part) => part === 0) && parts[5] === 0xffff;
+  const compatible = parts.slice(0, 6).every((part) => part === 0);
+  return (mapped || compatible) && privateIpv4([
+    parts[6] >> 8,
+    parts[6] & 0xff,
+    parts[7] >> 8,
+    parts[7] & 0xff,
+  ]);
+}
+
+function publicHostname(hostname) {
+  const lower = hostname.toLowerCase();
+  if (lower === "localhost" || lower === "localhost." || lower === "local"
+    || lower.endsWith(".localhost") || lower.endsWith(".localhost.")
+    || lower.endsWith(".local") || lower.endsWith(".local.")
+    || (!lower.includes(".") && !lower.startsWith("["))) return false;
+  const ipv4 = ipv4Parts(lower);
+  return !(ipv4 ? privateIpv4(ipv4) : privateIpv6(lower));
+}
+
 function safeHttpUrl(value, kind) {
   if (typeof value !== "string" || !value.trim() || /[\u0000-\u001f\u007f]/u.test(value)) fail(kind);
   try {
     const parsed = new URL(value.trim());
-    if (!(["http:", "https:"].includes(parsed.protocol) && parsed.host)) fail(kind);
+    if (!(["http:", "https:"].includes(parsed.protocol) && parsed.host)
+      || parsed.username || parsed.password || !publicHostname(parsed.hostname)) fail(kind);
   } catch {
     fail(kind);
   }
@@ -127,6 +200,11 @@ function links(value, kind, { series = false } = {}) {
   return value;
 }
 
+function hasLinkLeaf(value) {
+  if (isPlainObject(value)) return Object.values(value).some(hasLinkLeaf);
+  return typeof value === "string" && Boolean(value);
+}
+
 function video(value, kind, { includeSeries } = {}) {
   const required = ["code", "number", "title", "actors", "releaseDate", "cover"];
   if (includeSeries) required.push("series");
@@ -170,6 +248,7 @@ function summary(value, generation, kind, { withVideos = false } = {}) {
 
 function headers(value, bootstrap, kind, payloadKeys) {
   object(value, kind, { required: payloadKeys, allowed: payloadKeys });
+  utcTimestamp(value.generatedAt, kind);
   if (value.schemaVersion !== 3 || value.generation !== bootstrap.generation
     || value.generatedAt !== bootstrap.generatedAt) fail(kind);
 }
@@ -209,7 +288,7 @@ export function parseBootstrap(value) {
     allowed: ["schemaVersion", "generation", "generatedAt", "totals", "refresh", "resources", "artifacts", "recentVideos", "series"],
   });
   if (value.schemaVersion !== 3 || typeof value.generation !== "string" || !GENERATION_RE.test(value.generation)) fail(kind);
-  text(value.generatedAt, kind);
+  utcTimestamp(value.generatedAt, kind);
   const totals = object(value.totals, kind, {
     required: ["series", "videos", "linkedVideos"], allowed: ["series", "videos", "linkedVideos"],
   });
@@ -246,14 +325,19 @@ export function parseSearchPayload(value, bootstrap) {
   const kind = "search";
   headers(value, checked, kind, ["schemaVersion", "generation", "generatedAt", "videos"]);
   if (!Array.isArray(value.videos) || value.videos.length !== checked.totals.videos) fail(kind);
-  const seriesCodes = new Set(checked.series.map((item) => item.code));
+  const seriesCounts = new Map(checked.series.map((item) => [item.code, 0]));
   const codes = new Set();
+  let linkedVideos = 0;
   for (const item of value.videos) {
     video(item, kind, { includeSeries: true });
-    if (!seriesCodes.has(item.series) || codes.has(item.code)
+    if (!seriesCounts.has(item.series) || codes.has(item.code)
       || item.code.slice(0, item.code.lastIndexOf("-")) !== item.series) fail(kind);
     codes.add(item.code);
+    seriesCounts.set(item.series, seriesCounts.get(item.series) + 1);
+    if (hasLinkLeaf(item.links)) linkedVideos += 1;
   }
+  if (linkedVideos !== checked.totals.linkedVideos
+    || checked.series.some((item) => seriesCounts.get(item.code) !== item.count)) fail(kind);
   return frozen(value);
 }
 
