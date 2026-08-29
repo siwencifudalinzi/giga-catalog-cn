@@ -91,6 +91,10 @@ test("catalog cache and progressive controls have responsive accessible states",
     /@media\s*\(max-width:\s*74\.99rem\)[\s\S]*?(?=\n@media|$)/u,
   )?.[0] ?? "";
   assert.match(mobileCascade, /\.connection-status,\s*\.header-control/u);
+  const ordinaryConnectionStatus = mobileCascade.match(
+    /\.connection-status,\s*\.header-control\s+\[data-control-label\]\s*\{[\s\S]*?\}/u,
+  )?.[0] ?? "";
+  assert.match(ordinaryConnectionStatus, /display:\s*none;/u);
   const mobileCacheState = mobileCascade.match(
     /\.connection-status\.catalog-cache-state\s*\{[\s\S]*?\}/u,
   )?.[0] ?? "";
