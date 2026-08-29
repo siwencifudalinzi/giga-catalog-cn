@@ -1,8 +1,15 @@
 import json
 import copy
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
+from scripts.build_runtime_catalog import build_runtime_from_catalog
 from src.giga_catalog.runtime_catalog import build_runtime_catalogs, build_runtime_v3
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 
 class RuntimeCatalogTests(unittest.TestCase):
@@ -229,9 +236,7 @@ class RuntimeCatalogTests(unittest.TestCase):
         )
 
     def test_real_core_is_materially_smaller_than_the_complete_payload(self):
-        from pathlib import Path
-
-        root = Path(__file__).resolve().parents[2]
+        root = REPOSITORY_ROOT
         full = json.loads(
             (root / "public" / "data" / "catalog.json").read_text(encoding="utf-8")
         )
@@ -250,6 +255,88 @@ class RuntimeCatalogTests(unittest.TestCase):
                 for video in series["videos"]
             ),
         )
+
+
+class RuntimeCatalogBuilderTests(unittest.TestCase):
+    def test_invalid_catalog_does_not_change_existing_runtime_artifacts(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            catalog_path = root / "catalog.json"
+            catalog_path.write_text("{}", encoding="utf-8")
+            paths = self._runtime_paths(root)
+            paths["runtime_bootstrap"].parent.mkdir(parents=True)
+            paths["runtime_bootstrap"].write_text("old bootstrap", encoding="utf-8")
+            (paths["runtime_root"] / "g" / ("a" * 64)).mkdir(parents=True)
+            before = self._snapshot(root)
+
+            with self.assertRaisesRegex(RuntimeError, "catalog validation failed"):
+                build_runtime_from_catalog(catalog_path, **paths)
+
+            self.assertEqual(self._snapshot(root), before)
+
+    def test_republishes_byte_identical_runtime_artifacts(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            catalog_path = root / "catalog.json"
+            catalog_path.write_bytes(
+                (REPOSITORY_ROOT / "public" / "data" / "catalog.json").read_bytes()
+            )
+            paths = self._runtime_paths(root)
+
+            first = build_runtime_from_catalog(catalog_path, **paths)
+            first_bytes = self._snapshot(root)
+            second = build_runtime_from_catalog(catalog_path, **paths)
+
+            self.assertEqual(first, second)
+            self.assertEqual(self._snapshot(root), first_bytes)
+
+    def test_replacement_failure_preserves_bootstrap_and_generation(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            catalog_path = root / "catalog.json"
+            catalog_path.write_bytes(
+                (REPOSITORY_ROOT / "public" / "data" / "catalog.json").read_bytes()
+            )
+            paths = self._runtime_paths(root)
+            build_runtime_from_catalog(catalog_path, **paths)
+            before = self._snapshot(root)
+
+            from scripts.refresh import _commit_transaction as real_commit_transaction
+
+            def fail_replacement(operations, replacer, stale_remover):
+                return real_commit_transaction(
+                    operations,
+                    replacer=lambda source, target: (_ for _ in ()).throw(
+                        OSError("injected replacement failure")
+                    ),
+                    stale_remover=stale_remover,
+                )
+
+            with mock.patch(
+                "scripts.build_runtime_catalog._commit_transaction",
+                side_effect=fail_replacement,
+            ), self.assertRaisesRegex(OSError, "injected replacement failure"):
+                build_runtime_from_catalog(catalog_path, **paths)
+
+            self.assertEqual(self._snapshot(root), before)
+
+    @staticmethod
+    def _runtime_paths(root):
+        data = root / "public" / "data"
+        return {
+            "runtime_core": data / "catalog-core.json",
+            "runtime_tags": data / "catalog-tags.json",
+            "runtime_bootstrap": data / "catalog-bootstrap.json",
+            "runtime_root": data / "runtime",
+        }
+
+    @staticmethod
+    def _snapshot(root):
+        return {
+            path.relative_to(root).as_posix(): path.read_bytes()
+            for path in sorted(root.rglob("*"))
+            if path.is_file()
+        }
 
 
 if __name__ == "__main__":

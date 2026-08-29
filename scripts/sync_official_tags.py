@@ -32,7 +32,8 @@ from src.giga_catalog.tags import (
     parse_tag_directory,
 )
 from src.giga_catalog.validation import validate_catalog
-from src.giga_catalog.runtime_catalog import build_runtime_catalogs
+from src.giga_catalog.runtime_catalog import build_runtime_catalogs, build_runtime_v3
+from scripts.build_runtime_catalog import prune_runtime_generations, read_bootstrap_generation
 from scripts.refresh import _commit_transaction
 
 
@@ -60,6 +61,16 @@ def create_parser() -> argparse.ArgumentParser:
         "--runtime-tags",
         type=Path,
         default=ROOT / "public" / "data" / "catalog-tags.json",
+    )
+    parser.add_argument(
+        "--runtime-bootstrap",
+        type=Path,
+        default=ROOT / "public" / "data" / "catalog-bootstrap.json",
+    )
+    parser.add_argument(
+        "--runtime-root",
+        type=Path,
+        default=ROOT / "public" / "data" / "runtime",
     )
     parser.add_argument(
         "--products",
@@ -411,11 +422,23 @@ def run_sync(argv: Optional[Sequence[str]] = None) -> dict:
         "updatedAt": stamp,
         "tags": normalize_tag_definitions(definitions),
     }
+    previous_generation = read_bootstrap_generation(options.runtime_bootstrap)
     _commit_transaction(
         build_publish_targets(options, raw_products, raw_tags, rebuilt),
         replacer=None,
         stale_remover=None,
     )
+    try:
+        new_generation = read_bootstrap_generation(options.runtime_bootstrap)
+        if new_generation is None:
+            raise ValueError("published bootstrap has no valid generation")
+        removed = prune_runtime_generations(
+            options.runtime_root,
+            keep_generations={new_generation, previous_generation} - {None},
+        )
+        result["prunedGenerations"] = len(removed)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        result["pruneError"] = str(error)
     if options.checkpoint.is_file():
         options.checkpoint.unlink()
     return result
@@ -424,12 +447,19 @@ def run_sync(argv: Optional[Sequence[str]] = None) -> dict:
 def build_publish_targets(options, raw_products, raw_tags, catalog) -> list:
     """Build the one-transaction target set for full and runtime catalogs."""
     runtime_core, runtime_tags = build_runtime_catalogs(catalog)
+    v3 = build_runtime_v3(catalog)
+    v3_targets = [
+        (options.runtime_root.parent / relative, _json_bytes(payload))
+        for relative, payload in v3.files
+    ]
     return [
         (options.products, _json_bytes(raw_products)),
         (options.tags, _json_bytes(raw_tags)),
         (options.catalog, serialize_catalog(catalog)),
         (options.runtime_core, _json_bytes(runtime_core)),
         (options.runtime_tags, _json_bytes(runtime_tags)),
+        *v3_targets,
+        (options.runtime_bootstrap, _json_bytes(v3.bootstrap)),
     ]
 
 

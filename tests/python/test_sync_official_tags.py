@@ -1,5 +1,7 @@
+import json
 import unittest
 from pathlib import Path
+import tempfile
 from types import SimpleNamespace
 
 from scripts.sync_official_tags import (
@@ -9,6 +11,7 @@ from scripts.sync_official_tags import (
     create_parser,
     mark_unavailable_product_tags,
     merge_tag_definitions,
+    prune_runtime_generations,
     select_tag_sync_targets,
 )
 
@@ -21,6 +24,8 @@ class OfficialTagSyncTests(unittest.TestCase):
         options = create_parser().parse_args([])
         self.assertEqual(options.runtime_core.name, "catalog-core.json")
         self.assertEqual(options.runtime_tags.name, "catalog-tags.json")
+        self.assertEqual(options.runtime_bootstrap.name, "catalog-bootstrap.json")
+        self.assertEqual(options.runtime_root.parts[-2:], ("data", "runtime"))
 
         fake = SimpleNamespace(
             products=Path("products.json"),
@@ -28,24 +33,65 @@ class OfficialTagSyncTests(unittest.TestCase):
             catalog=Path("catalog.json"),
             runtime_core=Path("catalog-core.json"),
             runtime_tags=Path("catalog-tags.json"),
+            runtime_bootstrap=Path("catalog-bootstrap.json"),
+            runtime_root=Path("runtime"),
         )
         catalog = {
             "generatedAt": STAMP,
             "tags": [],
-            "series": [],
+            "totals": {"series": 1, "videos": 1, "linkedVideos": 0},
+            "refresh": {"mode": "incremental"},
+            "series": [
+                {
+                    "code": "SPSF",
+                    "count": 1,
+                    "firstReleaseDate": "2026-08-20",
+                    "latestReleaseDate": "2026-08-20",
+                    "videos": [
+                        {
+                            "code": "SPSF-1",
+                            "number": 1,
+                            "releaseDate": "2026-08-20",
+                        }
+                    ],
+                }
+            ],
         }
         targets = build_publish_targets(fake, [], {"tags": []}, catalog)
+        generation = json.loads(targets[-1][1])["generation"]
+        paths = [path for path, _ in targets]
 
-        self.assertEqual(
-            [path.name for path, _ in targets],
-            [
-                "products.json",
-                "tags.json",
-                "catalog.json",
-                "catalog-core.json",
-                "catalog-tags.json",
-            ],
+        self.assertEqual(paths[-1], fake.runtime_bootstrap)
+        self.assertIn(
+            fake.runtime_root / "g" / generation / "search.json",
+            paths,
         )
+        self.assertIn(
+            fake.runtime_root / "g" / generation / "series" / "spsf.json",
+            paths,
+        )
+
+    def test_prunes_only_verified_obsolete_runtime_generations(self):
+        current = "a" * 64
+        previous = "b" * 64
+        old = "c" * 64
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            runtime_root = Path(temporary_directory) / "runtime"
+            generation_root = runtime_root / "g"
+            for name in (current, previous, old, "notes", ".staging"):
+                (generation_root / name).mkdir(parents=True)
+
+            removed = prune_runtime_generations(
+                runtime_root,
+                keep_generations={current, previous},
+            )
+
+            self.assertEqual([path.name for path in removed], [old])
+            self.assertTrue((generation_root / current).is_dir())
+            self.assertTrue((generation_root / previous).is_dir())
+            self.assertFalse((generation_root / old).exists())
+            self.assertTrue((generation_root / "notes").is_dir())
+            self.assertTrue((generation_root / ".staging").is_dir())
 
     def test_applies_authoritative_detail_and_marks_even_empty_tags_complete(self):
         existing = {

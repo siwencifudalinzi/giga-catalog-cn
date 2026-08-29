@@ -176,7 +176,8 @@ class RefreshWorkflowConfigTests(unittest.TestCase):
         stage_command = (
             "git add -- data/raw data/state data/update-summary.json "
             "public/data/catalog.json public/data/catalog-core.json "
-            "public/data/catalog-tags.json public/data/featured-covers.json "
+            "public/data/catalog-tags.json public/data/catalog-bootstrap.json "
+            "public/data/featured-covers.json public/data/runtime "
             "public/media/featured-covers"
         )
         self.assertIn(stage_command, self.workflow)
