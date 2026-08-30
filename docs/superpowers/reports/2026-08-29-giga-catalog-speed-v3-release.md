@@ -5,6 +5,9 @@ Branch: `codex/catalog-speed-v3`
 Task 7 baseline: `532e953e8bf65aedf45173b37d1bd97d536e542d`
 Prior preparation commit: `40504025ec27ada50e513e95afe12f8b8b0b9c74`
 Fix/release commit: `df089f6c743a665e4b759210e3058fec9636b095`
+Audit reconciliation fix: `19c3cd0f14b6f0ac3226bd8cb0b40d8de9d2c846`
+Latest-main merge: `4440ecdb812195dd854fafe93b9e18b69bdd2eea`
+Current runtime-data commit: `aadf6a05ec9d698ada04aa1c1f410bc823e86218`
 
 ## Fix round and generated artifact evidence
 
@@ -28,6 +31,13 @@ byte sequence matched. The aggregate current-generation/bootstrap hash was
 also unchanged (`20f4413b2b315a6037d8519641f5e2a67c170f6830fd68ef9ca7671d11aa64bfb`);
 that digest is supplemental, not the equality check. The builder only pruned
 the superseded prior generation directory.
+
+After the final review, `origin/main` received two catalog-data refreshes.
+Those commits were merged without conflict and the V3 runtime artifacts were
+rebuilt from that exact catalog. The current generation is
+`62d36acbdd249ad5689cb94feaec2c524fb8c4f341561d0509d6f212c2f38b6b`;
+the earlier `ebdab7b6c52031aa730681eb8924edbf8ce8021cf5d37765528621b74779fde1`
+generation remains as the bounded rollback generation.
 
 | Artifact gate | Measured result |
 | --- | --- |
@@ -53,6 +63,18 @@ is not a planned Task 7 commit file.
 - `py scripts/refresh.py --mode links-only --dry-run`: **DRY RUN UNCHANGED**, 3,793 videos / 137 series / 2,955 linked, diagnostics 0.
 - `git diff --check`: passed.
 - Static V3/JS secret scan: no token/key/authorization/bearer/private-url matches. The broad `jwt` term has two benign substring matches inside opaque legacy Streamtape IDs in the pre-existing `public/data/resolved-links.json`; no credential or token value was found.
+
+The 2026-08-30 scheduled audit failure was reproduced locally before the fix.
+The official search directory omitted 100 previously published products even
+though their official detail pages remained live and parseable. The audit now
+reconciles each omitted product against its exact official detail URL, retains
+the previous public record only when the product ID and canonical code match,
+accepts only an explicit official top-page redirect as deletion evidence, and
+fails closed on network, HTTP, parser, or identity ambiguity. A real post-fix
+`py scripts/refresh.py --mode audit --dry-run` completed with 3,793 videos,
+137 series, 2,955 linked videos, 100 detail reconciliations, zero deletions,
+and zero diagnostics. Post-fix suites passed with 281 Python tests (one
+existing Windows symlink-permission skip) and 116 JavaScript tests.
 
 ## Local browser measurements
 
