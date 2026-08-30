@@ -558,6 +558,119 @@ class IncrementalDiscoveryTests(unittest.TestCase):
         self.assertEqual(summary["cursor"], 3)
         self.assertEqual(summary["stopReason"], "empty")
 
+    def test_complete_audit_reconciles_directory_omissions_against_live_details(self) -> None:
+        """A searchable-directory omission is not a deletion while its official detail survives."""
+        detail = (FIXTURES / "product_spsf.html").read_text(encoding="utf-8")
+        existing = {
+            "productId": 8123,
+            "code": "SPSF-44",
+            "title": "Previously published title",
+            "tagIds": [96],
+        }
+        urls = []
+
+        def fetch(url: str) -> _Response:
+            urls.append(url)
+            if "/product/" in url:
+                return _Response(detail, url=url)
+            return _Response("", url=url)
+
+        discovered, summary = discover_products(
+            [existing],
+            mode="audit",
+            delay_seconds=0,
+            fetch=fetch,
+            include_known=True,
+        )
+
+        self.assertEqual(discovered, [existing])
+        self.assertEqual(len([url for url in urls if "/product/" in url]), 1)
+        self.assertEqual(summary["stopReason"], "empty")
+        self.assertEqual(summary["parsedProducts"], 1)
+        self.assertEqual(summary["knownProducts"], 1)
+        self.assertEqual(summary["detailReconciled"], 1)
+        self.assertEqual(summary["detailMissing"], 0)
+        self.assertEqual(summary["errors"], 0)
+
+    def test_complete_audit_allows_only_an_explicit_top_redirect_to_delete(self) -> None:
+        """An official top redirect is negative evidence; arbitrary bad HTML is not."""
+        existing = {"productId": 8123, "code": "SPSF-44"}
+
+        def fetch(url: str) -> _Response:
+            if "/product/" in url:
+                return _Response(
+                    status_code=302,
+                    url=url,
+                    headers={"Location": "https://www.giga-web.jp/top.php"},
+                )
+            return _Response("", url=url)
+
+        discovered, summary = discover_products(
+            [existing],
+            mode="audit",
+            delay_seconds=0,
+            fetch=fetch,
+            include_known=True,
+        )
+
+        self.assertEqual(discovered, [])
+        self.assertEqual(summary["detailReconciled"], 0)
+        self.assertEqual(summary["detailMissing"], 1)
+        self.assertEqual(summary["errors"], 0)
+
+    def test_complete_audit_fails_closed_when_omitted_detail_is_unresolved(self) -> None:
+        """A transient or malformed detail response cannot authorize catalog deletion."""
+        existing = {"productId": 8123, "code": "SPSF-44"}
+        detail_calls = 0
+
+        def fetch(url: str) -> _Response:
+            nonlocal detail_calls
+            if "/product/" in url:
+                detail_calls += 1
+                return _Response(status_code=503, url=url)
+            return _Response("", url=url)
+
+        discovered, summary = discover_products(
+            [existing],
+            mode="audit",
+            delay_seconds=0,
+            retries=2,
+            fetch=fetch,
+            include_known=True,
+        )
+
+        self.assertEqual(discovered, [])
+        self.assertEqual(detail_calls, 2)
+        self.assertEqual(summary["stopReason"], "error")
+        self.assertEqual(summary["errors"], 1)
+        self.assertIn(
+            {"type": "omitted_product_detail_unresolved", "productId": 8123},
+            summary["diagnostics"],
+        )
+
+    def test_complete_audit_rejects_successful_non_product_detail_html(self) -> None:
+        """HTTP 200 alone is not proof that an omitted product still exists or was deleted."""
+        existing = {"productId": 8123, "code": "SPSF-44"}
+
+        def fetch(url: str) -> _Response:
+            return _Response(
+                "<html><body>maintenance page</body></html>" if "/product/" in url else "",
+                url=url,
+            )
+
+        discovered, summary = discover_products(
+            [existing],
+            mode="audit",
+            delay_seconds=0,
+            fetch=fetch,
+            include_known=True,
+        )
+
+        self.assertEqual(discovered, [])
+        self.assertEqual(summary["stopReason"], "error")
+        self.assertEqual(summary["errors"], 1)
+        self.assertEqual(summary["detailMissing"], 0)
+
     def test_zero_suffix_card_reconciles_one_to_one_without_skipping_or_fallback(self) -> None:
         """A real zero-suffix card must parse, not be ignored or excused from accounting."""
         directory = (FIXTURES / "search_thza_zero.html").read_text(encoding="utf-8")

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 from html import unescape
 from html.parser import HTMLParser
@@ -300,7 +301,8 @@ def discover_products(
                 timeout=timeout,
             )
 
-    known_ids = _known_product_ids(existing)
+    known_products = _known_products_by_id(existing)
+    known_ids = set(known_products)
     if mode == "tail":
         effective_delay = max(delay_seconds, 2.0) if uses_live_fetch else delay_seconds
         return _discover_tail(
@@ -321,6 +323,7 @@ def discover_products(
         product_url,
         retries,
         include_known,
+        known_products,
     )
 
 
@@ -334,6 +337,7 @@ def _discover_directory(
     product_url: str = PRODUCT_URL,
     retry_attempts: int = 3,
     include_known: bool = False,
+    known_records: Optional[Dict[int, dict]] = None,
 ) -> Tuple[List[dict], dict]:
     discovered: List[dict] = []
     pages_fetched = 0
@@ -353,6 +357,8 @@ def _discover_directory(
     page_reconciliation = []
     directory_ids = set()
     card_integrity_complete = True
+    detail_reconciled = 0
+    detail_missing = 0
 
     while page_limit is None or pages_fetched < page_limit:
         response, attempts, failed = _fetch_with_retry(
@@ -477,6 +483,48 @@ def _discover_directory(
             break
         page += 1
 
+    if (
+        mode == "audit"
+        and include_known
+        and stop_reason == "empty"
+        and known_records
+    ):
+        for product_id in sorted(set(known_records) - directory_ids):
+            detail_response, attempts, failed = _fetch_with_retry(
+                product_url.format(product_id=product_id),
+                fetch,
+                delay_seconds,
+                attempts=retry_attempts,
+            )
+            retries += attempts - 1
+            if not failed and _is_top_redirect(detail_response):
+                detail_missing += 1
+                continue
+
+            product = None
+            if not failed and _is_directory_response(detail_response):
+                product = parse_product_page(
+                    _response_html(detail_response), product_id
+                )
+            previous_code = normalize_code(known_records[product_id].get("code"))
+            if product is None or product.get("code") != previous_code:
+                errors += 1
+                stop_reason = "error"
+                error = "omitted_product_detail_unresolved"
+                diagnostics.append(
+                    {
+                        "type": "omitted_product_detail_unresolved",
+                        "productId": product_id,
+                    }
+                )
+                break
+
+            discovered.append(copy.deepcopy(known_records[product_id]))
+            returned_ids.add(product_id)
+            parsed_products += 1
+            known_products += 1
+            detail_reconciled += 1
+
     summary = {
         "mode": mode,
         "pagesFetched": pages_fetched,
@@ -494,6 +542,9 @@ def _discover_directory(
         "pageReconciliation": page_reconciliation,
         "diagnostics": diagnostics,
     }
+    if mode == "audit":
+        summary["detailReconciled"] = detail_reconciled
+        summary["detailMissing"] = detail_missing
     if error is not None:
         summary["error"] = error
     return discovered, summary
@@ -932,13 +983,13 @@ def _parse_search_card(card: _Node) -> Optional[dict]:
     )
 
 
-def _known_product_ids(existing: Iterable[dict]) -> set:
-    ids = set()
+def _known_products_by_id(existing: Iterable[dict]) -> Dict[int, dict]:
+    products = {}
     for product in existing:
         value = product.get("productId") if isinstance(product, dict) else None
         try:
             if value is not None:
-                ids.add(int(value))
+                products[int(value)] = product
         except (TypeError, ValueError):
             continue
-    return ids
+    return products
