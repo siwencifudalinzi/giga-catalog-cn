@@ -13,6 +13,7 @@ from src.giga_catalog.tags import build_public_tag_index
 
 _PROVIDERS = ("gofile", "player4me", "streamtape", "subtitle", "vidara")
 _MOJIBAKE_MARKERS = ("\ufffd", "丐", "乓", "涓", "涔")
+_TAG_STATE_FIELDS = ("tagIds", "tagsStatus", "tagsUpdatedAt", "tagsSource")
 
 
 def serialize_catalog(catalog: Mapping[str, object]) -> bytes:
@@ -338,7 +339,7 @@ def _apply_retention(
     if not previous:
         return {code: copy.deepcopy(incoming[code]) for code in sorted(incoming)}
     incoming = {
-        code: _preserve_preview_precision(previous.get(code), incoming[code])
+        code: _preserve_source_enrichment(previous.get(code), incoming[code])
         for code in sorted(incoming)
     }
     if mode == "links-only":
@@ -436,6 +437,26 @@ def _preserve_preview_precision(
         and previous_count > incoming_count
     ):
         selected["previewCount"] = previous_count
+    return selected
+
+
+def _preserve_source_enrichment(
+    previous: Optional[Mapping[str, object]],
+    incoming: Mapping[str, object],
+) -> dict:
+    selected = _preserve_preview_precision(previous, incoming)
+    if not isinstance(previous, Mapping):
+        return selected
+    same_official_product = (
+        _positive_int(previous.get("productId")) is not None
+        and _positive_int(previous.get("productId"))
+        == _positive_int(selected.get("productId"))
+    )
+    incoming_has_tag_state = any(field in selected for field in _TAG_STATE_FIELDS)
+    previous_has_tag_state = all(field in previous for field in _TAG_STATE_FIELDS)
+    if same_official_product and not incoming_has_tag_state and previous_has_tag_state:
+        for field in _TAG_STATE_FIELDS:
+            selected[field] = copy.deepcopy(previous[field])
     return selected
 
 

@@ -284,6 +284,39 @@ class DeterministicMergeTests(unittest.TestCase):
         video = catalog["series"][0]["videos"][0]
         self.assertEqual(video["previewCount"], 31)
 
+    def test_known_verified_tags_survive_directory_rediscovery(self) -> None:
+        """Search cards cannot erase tag evidence that only product details provide."""
+        previous, _ = build_catalog(
+            [
+                product(
+                    "SPSF-1",
+                    title="Old title",
+                    productId=101,
+                    tagIds=[6, 25],
+                    tagsStatus="complete",
+                    tagsUpdatedAt="2026-08-20T00:00:00Z",
+                    tagsSource="official",
+                )
+            ],
+            {},
+            generated_at="2026-08-20T00:00:00Z",
+        )
+
+        current, _ = build_catalog(
+            [product("SPSF-1", title="Updated title", productId=101)],
+            {},
+            generated_at=GENERATED_AT,
+            previous_catalog=previous,
+            refresh_context={"mode": "audit", "scanComplete": True},
+        )
+
+        video = current["series"][0]["videos"][0]
+        self.assertEqual(video["title"], "Updated title")
+        self.assertEqual(video["tagIds"], [6, 25])
+        self.assertEqual(video["tagsStatus"], "complete")
+        self.assertEqual(video["tagsUpdatedAt"], "2026-08-20T00:00:00Z")
+        self.assertEqual(video["tagsSource"], "official")
+
     def test_duplicate_winner_is_quality_ranked_and_permutation_independent(self) -> None:
         """Input order must not decide which duplicate metadata is published."""
         candidates = [
