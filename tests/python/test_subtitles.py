@@ -32,12 +32,13 @@ def subtitle_directory_xlsx(
     sheet_name="giga collection",
     portal_target="https://ouo.io/BAbfv4",
     pink_target="https://ouo.io/2yaA66",
+    middle_provider_label="PLAYER4ME LINK",
 ):
     """Build the smallest workbook that mirrors Google's public XLSX contract."""
     strings = [
         "NEW CODE",
         "STREAMTAPE LINK",
-        "PLAYER4ME LINK",
+        middle_provider_label,
         "GOFILE LINK",
         "UNCENSORED",
         "SRT ENGSUB DOWNLOAD",
@@ -401,6 +402,21 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
         self.assertEqual(len(directory.unresolved_sources), 1)
         self.assertEqual(directory.unresolved_sources[0].series, "PGHD")
         self.assertEqual(directory.unresolved_sources[0].url, "https://ouo.io/2yaA66")
+
+    def test_xlsx_export_accepts_retired_optional_middle_provider_label(self) -> None:
+        """Removing Player4me from the live directory must not erase subtitle evidence."""
+        parser = getattr(subtitle_module, "parse_subtitle_directory_xlsx", None)
+        self.assertTrue(callable(parser), "the XLSX directory parser is missing")
+
+        directory = parser(
+            subtitle_directory_xlsx(middle_provider_label=""),
+            source_url=DIRECTORY_URL,
+            catalog_series=CATALOG_SERIES,
+        )
+
+        self.assertEqual(directory.portal_url, "https://ouo.io/BAbfv4")
+        self.assertEqual(directory.pink_source_count, 1)
+        self.assertEqual(directory.unresolved_sources[0].series, "PGHD")
 
     def test_xlsx_export_fails_closed_on_wrong_workbook_or_missing_links(self) -> None:
         """A ZIP, wrong workbook, or missing source target cannot masquerade as the directory."""

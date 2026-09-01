@@ -19,6 +19,30 @@ FIXTURE_PATH = Path(__file__).parents[1] / "fixtures" / "sheet.csv"
 
 
 class SheetParserTests(unittest.TestCase):
+    def test_maps_live_schema_after_optional_middle_provider_columns_are_removed(self) -> None:
+        """The sheet may retire Player4me/Vidara without hiding required providers."""
+        text = (
+            "NEW CODE,STREAMTAPE LINK,GOFILE LINK,,UNCENSORED,"
+            "STREAMTAPE LINK,GOFILE LINK,\n"
+            "SPSF-63,https://ouo.io/a,https://ouo.io/c,,,"
+            "https://ouo.io/d,https://ouo.io/f,\n"
+        )
+
+        links, conflicts = parse_sheet_csv(text)
+
+        self.assertEqual(
+            links["SPSF-63"],
+            {
+                "streamtape": "https://ouo.io/a",
+                "gofile": "https://ouo.io/c",
+                "uncensored": {
+                    "streamtape": "https://ouo.io/d",
+                    "gofile": "https://ouo.io/f",
+                },
+            },
+        )
+        self.assertEqual(conflicts, [])
+
     def test_maps_vidara_replacement_header_without_losing_uncensored_player4me(self) -> None:
         """The live sheet may replace only the normal Player4me column with Vidara."""
         text = (

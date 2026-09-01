@@ -17,9 +17,9 @@ _PROVIDER_HEADERS = {
     "GOFILE LINK": "gofile",
 }
 _PROVIDER_HEADER_SLOTS = (
-    ("STREAMTAPE LINK",),
-    ("PLAYER4ME LINK", "VIDARA LINK"),
-    ("GOFILE LINK",),
+    (("STREAMTAPE LINK",), True),
+    (("PLAYER4ME LINK", "VIDARA LINK"), False),
+    (("GOFILE LINK",), True),
 )
 _TRANSIENT_STATUS_CODES = {408, 425, 429}
 
@@ -202,12 +202,14 @@ def _provider_columns(
     group: str,
 ) -> list[tuple[int, str]]:
     columns = []
-    for aliases in _PROVIDER_HEADER_SLOTS:
+    for aliases, required in _PROVIDER_HEADER_SLOTS:
         indexes = [
             index
             for index in range(start, end)
             if header[index] in aliases
         ]
+        if not indexes and not required:
+            continue
         if len(indexes) != 1:
             expected = " or ".join(repr(name) for name in aliases)
             raise SheetFormatError(
