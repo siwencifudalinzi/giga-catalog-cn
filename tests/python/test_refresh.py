@@ -33,6 +33,16 @@ SUBTITLE_DIRECTORY_URL = (
 SUBTITLE_DIRECTORY_HTML = (
     Path(__file__).parents[1] / "fixtures" / "subtitle_directory.html"
 ).read_text(encoding="utf-8")
+EMPTY_COLLECTION_DIRECTORY_HTML = """<!doctype html>
+<html><head><style>.waffle .black { color: #000000; }</style></head><body>
+<table class="waffle"><tbody>
+<tr><td class="black">NEW CODE</td><td class="black">STREAMTAPE LINK</td>
+<td class="black">GOFILE LINK</td><td class="black">UNCENSORED</td></tr>
+<tr><td class="black">BLUE NORMAL OR DOWN</td></tr>
+<tr><td class="black">BLACK NOTHING</td></tr>
+<tr><td class="black">RED NEWEST</td></tr>
+<tr><td class="black">ORANGE LIST NOT COMPLETE</td></tr>
+</tbody></table></body></html>"""
 CURRENT_SUBTITLE_RESOURCES = {
     "subtitleDirectory": {
         "label": "SRT ENGSUB DOWNLOAD",
@@ -47,8 +57,14 @@ def fixture_subtitle_downloader(url, *, timeout, retries, delay_seconds):
     return SUBTITLE_DIRECTORY_HTML
 
 
+def fixture_collection_downloader(url, *, timeout, retries, delay_seconds):
+    """Explicit no-network collection default with no current reupload sheets."""
+    return EMPTY_COLLECTION_DIRECTORY_HTML
+
+
 def run_refresh(*args, **kwargs):
     kwargs.setdefault("subtitle_downloader", fixture_subtitle_downloader)
+    kwargs.setdefault("collection_downloader", fixture_collection_downloader)
     return production_run_refresh(*args, **kwargs)
 
 
@@ -349,6 +365,67 @@ class RefreshArgumentTests(unittest.TestCase):
 
 
 class RefreshPipelineTests(unittest.TestCase):
+    def test_available_collection_child_overlays_reupload_without_erasing_old_links(self) -> None:
+        """A current blue sheet adds one external reupload slot and preserves providers."""
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            output = root / "public"
+            data = root / "private"
+            write_previous(
+                output,
+                products=[product("AHEF-1")],
+                links={"AHEF-1": {"gofile": "https://example.test/old"}},
+            )
+            directory = EMPTY_COLLECTION_DIRECTORY_HTML.replace(
+                "</tbody>",
+                '<tr><td style="color:#1155cc"><a href="https://docs.google.com/'
+                'spreadsheets/d/ahef-child/edit?gid=0#gid=0">AHEF</a></td></tr>'
+                "</tbody>",
+            ).replace(
+                "<style>.waffle .black { color: #000000; }</style>",
+                "<style>.waffle .black { color: #000000; }"
+                ".waffle .blue { color: #1155cc; }</style>",
+            ).replace('style="color:#1155cc"', 'class="blue"')
+            calls = []
+
+            def collection_download(url, **kwargs):
+                calls.append(url)
+                if url == SUBTITLE_DIRECTORY_URL:
+                    return directory
+                return "AHEF-01,https://ouo.io/reuploaded\n"
+
+            result = run_refresh(
+                [
+                    "--mode",
+                    "links-only",
+                    "--output-root",
+                    str(output),
+                    "--data-root",
+                    str(data),
+                ],
+                sheet_downloader=lambda *args, **kwargs: SHEET_HEADER,
+                collection_downloader=collection_download,
+                featured_cover_refresher=lambda *args, **kwargs: {"published": False},
+                clock=lambda: GENERATED_AT,
+            )
+
+            catalog = json.loads(
+                (output / "data" / "catalog.json").read_text(encoding="utf-8")
+            )
+            links = catalog["series"][0]["videos"][0]["links"]
+            self.assertEqual(links["gofile"], "https://example.test/old")
+            self.assertEqual(links["reupload"], "https://ouo.io/reuploaded")
+            self.assertEqual(
+                calls,
+                [
+                    SUBTITLE_DIRECTORY_URL,
+                    "https://docs.google.com/spreadsheets/d/ahef-child/"
+                    "export?format=csv&gid=0",
+                ],
+            )
+            self.assertEqual(result["internal"]["sources"]["collection"]["childSheets"], 1)
+            self.assertEqual(result["internal"]["sources"]["collection"]["linkKeys"], 1)
+
     def test_subtitle_policy_and_resource_only_change_publish_current_evidence(self) -> None:
         """The first portal import is content even when no per-video subtitle resolves."""
         with tempfile.TemporaryDirectory() as temporary_directory:

@@ -12,14 +12,16 @@ from typing import Iterable, Iterator, Mapping, Optional
 from urllib.parse import urlsplit, urlunsplit
 
 
-PROVIDER_ORDER = ("streamtape", "player4me", "gofile")
+PROVIDER_ORDER = ("reupload", "streamtape", "player4me", "gofile")
 SOURCE_HOST = "ouo.io"
 GOFILE_HOSTS = {"gofile.io", "www.gofile.io"}
 STREAMTAPE_HOSTS = {"streamtape.com"}
 PLAYER4ME_HOSTS = {"gigaandzen.embed4me.com"}
 ALLOWED_FINAL_HOSTS = GOFILE_HOSTS | STREAMTAPE_HOSTS | PLAYER4ME_HOSTS
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
-SLOT_RE = re.compile(r"^(standard|uncensored)\.(streamtape|player4me|gofile)$")
+SLOT_RE = re.compile(
+    r"^(standard|uncensored)\.(reupload|streamtape|player4me|gofile)$"
+)
 GOFILE_PATH_RE = re.compile(r"^/d/[A-Za-z0-9]+/?$")
 STREAMTAPE_PATH_RE = re.compile(r"^/(?:v|e)/[A-Za-z0-9_-]+(?:/[^/?#]*)?/?$")
 

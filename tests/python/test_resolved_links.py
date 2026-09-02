@@ -29,6 +29,7 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
                     "code": "SPSF-58",
                     "releaseDate": "2026-09-11",
                     "links": {
+                        "reupload": "https://ouo.io/latestUpload",
                         "gofile": "https://ouo.io/normalGo",
                         "streamtape": "https://ouo.io/normalSt",
                         "uncensored": {
@@ -43,6 +44,7 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
         self.assertEqual(
             [(item.code, item.slot, item.provider) for item in candidates],
             [
+                ("SPSF-58", "standard.reupload", "reupload"),
                 ("SPSF-58", "standard.streamtape", "streamtape"),
                 ("SPSF-58", "standard.gofile", "gofile"),
                 ("SPSF-58", "uncensored.streamtape", "streamtape"),

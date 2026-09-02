@@ -1019,6 +1019,27 @@ test("external links are grouped deterministically and unsafe URLs are dropped",
   );
 });
 
+test("reuploaded collection links appear first with a clear Chinese label", () => {
+  const groups = collectLinkGroups({
+    gofile: "https://ouo.io/oldLink",
+    reupload: "https://ouo.io/newLink",
+  });
+  assert.deepEqual(groups[0].links, [
+    {
+      provider: "reupload",
+      slot: "standard.reupload",
+      label: "重传链接",
+      url: "https://ouo.io/newLink",
+    },
+    {
+      provider: "gofile",
+      slot: "standard.gofile",
+      label: "Gofile",
+      url: "https://ouo.io/oldLink",
+    },
+  ]);
+});
+
 test("resolved cache upgrades matching slots without colliding with uncensored links", async () => {
   const groups = collectLinkGroups({
     gofile: "https://ouo.io/mT78vqU",

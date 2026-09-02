@@ -155,6 +155,32 @@ test("a stale source slot label may resolve to a different allowlisted provider"
   );
 });
 
+test("a generic reupload slot can resolve to its actual allowlisted provider", async () => {
+  const raw = manifestWith("https://gofile.io/d/N87ugOtd");
+  raw.entries["SPSF-58"]["standard.reupload"] =
+    raw.entries["SPSF-58"]["standard.gofile"];
+  delete raw.entries["SPSF-58"]["standard.gofile"];
+  const manifest = normalizeResolvedLinkManifest(raw);
+  assert.equal(manifest.size, 1);
+  assert.deepEqual(
+    await resolveLinkTarget(
+      {
+        code: "SPSF-58",
+        provider: "reupload",
+        slot: "standard.reupload",
+        label: "重传链接",
+        sourceUrl: SOURCE,
+      },
+      manifest,
+    ),
+    {
+      url: "https://gofile.io/d/N87ugOtd",
+      label: "直达 Gofile",
+      resolved: true,
+    },
+  );
+});
+
 test("loader fetches once and network failure falls back empty", async () => {
   let calls = 0;
   const load = createResolvedLinkLoader(async () => {

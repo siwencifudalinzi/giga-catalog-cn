@@ -25,6 +25,7 @@ const FEATURED_COVERS_TIMEOUT_MS = 2000;
 const PREVIEW_BATCH_SIZE = 4;
 const loadResolvedLinks = createResolvedLinkLoader();
 const PROVIDERS = Object.freeze([
+  ["reupload", "重传链接"],
   ["streamtape", "Streamtape"],
   ["player4me", "Player4me"],
   ["vidara", "Vidara"],

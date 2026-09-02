@@ -26,6 +26,28 @@ DIRECTORY_URL = (
 )
 CATALOG_SERIES = {"AHEF", "PGHD", "SPSE", "SPSF"}
 
+COLLECTION_DIRECTORY_HTML = """<!doctype html>
+<html><head><style>
+.waffle .blue { color: #1155cc; }
+.waffle .red { color: #ff0000; }
+.waffle .orange { color: #ff9900; }
+.waffle .pink { color: #ff00ff; }
+.waffle .black { color: #000000; }
+</style></head><body><table class="waffle"><tbody>
+<tr><td class="black">NEW CODE</td><td class="black">STREAMTAPE LINK</td>
+<td class="black">GOFILE LINK</td><td class="black">UNCENSORED</td></tr>
+<tr><td class="black">COLOR</td><td class="pink">PINK ENGSUB</td></tr>
+<tr><td class="black"></td><td class="blue">BLUE NORMAL OR DOWN</td></tr>
+<tr><td class="black"></td><td class="black">BLACK NOTHING</td></tr>
+<tr><td class="black"></td><td class="red">RED NEWEST</td></tr>
+<tr><td class="black"></td><td class="orange">ORANGE LIST NOT COMPLETE</td></tr>
+<tr><td class="blue"><a href="https://docs.google.com/spreadsheets/d/ahef-child/edit?gid=0#gid=0">AHEF</a></td></tr>
+<tr><td class="orange"><a href="https://drive.google.com/open?id=avgp-child&amp;usp=drive_copy">AVGP</a></td></tr>
+<tr><td class="red"><a href="https://docs.google.com/spreadsheets/d/csft-child/edit?gid=7#gid=7">CSFT</a></td></tr>
+<tr><td class="pink"><a href="https://docs.google.com/spreadsheets/d/pghd-subtitles/edit?gid=0#gid=0">PGHD</a></td></tr>
+<tr><td class="black"><a href="https://docs.google.com/spreadsheets/d/spsf-old/edit?gid=0#gid=0">SPSF</a></td></tr>
+</tbody></table></body></html>"""
+
 
 def subtitle_directory_xlsx(
     *,
@@ -349,6 +371,60 @@ class SubtitleStateManifestTests(unittest.TestCase):
 
 
 class SubtitleDirectoryParserTests(unittest.TestCase):
+    def test_collection_directory_selects_only_available_reupload_sheets(self) -> None:
+        """Blue/red/orange series are usable; pink subtitles and black gaps are not."""
+        parser = getattr(subtitle_module, "parse_collection_directory_html", None)
+        self.assertTrue(callable(parser), "the collection directory parser is missing")
+
+        sources = parser(
+            COLLECTION_DIRECTORY_HTML,
+            source_url=DIRECTORY_URL,
+            catalog_series={"AHEF", "AVGP", "CSFT", "PGHD", "SPSF"},
+        )
+
+        self.assertEqual([source.series for source in sources], ["AHEF", "AVGP", "CSFT"])
+        self.assertEqual(
+            sources[0].csv_url,
+            "https://docs.google.com/spreadsheets/d/ahef-child/export?format=csv&gid=0",
+        )
+        self.assertEqual(
+            sources[1].csv_url,
+            "https://docs.google.com/spreadsheets/d/avgp-child/export?format=csv&gid=0",
+        )
+        self.assertEqual(
+            sources[2].csv_url,
+            "https://docs.google.com/spreadsheets/d/csft-child/export?format=csv&gid=7",
+        )
+
+    def test_collection_child_csv_normalizes_and_bounds_reupload_links(self) -> None:
+        parser = getattr(subtitle_module, "parse_collection_child_csv", None)
+        self.assertTrue(callable(parser), "the collection child parser is missing")
+
+        links = parser(
+            "AKBD-01,https://ouo.io/newOne\n"
+            "AKBD-02,https://ouo.io/newTwo\n"
+            "AKBD-99,https://ouo.io/notInCatalog\n",
+            series="AKBD",
+            catalog_codes={"AKBD-1", "AKBD-2"},
+        )
+
+        self.assertEqual(
+            links,
+            {
+                "AKBD-1": "https://ouo.io/newOne",
+                "AKBD-2": "https://ouo.io/newTwo",
+            },
+        )
+
+        for payload, message in (
+            ("AKBD-01,https://evil.example/link\n", "ouo.io"),
+            ("CSFT-01,https://ouo.io/wrongSeries\n", "wrong series"),
+            ("AKBD-01,https://ouo.io/a,extra\n", "exactly two columns"),
+        ):
+            with self.subTest(payload=payload):
+                with self.assertRaisesRegex(SubtitleFormatError, message):
+                    parser(payload, series="AKBD", catalog_codes={"AKBD-1"})
+
     def setUp(self) -> None:
         self.html = DIRECTORY_FIXTURE.read_text(encoding="utf-8")
 

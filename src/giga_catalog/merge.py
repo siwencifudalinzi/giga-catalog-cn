@@ -11,7 +11,14 @@ from src.giga_catalog.previews import preview_descriptor_from_cover
 from src.giga_catalog.tags import build_public_tag_index
 
 
-_PROVIDERS = ("gofile", "player4me", "streamtape", "subtitle", "vidara")
+_PROVIDERS = (
+    "gofile",
+    "player4me",
+    "reupload",
+    "streamtape",
+    "subtitle",
+    "vidara",
+)
 _MOJIBAKE_MARKERS = ("\ufffd", "丐", "乓", "涓", "涔")
 _TAG_STATE_FIELDS = ("tagIds", "tagsStatus", "tagsUpdatedAt", "tagsSource")
 

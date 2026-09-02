@@ -21,6 +21,7 @@ from src.giga_catalog.sheet import download_sheet, download_sheet_bytes
 SUBTITLE_SHEET_ID = "1wyNMnWXLRoHySoErtj3A-XeuBrenem7NCRb_Qvm5Zag"
 SUBTITLE_SHEET_GID = "0"
 PINK_ENGSUB_COLOR = "#ff00ff"
+COLLECTION_LINK_COLORS = frozenset({"#0000ff", "#1155cc", "#ff0000", "#ff9900"})
 
 _IDENTITY_LABELS = {
     "NEW CODE",
@@ -73,6 +74,15 @@ class SubtitleFormatError(ValueError):
 @dataclass(frozen=True)
 class SubtitleChildSource:
     """One explicitly pink child spreadsheet bounded to a catalog series."""
+
+    series: str
+    source_url: str
+    csv_url: str
+
+
+@dataclass(frozen=True)
+class CollectionChildSource:
+    """One available historical-video sheet linked from the public directory."""
 
     series: str
     source_url: str
@@ -567,6 +577,126 @@ def parse_subtitle_directory_html(
         available_colors=class_colors.values(),
         require_identity_note=True,
     )
+
+
+def parse_collection_directory_html(
+    text: str,
+    *,
+    source_url: str,
+    catalog_series: Iterable[str],
+) -> Tuple[CollectionChildSource, ...]:
+    """Select available non-subtitle collection sheets from Google's rich view."""
+    _validate_directory_url(source_url)
+    if not isinstance(text, str) or not text.strip():
+        raise SubtitleFormatError("collection directory HTML is empty")
+
+    parser = _DirectoryParser()
+    try:
+        parser.feed(text)
+        parser.close()
+    except (TypeError, ValueError) as error:
+        raise SubtitleFormatError("collection directory HTML is malformed") from error
+    if parser.waffle_table_count != 1 or not parser.cells:
+        raise SubtitleFormatError(
+            "collection directory must contain exactly one waffle table"
+        )
+
+    class_colors = _parse_class_colors("".join(parser.style_parts))
+    labels = {cell.text.upper() for cell in parser.cells if cell.text}
+    missing_identity = sorted(_IDENTITY_LABELS - labels)
+    if missing_identity:
+        raise SubtitleFormatError(
+            "collection directory identity labels are missing: "
+            + ", ".join(missing_identity)
+        )
+    for legend in (
+        "BLUE NORMAL OR DOWN",
+        "BLACK NOTHING",
+        "RED NEWEST",
+        "ORANGE LIST NOT COMPLETE",
+    ):
+        if legend not in labels:
+            raise SubtitleFormatError(
+                f"collection directory legend is missing: {legend}"
+            )
+
+    normalized_catalog_series = _normalized_series_set(catalog_series)
+    sources: Dict[str, CollectionChildSource] = {}
+    for cell in parser.cells:
+        if _cell_color(cell, class_colors) not in COLLECTION_LINK_COLORS:
+            continue
+        for anchor in cell.anchors:
+            series = _normalize_series(anchor.text)
+            if series is None or series not in normalized_catalog_series:
+                continue
+            destination = _resolved_http_url(anchor.href)
+            csv_url = _collection_child_csv_url(destination)
+            if series in sources:
+                raise SubtitleFormatError(
+                    f"duplicate collection source for series {series}"
+                )
+            sources[series] = CollectionChildSource(
+                series=series,
+                source_url=destination,
+                csv_url=csv_url,
+            )
+    return tuple(sources[series] for series in sorted(sources))
+
+
+def parse_collection_child_csv(
+    text: str,
+    *,
+    series: str,
+    catalog_codes: Iterable[str],
+) -> Dict[str, str]:
+    """Parse one headerless CODE,URL reupload sheet with strict source bounds."""
+    normalized_series = _normalize_series(series)
+    if normalized_series is None:
+        raise SubtitleFormatError(f"invalid collection child series {series!r}")
+    if not isinstance(text, str) or not text.strip():
+        raise SubtitleFormatError("collection child CSV is empty")
+    if text.lstrip().lower().startswith(("<!doctype html", "<html")):
+        raise SubtitleFormatError("collection child source returned HTML")
+
+    normalized_catalog_codes = set()
+    for value in catalog_codes:
+        code = normalize_code(value)
+        if code is not None:
+            normalized_catalog_codes.add(code)
+
+    links: Dict[str, str] = {}
+    seen_codes = set()
+    try:
+        rows = csv.reader(StringIO(text))
+        for row_number, row in enumerate(rows, 1):
+            if not row or not any(value.strip() for value in row):
+                continue
+            if len(row) != 2:
+                raise SubtitleFormatError(
+                    f"collection child row {row_number} must contain exactly two columns"
+                )
+            code = normalize_code(row[0])
+            if code is None:
+                raise SubtitleFormatError(
+                    f"collection child row {row_number} has an invalid code"
+                )
+            if code.rsplit("-", 1)[0] != normalized_series:
+                raise SubtitleFormatError(
+                    f"collection child code {code} has the wrong series prefix"
+                )
+            if code in seen_codes:
+                raise SubtitleFormatError(
+                    f"duplicate normalized collection child code {code}"
+                )
+            seen_codes.add(code)
+            url = _collection_source_url(row[1].strip())
+            if code in normalized_catalog_codes:
+                links[code] = url
+    except csv.Error as error:
+        raise SubtitleFormatError("collection child CSV is malformed") from error
+    if not links:
+        raise SubtitleFormatError("collection child CSV contains no catalog links")
+    return dict(sorted(links.items()))
 
 
 def parse_subtitle_directory_xlsx(
@@ -1150,6 +1280,79 @@ def _child_csv_url(value: str) -> str:
         f"https://docs.google.com/spreadsheets/d/{document_id}/export"
         f"?format=csv&gid={gid}"
     )
+
+
+def _collection_child_csv_url(value: str) -> str:
+    """Convert one bounded public Sheet/Drive link into a CSV export URL."""
+    parsed = urlparse(value)
+    try:
+        port = parsed.port
+    except ValueError as error:
+        raise SubtitleFormatError("collection child source has an invalid port") from error
+    if (
+        parsed.scheme != "https"
+        or parsed.username is not None
+        or parsed.password is not None
+        or port not in {None, 443}
+    ):
+        raise SubtitleFormatError("collection child source must be HTTPS")
+
+    if parsed.hostname == "docs.google.com":
+        return _child_csv_url(value)
+
+    if parsed.hostname != "drive.google.com" or parsed.path != "/open":
+        raise SubtitleFormatError(
+            "collection child source is not a public Google Sheet"
+        )
+    if parsed.fragment:
+        raise SubtitleFormatError("collection child Drive URL must not use a fragment")
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    if set(query) - {"id", "usp"}:
+        raise SubtitleFormatError("collection child Drive URL has unknown parameters")
+    identifiers = query.get("id", [])
+    if (
+        len(identifiers) != 1
+        or re.fullmatch(r"[A-Za-z0-9_-]+", identifiers[0]) is None
+    ):
+        raise SubtitleFormatError("collection child Drive URL has an invalid id")
+    if identifiers[0] == SUBTITLE_SHEET_ID:
+        raise SubtitleFormatError("collection child source cannot be the main directory")
+    usp_values = query.get("usp", [])
+    if len(usp_values) > 1 or any(
+        re.fullmatch(r"[A-Za-z0-9_-]+", item) is None for item in usp_values
+    ):
+        raise SubtitleFormatError("collection child Drive URL has an invalid usp")
+    return (
+        "https://docs.google.com/spreadsheets/d/"
+        f"{identifiers[0]}/export?format=csv&gid=0"
+    )
+
+
+def _collection_source_url(value: str) -> str:
+    """Accept only opaque HTTPS ouo.io links from collection child sheets."""
+    if not isinstance(value, str) or not value:
+        raise SubtitleFormatError("collection source URL is empty")
+    if any(character.isspace() or ord(character) < 32 for character in value):
+        raise SubtitleFormatError("collection source URL contains unsafe characters")
+    parsed = urlparse(value)
+    try:
+        port = parsed.port
+    except ValueError as error:
+        raise SubtitleFormatError("collection source URL has an invalid port") from error
+    if (
+        parsed.scheme != "https"
+        or parsed.hostname != "ouo.io"
+        or parsed.username is not None
+        or parsed.password is not None
+        or port not in {None, 443}
+        or parsed.query
+        or parsed.fragment
+        or re.fullmatch(r"/[A-Za-z0-9]+", parsed.path) is None
+    ):
+        raise SubtitleFormatError(
+            "collection source URL must be an HTTPS ouo.io short link"
+        )
+    return value
 
 
 def _normalized_series_set(values: Iterable[str]) -> set:

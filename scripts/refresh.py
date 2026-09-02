@@ -25,6 +25,8 @@ from src.giga_catalog.sheet import download_sheet, parse_sheet_csv  # noqa: E402
 from src.giga_catalog.subtitles import (  # noqa: E402
     SubtitleFormatError,
     download_subtitle_source,
+    parse_collection_child_csv,
+    parse_collection_directory_html,
     parse_subtitle_child_csv,
     parse_subtitle_directory_html,
     parse_subtitle_directory_xlsx,
@@ -90,6 +92,7 @@ def run_refresh(
     *,
     sheet_downloader: Optional[Callable] = None,
     subtitle_downloader: Optional[Callable] = None,
+    collection_downloader: Optional[Callable] = None,
     discoverer: Optional[Callable] = None,
     validator: Optional[Callable] = None,
     replacer: Optional[Callable] = None,
@@ -103,6 +106,7 @@ def run_refresh(
     _validate_options(options)
     sheet_downloader = sheet_downloader or download_sheet
     subtitle_downloader = subtitle_downloader or download_subtitle_source
+    collection_downloader = collection_downloader or download_sheet
     discoverer = discoverer or discover_products
     validator = validator or validate_catalog
     migrator = migrator or migrate_legacy
@@ -189,6 +193,48 @@ def run_refresh(
 
     catalog_codes = _product_codes(existing_products + candidate_products)
     catalog_series = {code.rsplit("-", 1)[0] for code in catalog_codes}
+    collection_html = collection_downloader(
+        options.subtitle_url,
+        timeout=options.timeout,
+        retries=options.retries,
+        delay_seconds=options.delay,
+    )
+    if not isinstance(collection_html, str):
+        raise RefreshError("collection directory downloader did not return HTML text")
+    collection_sources = parse_collection_directory_html(
+        collection_html,
+        source_url=options.subtitle_url,
+        catalog_series=catalog_series,
+    )
+    collection_links = {}
+    for child in collection_sources:
+        child_text = collection_downloader(
+            child.csv_url,
+            timeout=options.timeout,
+            retries=options.retries,
+            delay_seconds=options.delay,
+        )
+        if not isinstance(child_text, str):
+            raise RefreshError("collection child downloader did not return CSV text")
+        child_links = parse_collection_child_csv(
+            child_text,
+            series=child.series,
+            catalog_codes=catalog_codes,
+        )
+        duplicate_codes = sorted(set(collection_links) & set(child_links))
+        if duplicate_codes:
+            raise RefreshError(
+                "duplicate collection video codes: " + ", ".join(duplicate_codes)
+            )
+        collection_links.update(child_links)
+    selected_links = _overlay_links(
+        selected_links,
+        {
+            code: {"reupload": url}
+            for code, url in sorted(collection_links.items())
+        },
+    )
+
     subtitle_payload = subtitle_downloader(
         options.subtitle_url,
         timeout=options.timeout,
@@ -319,6 +365,13 @@ def run_refresh(
             "sha256": inputs["sheetSha256"],
         },
         "official": _json_safe_mapping(discovery_summary),
+        "collection": {
+            "url": options.subtitle_url,
+            "sha256": _hash_bytes(collection_html.encode("utf-8")),
+            "childSheets": len(collection_sources),
+            "linkKeys": len(collection_links),
+            "diagnostics": [],
+        },
         "subtitles": {
             "url": options.subtitle_url,
             "sha256": subtitle_sha256,

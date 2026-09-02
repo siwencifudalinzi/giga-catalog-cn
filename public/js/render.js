@@ -10,6 +10,7 @@ const DESKTOP_BREAKPOINT = 768;
 const LINK_LABELS = Object.freeze({
   gofile: "Gofile",
   player4me: "Player4me",
+  reupload: "重传链接",
   streamtape: "Streamtape",
   subtitle: "字幕",
   vidara: "Vidara",
