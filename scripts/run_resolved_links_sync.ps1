@@ -25,7 +25,7 @@ try {
     git fetch origin
     git rebase origin/main
 
-    & 'C:\Windows\py.exe' scripts/resolve_links.py --browser --workers $Workers --max-links $MaxLinks --delay 0.5 --write
+    & 'C:\Windows\py.exe' scripts/resolve_links.py --browser --headless --workers $Workers --max-links $MaxLinks --delay 0.5 --write
     if ($LASTEXITCODE -ne 0) { throw "resolver exited $LASTEXITCODE" }
     & 'C:\Windows\py.exe' -m unittest tests.python.test_resolved_links -v
     if ($LASTEXITCODE -ne 0) { throw "resolved-link tests exited $LASTEXITCODE" }

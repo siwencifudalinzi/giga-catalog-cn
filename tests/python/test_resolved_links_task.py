@@ -16,7 +16,7 @@ class ResolvedLinksTaskTests(unittest.TestCase):
 
     def test_runner_updates_only_generated_manifest_and_never_force_pushes(self):
         text = (ROOT / "scripts/run_resolved_links_sync.ps1").read_text(encoding="utf-8")
-        self.assertIn("resolve_links.py", text)
+        self.assertIn("resolve_links.py --browser --headless", text)
         self.assertIn("public/data/resolved-links.json", text)
         self.assertIn("HEAD:main", text)
         self.assertIn("$hasChanges = $LASTEXITCODE -eq 1", text)
