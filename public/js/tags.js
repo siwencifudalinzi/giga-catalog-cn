@@ -1,3 +1,7 @@
+export function nextTagSelection(current, action = "include") {
+  return current === action ? "neutral" : action;
+}
+
 function normalizeText(value) {
   return typeof value === "string"
     ? value.normalize("NFKC").trim().replace(/\s+/gu, " ").toLowerCase()

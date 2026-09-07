@@ -2,6 +2,16 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createTagIndex, filterVideosByTags } from "../../public/js/tags.js";
+import * as tagUtilities from "../../public/js/tags.js";
+
+test("tag selection toggles off and exclusion is an explicit action", () => {
+  assert.equal(tagUtilities.nextTagSelection("neutral", "include"), "include");
+  assert.equal(tagUtilities.nextTagSelection("include", "include"), "neutral");
+  assert.equal(tagUtilities.nextTagSelection("neutral", "exclude"), "exclude");
+  assert.equal(tagUtilities.nextTagSelection("exclude", "exclude"), "neutral");
+  assert.equal(tagUtilities.nextTagSelection("include", "exclude"), "exclude");
+  assert.equal(tagUtilities.nextTagSelection("exclude", "include"), "include");
+});
 
 
 const tags = [

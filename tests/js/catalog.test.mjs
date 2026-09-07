@@ -7,6 +7,13 @@ import {
   normalizeVideoCode,
 } from "../../public/js/catalog.js";
 
+test("search sorts code suffixes numerically, not lexicographically", () => {
+  const model = createCatalogModel({series: [{code: "SPSF", videos:
+    [1, 10, 11, 2].map(number => ({code: `SPSF-${number}`, number, title: "sample", actors: []}))
+  }]});
+  assert.deepEqual(model.search("SPSF").map(item => item.code), ["SPSF-1", "SPSF-2", "SPSF-10", "SPSF-11"]);
+});
+
 test("catalog normalization helpers remain public for the V3 runtime layer", () => {
   assert.equal(normalizeText(" ＳＰＳＦ  1 "), "spsf 1");
   assert.equal(normalizeVideoCode(" spsf_001 "), "SPSF-1");
@@ -575,7 +582,7 @@ test("release-state badges compare dates to the supplied catalog generation date
 
   assert.match(
     container.innerHTML,
-    /data-code="SPSF-1"[\s\S]*?<span class="video-release-state">预告<\/span>/u,
+    /data-code="SPSF-1"[\s\S]*?<span class="video-release-state">即将发行 · 2026-09-11<\/span>/u,
   );
   assert.doesNotMatch(
     container.innerHTML.match(/data-code="SPSF-2"[\s\S]*?<\/article>/u)?.[0] ?? "",

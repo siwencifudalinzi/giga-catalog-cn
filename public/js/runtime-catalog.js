@@ -1,4 +1,4 @@
-import { normalizeText, normalizeVideoCode } from "./catalog.js";
+import { normalizeText, normalizeVideoCode, normalizeSearchQuery, compareVideoCodes } from "./catalog.js";
 import { createTagIndex, filterVideosByTags } from "./tags.js";
 
 const GENERATION_RE = /^[0-9a-f]{64}$/u;
@@ -447,7 +447,8 @@ export function createRuntimeCatalogStore(bootstrap) {
       return checked.series;
     },
     getRecentVideos() {
-      return currentRecent();
+      return Object.freeze([...currentRecent()].sort((left, right) =>
+        String(right.releaseDate ?? "").localeCompare(String(left.releaseDate ?? "")) || compareVideoCodes(left, right)));
     },
     getSeries(code) {
       const key = typeof code === "string" ? code.trim().toUpperCase() : "";
@@ -466,13 +467,13 @@ export function createRuntimeCatalogStore(bootstrap) {
       return currentSearch().get(key) ?? null;
     },
     search(query) {
-      const needle = normalizeText(normalizeVideoCode(query) ?? query);
+      const needle = normalizeSearchQuery(query);
       if (!needle) return Object.freeze([]);
       return Object.freeze([...currentSearch().values()].filter((item) => {
         const tags = item.tagIds.map((id) => tagIndex.get(id)).filter(Boolean);
         return normalizeText([item.code, item.title, ...item.actors, item.series,
           ...tags.flatMap((tag) => [tag.nameZh, tag.nameJa])].join(" ")).includes(needle);
-      }));
+      }).sort(compareVideoCodes));
     },
     getTag(id) {
       return tagIndex.get(id);

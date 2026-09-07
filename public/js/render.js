@@ -447,7 +447,7 @@ function renderVideoCard(
     /^\d{4}-\d{2}-\d{2}$/u.test(asOfDate) &&
     typeof video?.releaseDate === "string" &&
     video.releaseDate > asOfDate
-      ? '<span class="video-release-state">预告</span>'
+      ? `<span class="video-release-state">即将发行 · ${escapeHtml(video.releaseDate)}</span>`
       : "";
 
   return [

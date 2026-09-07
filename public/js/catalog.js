@@ -30,6 +30,18 @@ export function normalizeText(value) {
     : "";
 }
 
+export function normalizeSearchQuery(value) {
+  const text = normalizeText(value).replace(/[‐‑‒–—−]/gu, "-");
+  const candidate = text.replace(/[\s_-]+/gu, "-").replace(/^([a-z]+)(\d+)$/u, "$1-$2");
+  return normalizeText(normalizeVideoCode(candidate) ?? text);
+}
+
+const codeCollator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+
+export function compareVideoCodes(left, right) {
+  return codeCollator.compare(String(left.code ?? ""), String(right.code ?? ""));
+}
+
 export function normalizeVideoCode(value) {
   if (typeof value !== "string") {
     return null;
@@ -155,14 +167,15 @@ export function createCatalogModel(payload = {}) {
     metadata,
 
     search(query) {
-      const needle = normalizeText(normalizeVideoCode(query) ?? query);
+      const needle = normalizeSearchQuery(query);
       if (!needle) {
         return Object.freeze([]);
       }
       return Object.freeze(
         searchIndex
           .filter((entry) => entry.haystack.includes(needle))
-          .map((entry) => entry.video),
+          .map((entry) => entry.video)
+          .sort(compareVideoCodes),
       );
     },
 

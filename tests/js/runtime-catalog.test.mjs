@@ -15,6 +15,25 @@ import {
 const generation = "a".repeat(64);
 const generatedAt = "2026-08-29T00:00:00Z";
 
+test("search uses numeric product order independent of artifact order", () => {
+  const bootstrap = parseBootstrap(validBootstrap());
+  const store = createRuntimeCatalogStore(bootstrap);
+  const payload = validSearch();
+  payload.videos.reverse();
+  store.installSearch(parseSearchPayload(payload, bootstrap));
+  assert.deepEqual(store.search("SPSF").map((item) => item.code), ["SPSF-1", "SPSF-2"]);
+});
+
+test("search accepts compact, spaced and full-width product codes", () => {
+  const bootstrap = parseBootstrap(validBootstrap());
+  const store = createRuntimeCatalogStore(bootstrap);
+  store.installSearch(parseSearchPayload(validSearch(), bootstrap));
+  for (const query of ["SPSF1", "spsf001", "ＳＰＳＦ－００１", "SPSF  001", "SPSF—1"]) {
+    assert.deepEqual(store.search(query).map((item) => item.code), ["SPSF-1"], query);
+  }
+  assert.deepEqual(store.search("女战士").map((item) => item.code), ["SPSF-1"]);
+});
+
 function clone(value) {
   return structuredClone(value);
 }
