@@ -1,5 +1,6 @@
 import { normalizeText, normalizeVideoCode, normalizeSearchQuery, compareVideoCodes } from "./catalog.js";
 import { createTagIndex, filterVideosByTags } from "./tags.js";
+import { buildSeriesPreviews } from './series-navigation.js';
 
 const GENERATION_RE = /^[0-9a-f]{64}$/u;
 const SERIES_RE = /^[A-Z][A-Z0-9]*$/u;
@@ -427,6 +428,7 @@ export function createRuntimeCatalogStore(bootstrap) {
   const checked = parseBootstrap(bootstrap);
   const rawSeries = new Map();
   const rawRecent = new Map(checked.recentVideos.map((item) => [item.code, item]));
+  let seriesPreviews = buildSeriesPreviews(rawRecent.values());
   let rawSearch = new Map();
   let assignments = new Map();
   let tagIndex = createTagIndex([]);
@@ -445,6 +447,9 @@ export function createRuntimeCatalogStore(bootstrap) {
     }),
     getSeriesSummaries() {
       return checked.series;
+    },
+    getSeriesPreview(code) {
+      return seriesPreviews.get(code) ?? null;
     },
     getRecentVideos() {
       return Object.freeze([...currentRecent()].sort((left, right) =>
@@ -472,7 +477,7 @@ export function createRuntimeCatalogStore(bootstrap) {
       return Object.freeze([...currentSearch().values()].filter((item) => {
         const tags = item.tagIds.map((id) => tagIndex.get(id)).filter(Boolean);
         return normalizeText([item.code, item.title, ...item.actors, item.series,
-          ...tags.flatMap((tag) => [tag.nameZh, tag.nameJa])].join(" ")).includes(needle);
+          ...tags.flatMap((tag) => tag.aliases)].join(" ")).includes(needle);
       }).sort(compareVideoCodes));
     },
     getTag(id) {
@@ -492,6 +497,7 @@ export function createRuntimeCatalogStore(bootstrap) {
     installSearch(payload) {
       const next = parseSearchPayload(payload, checked);
       rawSearch = new Map(next.videos.map((item) => [item.code, item]));
+      seriesPreviews = buildSeriesPreviews(rawSearch.values());
     },
     installTags(payload) {
       const next = parseTagPayload(payload, checked);

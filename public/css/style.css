@@ -590,6 +590,8 @@ img {
 }
 
 .series-rail {
+  display: flex;
+  flex-direction: column;
   position: sticky;
   top: calc(var(--header-h) + var(--sp-4));
   max-height: calc(100vh - var(--header-h) - 2 * var(--sp-4));
@@ -617,6 +619,7 @@ img {
 
 .series-index {
   display: grid;
+  align-content: start;
   gap: 2px;
   max-height: calc(100vh - var(--header-h) - 10rem);
   padding: var(--sp-2);
@@ -2009,6 +2012,74 @@ body[data-view="tags"] .series-rail {
 
   .detail-cover-frame {
     width: min(11rem, 60vw);
+  }
+}
+
+.series-search-label {
+  display: block;
+  margin-block: var(--sp-3) var(--sp-1);
+  color: var(--muted);
+  font-size: var(--fs-1);
+}
+.series-rail__heading { flex-shrink: 0; }
+.series-rail .series-index { min-height: 0; }
+.series-search {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--sp-2);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.series-drawer-search { padding: 0 var(--sp-4); }
+.series-drawer-search p { margin-block: var(--sp-2); color: var(--muted); }
+.drawer-panel { grid-template-rows: auto auto minmax(0, 1fr); }
+.series-index__item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: var(--sp-1) var(--sp-2);
+}
+.series-index__cover {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  font-size: 0.65rem;
+}
+.series-preview-image { width: 100%; height: 100%; object-fit: cover; }
+.series-index__code { grid-column: 2; }
+.series-index__count { grid-column: 3; }
+.series-index__date {
+  grid-column: 2 / -1;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.current-series-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.tag-chip__original { color: inherit; font-size: 0.75rem; }
+.tag-chip { flex-wrap: wrap; }
+@media (max-width: 47.99rem) {
+  .current-series-bar {
+    position: sticky;
+    top: calc(var(--actual-header-h, var(--header-h)) + var(--sp-2));
+    z-index: 3;
   }
 }
 

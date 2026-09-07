@@ -1,3 +1,5 @@
+import { tagPresentation } from './tag-labels.js';
+
 export function nextTagSelection(current, action = "include") {
   return current === action ? "neutral" : action;
 }
@@ -50,6 +52,7 @@ export function createTagIndex(source = []) {
       group: value.group,
       nameJa,
       nameZh,
+      ...tagPresentation(nameJa, nameZh),
       count: Number.isInteger(value.count) && value.count >= 0 ? value.count : 0,
     });
     byId.set(tag.id, tag);
@@ -63,7 +66,7 @@ export function createTagIndex(source = []) {
   );
   const searchRows = all.map((tag) => ({
     tag,
-    haystack: normalizeText(`${tag.nameZh} ${tag.nameJa}`),
+    haystack: normalizeText(tag.aliases.join(' ')),
   }));
 
   return Object.freeze({

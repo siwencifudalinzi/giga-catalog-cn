@@ -15,6 +15,7 @@ import { createRuntimeCatalogStore } from "./runtime-catalog.js";
 import { createRuntimeLoader } from "./runtime-loader.js";
 import { nextTagSelection } from "./tags.js";
 import { compareVideoCodes } from "./catalog.js";
+import { filterSeries } from './series-navigation.js';
 import {
   createResolvedLinkLoader,
   resolveLinkTarget,
@@ -974,6 +975,7 @@ function startApplication() {
     tagMatch: "all",
     tagSearch: "",
     expandedTagGroups: new Set(),
+    seriesQuery: "",
     tagSort: "newest",
     searchReady: false,
     searchError: null,
@@ -1107,7 +1109,11 @@ function startApplication() {
   }
 
   function renderSeriesNavigation() {
-    const series = seriesSummaries();
+    const focusedSeries = document.activeElement?.dataset?.series;
+    const focusedList = document.activeElement?.parentElement?.id;
+    const series = filterSeries(seriesSummaries(), state.seriesQuery);
+    const status = document.querySelector('#series-search-status');
+    if (status) status.textContent = `找到 ${series.length} 个系列`;
     const buildList = (container) => {
       const fragment = document.createDocumentFragment();
       for (const item of series) {
@@ -1127,12 +1133,32 @@ function startApplication() {
             `${formatNumber(item.count)} 部`,
           ),
         );
+        const preview = state.store.getSeriesPreview(item.code);
+        const imageFrame = createElement('span', 'series-index__cover');
+        if (preview?.cover) {
+          const image = createElement('img', 'series-preview-image');
+          image.src = preview.cover;
+          image.alt = '';
+          image.loading = 'lazy';
+          image.width = 48;
+          image.height = 72;
+          image.addEventListener('error', () => { image.remove(); imageFrame.textContent = item.code; }, {once:true});
+          imageFrame.append(image);
+        } else {
+          imageFrame.textContent = item.code;
+        }
+        button.prepend(imageFrame);
+        button.append(createElement('span', 'series-index__date', item.latestReleaseDate ? `最近发行 ${item.latestReleaseDate}` : '发行日期未知'));
         fragment.append(button);
       }
+      if (!series.length) fragment.append(createElement('p', 'empty-state empty-state--compact', '没有匹配的系列，请缩短代码或清空搜索。'));
       container.replaceChildren(fragment);
     };
     buildList(ui.seriesRail);
     buildList(ui.seriesDrawerList);
+    if (focusedSeries && focusedList) {
+      document.getElementById(focusedList)?.querySelector(`[data-series="${focusedSeries}"]`)?.focus({preventScroll:true});
+    }
   }
 
   function updateSeriesSelection() {
@@ -1297,7 +1323,7 @@ function startApplication() {
     fragment.append(
       renderViewHeading(
         "SERIES DIRECTORY",
-        "全部系列",
+        "按系列浏览",
         "选择系列，查看其中的影片。",
       ),
     );
@@ -1306,6 +1332,15 @@ function startApplication() {
       ui.main.replaceChildren(fragment);
       return;
     }
+    const current = createElement('div', 'current-series-bar');
+    current.append(createElement('span', '', `当前系列：${selected.code} · ${formatNumber(selected.count)} 部`));
+    const switcher = createElement('button', 'button button--quiet', '切换系列');
+    switcher.type = 'button';
+    switcher.dataset.action = 'open-drawer';
+    switcher.setAttribute('aria-haspopup', 'dialog');
+    current.append(switcher);
+    fragment.append(current);
+    if (!state.searchReady) void ensureSearchCatalog();
     const shell = createElement("div", "selected-series");
     shell.innerHTML = renderSeriesShell(selected);
     fragment.append(shell);
@@ -1441,6 +1476,10 @@ function startApplication() {
       createElement("span", "tag-chip__name", tag.nameZh),
       createElement("span", "tag-chip__count", formatNumber(tag.count)),
     );
+    if (state.tagSearch && tag.nameJa !== tag.nameZh) {
+      chip.append(createElement('span', 'tag-chip__original', tag.nameJa));
+    }
+    chip.title = `原名：${tag.nameJa}`;
     const wrapper = createElement("div", "tag-choice");
     const exclude = createElement("button", "tag-exclude", selected === "exclude" ? "已排除" : "排除");
     exclude.type = "button";
@@ -1476,7 +1515,7 @@ function startApplication() {
 
   function findRuntimeTags(query) {
     const needle = String(query ?? "").normalize("NFKC").trim().toLowerCase();
-    return state.store.getTags().filter((tag) => !needle || [tag.nameZh, tag.nameJa]
+    return state.store.getTags().filter((tag) => !needle || tag.aliases
       .some((name) => String(name).normalize("NFKC").toLowerCase().includes(needle)));
   }
 
@@ -1779,6 +1818,7 @@ function startApplication() {
           includeTags: false,
         });
         state.searchReady = true;
+        renderSeriesNavigation();
         state.searchError = null;
         state.searchAborted = false;
         return true;
@@ -2014,6 +2054,7 @@ function startApplication() {
     resetViewProgressiveCounter(state.visible, state.view, code);
     persistPreferences();
     renderCurrentView({ focusMain: true });
+    ui.main.scrollIntoView({ block: 'start', behavior: 'instant' });
     await ensureSeriesCatalog(code);
   }
 
@@ -2491,12 +2532,14 @@ function startApplication() {
       state.drawerTrigger = control;
       ui.seriesDrawer.showModal();
       document.body.classList.add("modal-open");
-      ui.seriesDrawer.querySelector("[data-action='close-drawer']").focus();
+      document.querySelector('#series-search-drawer').focus();
+      void ensureSearchCatalog();
     } else if (action === "close-drawer") {
       closeDrawer();
     } else if (action === "select-series") {
-      void selectSeries(control.dataset.series);
+      state.drawerTrigger = null;
       closeDrawer();
+      void selectSeries(control.dataset.series);
     } else if (action === "mount-series") {
       const code = control.dataset.series;
       if (state.mountedSeries === code) {
@@ -2668,6 +2711,13 @@ function startApplication() {
   });
 
   document.addEventListener("input", (event) => {
+    if (event.target?.classList.contains('series-search')) {
+      state.seriesQuery = event.target.value;
+      for (const input of document.querySelectorAll('.series-search')) {
+        if (input !== event.target) input.value = state.seriesQuery;
+      }
+      renderSeriesNavigation();
+    }
     if (event.target?.id === "tag-directory-search") {
       state.tagSearch = event.target.value;
       resetProgressiveCounter(state.visible, { view: "tags" });
@@ -2786,6 +2836,12 @@ function startApplication() {
   }
 
   applyPreferences();
+  const header = document.querySelector('.app-header');
+  if (header && typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(() => {
+      document.documentElement.style.setProperty('--actual-header-h', `${header.getBoundingClientRect().height}px`);
+    }).observe(header);
+  }
   updateFavoriteCount();
   ui.searchClear.hidden = true;
   void loadRuntimeCatalog();

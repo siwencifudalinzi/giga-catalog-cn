@@ -148,7 +148,7 @@ export function createCatalogModel(payload = {}) {
           video.title,
           ...actors,
           series.code,
-          ...assignedTags.flatMap((tag) => [tag.nameZh, tag.nameJa]),
+          ...assignedTags.flatMap((tag) => tag.aliases),
         ].join(" "),
       );
       searchIndex.push(Object.freeze({ video, haystack }));

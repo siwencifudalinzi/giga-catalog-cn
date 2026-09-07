@@ -138,7 +138,7 @@
             data-view="all"
             tabindex="-1"
           >
-            全部系列
+            按系列浏览
           </button>
           <button
             type="button"
@@ -196,6 +196,8 @@
           <span class="state-kicker">INDEX</span>
           <h2 id="series-rail-title">系列索引</h2>
           <p>选择系列，查看影片。</p>
+          <label class="series-search-label" for="series-search-rail">搜索系列代码</label>
+          <input id="series-search-rail" class="series-search" type="search" placeholder="例如 SPSF、THP" autocomplete="off">
         </div>
         <div id="series-rail-list" class="series-index"></div>
       </nav>
@@ -243,6 +245,11 @@
             <span aria-hidden="true">×</span>
           </button>
         </header>
+        <div class="series-drawer-search">
+          <label class="series-search-label" for="series-search-drawer">搜索系列代码</label>
+          <input id="series-search-drawer" class="series-search" type="search" placeholder="例如 SPSF、THP" autocomplete="off">
+          <p id="series-search-status" role="status" aria-live="polite"></p>
+        </div>
         <div id="series-drawer-list" class="series-index series-index--drawer"></div>
       </div>
     </dialog>
