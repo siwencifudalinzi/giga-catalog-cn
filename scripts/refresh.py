@@ -216,11 +216,14 @@ def run_refresh(
         )
         if not isinstance(child_text, str):
             raise RefreshError("collection child downloader did not return CSV text")
-        child_links = parse_collection_child_csv(
-            child_text,
-            series=child.series,
-            catalog_codes=catalog_codes,
-        )
+        try:
+            child_links = parse_collection_child_csv(
+                child_text,
+                series=child.series,
+                catalog_codes=catalog_codes,
+            )
+        except SubtitleFormatError as error:
+            raise RefreshError(f"collection series {child.series}: {error}") from error
         duplicate_codes = sorted(set(collection_links) & set(child_links))
         if duplicate_codes:
             raise RefreshError(

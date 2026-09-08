@@ -392,7 +392,7 @@ class RefreshPipelineTests(unittest.TestCase):
                 calls.append(url)
                 if url == SUBTITLE_DIRECTORY_URL:
                     return directory
-                return "AHEF-01,https://ouo.io/reuploaded\n"
+                return "AHEF-01,https://ouo.io/reuploaded,hardsub,\n"
 
             result = run_refresh(
                 [
@@ -415,6 +415,7 @@ class RefreshPipelineTests(unittest.TestCase):
             links = catalog["series"][0]["videos"][0]["links"]
             self.assertEqual(links["gofile"], "https://example.test/old")
             self.assertEqual(links["reupload"], "https://ouo.io/reuploaded")
+            self.assertNotIn("subtitle", links)
             self.assertEqual(
                 calls,
                 [

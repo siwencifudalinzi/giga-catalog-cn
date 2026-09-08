@@ -396,6 +396,25 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
             "https://docs.google.com/spreadsheets/d/csft-child/export?format=csv&gid=7",
         )
 
+    def test_collection_child_csv_accepts_only_empty_trailing_export_columns(self) -> None:
+        parser = subtitle_module.parse_collection_child_csv
+        for padding in (",", ",,", ",  ,\t"):
+            with self.subTest(padding=padding):
+                self.assertEqual(
+                    parser(
+                        "GATE-01,https://ouo.io/example" + padding + "\n,,,\n",
+                        series="GATE", catalog_codes={"GATE-1"},
+                    ),
+                    {"GATE-1": "https://ouo.io/example"},
+                )
+        for row in (
+            "GATE-01,https://ouo.io/example,,note",
+            ",GATE-01,https://ouo.io/example",
+            "GATE-01,,",
+        ):
+            with self.subTest(row=row), self.assertRaises(SubtitleFormatError):
+                parser(row, series="GATE", catalog_codes={"GATE-1"})
+
     def test_collection_child_csv_normalizes_and_bounds_reupload_links(self) -> None:
         parser = getattr(subtitle_module, "parse_collection_child_csv", None)
         self.assertTrue(callable(parser), "the collection child parser is missing")
@@ -424,6 +443,38 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
             with self.subTest(payload=payload):
                 with self.assertRaisesRegex(SubtitleFormatError, message):
                     parser(payload, series="AKBD", catalog_codes={"AKBD-1"})
+
+    def test_collection_child_hardsub_note_does_not_change_link_classification(self) -> None:
+        for note in ("hardsub", " HARDSUB "):
+            self.assertEqual(
+                subtitle_module.parse_collection_child_csv(
+                    "GATE-01,https://ouo.io/example," + note + ",,\n",
+                    series="GATE", catalog_codes={"GATE-1"},
+                ),
+                {"GATE-1": "https://ouo.io/example"},
+            )
+        for row in ("GATE-01,https://ouo.io/example,,hardsub", "GATE-01,https://ouo.io/example,hardsub,extra"):
+            with self.subTest(row=row), self.assertRaises(SubtitleFormatError):
+                subtitle_module.parse_collection_child_csv(row, series="GATE", catalog_codes={"GATE-1"})
+
+    def test_collection_child_reupload_request_is_not_a_live_link(self) -> None:
+        parser = subtitle_module.parse_collection_child_csv
+        for pending in ("GGTB-07,NEED ASK FOR REUP", "GGTB-07,NEED ASK FOR REUP,https://ouo.io/pending"):
+            self.assertEqual(
+                parser("GGTB-01,https://ouo.io/ready\n" + pending,
+                       series="GGTB", catalog_codes={"GGTB-1", "GGTB-7"}),
+                {"GGTB-1": "https://ouo.io/ready"},
+            )
+        for pending in (
+            "GGTB-07,NEED ASK FOR REUP,https://evil.example/link",
+            "GGTB-07,NEED ASK FOR REUP,unknown",
+            "GGTB-07,UNKNOWN STATUS,https://ouo.io/pending",
+            "OTHER-07,NEED ASK FOR REUP,https://ouo.io/pending",
+            "GGTB-01,NEED ASK FOR REUP,https://ouo.io/pending",
+        ):
+            with self.subTest(pending=pending), self.assertRaises(SubtitleFormatError):
+                parser("GGTB-01,https://ouo.io/ready\n" + pending,
+                       series="GGTB", catalog_codes={"GGTB-1", "GGTB-7"})
 
     def setUp(self) -> None:
         self.html = DIRECTORY_FIXTURE.read_text(encoding="utf-8")

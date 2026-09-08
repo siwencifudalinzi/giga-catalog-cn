@@ -649,7 +649,12 @@ def parse_collection_child_csv(
     series: str,
     catalog_codes: Iterable[str],
 ) -> Dict[str, str]:
-    """Parse one headerless CODE,URL reupload sheet with strict source bounds."""
+    """Parse CODE,URL with optional HARDSUB note and empty export padding.
+
+    HARDSUB is a source annotation, not evidence of a standalone subtitle URL.
+    NEED ASK FOR REUP records are validated but supply no available link.
+    Unknown populated columns still fail rather than being silently discarded.
+    """
     normalized_series = _normalize_series(series)
     if normalized_series is None:
         raise SubtitleFormatError(f"invalid collection child series {series!r}")
@@ -671,6 +676,14 @@ def parse_collection_child_csv(
         for row_number, row in enumerate(rows, 1):
             if not row or not any(value.strip() for value in row):
                 continue
+            while len(row) > 2 and not row[-1].strip():
+                row.pop()
+            pending_reupload = len(row) >= 2 and row[1].strip().upper() == "NEED ASK FOR REUP"
+            if pending_reupload and len(row) == 3:
+                _collection_source_url(row[2].strip())
+                row.pop()
+            if len(row) == 3 and row[2].strip().casefold() == "hardsub":
+                row.pop()
             if len(row) != 2:
                 raise SubtitleFormatError(
                     f"collection child row {row_number} must contain exactly two columns"
@@ -689,6 +702,8 @@ def parse_collection_child_csv(
                     f"duplicate normalized collection child code {code}"
                 )
             seen_codes.add(code)
+            if pending_reupload:
+                continue
             url = _collection_source_url(row[1].strip())
             if code in normalized_catalog_codes:
                 links[code] = url
