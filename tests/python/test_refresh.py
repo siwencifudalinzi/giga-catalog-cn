@@ -365,6 +365,37 @@ class RefreshArgumentTests(unittest.TestCase):
 
 
 class RefreshPipelineTests(unittest.TestCase):
+    def test_black_archive_links_are_imported_despite_an_unavailable_archive(self) -> None:
+        import requests
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            output = root / "public"
+            write_previous(output, products=[product("AHEF-1"), product("AVGP-1", productId=2)],
+                           links={"AVGP-1": {"gofile": "https://example.test/keep"}})
+            directory = EMPTY_COLLECTION_DIRECTORY_HTML.replace(
+                "</tbody>",
+                '<tr><td class="black"><a href="https://docs.google.com/spreadsheets/d/ahef-child/edit">AHEF</a></td>'
+                '<td class="black"><a href="https://docs.google.com/spreadsheets/d/avgp-child/edit">AVGP</a></td></tr></tbody>',
+            )
+            def download(url, **kwargs):
+                if url == SUBTITLE_DIRECTORY_URL:
+                    return directory
+                if "avgp-child" in url:
+                    raise requests.HTTPError("404 missing archive")
+                return "AHEF-01,https://ouo.io/archive,https://ouo.io/mirror\n"
+            result = run_refresh(
+                ["--mode", "links-only", "--output-root", str(output), "--data-root", str(root / "private")],
+                sheet_downloader=lambda *args, **kwargs: SHEET_HEADER,
+                collection_downloader=download,
+                featured_cover_refresher=lambda *args, **kwargs: {"published": False},
+                clock=lambda: GENERATED_AT,
+            )
+            catalog = json.loads((output / "data" / "catalog.json").read_text(encoding="utf-8"))
+            videos = {v["code"]: v for s in catalog["series"] for v in s["videos"]}
+            self.assertEqual(videos["AHEF-1"]["links"]["reupload"], "https://ouo.io/archive")
+            self.assertEqual(videos["AVGP-1"]["links"]["gofile"], "https://example.test/keep")
+            self.assertEqual(len(result["internal"]["sources"]["collection"]["diagnostics"]), 1)
+
     def test_pending_collection_removes_only_reupload_and_accepts_all_pending(self) -> None:
         for active_row in ("", "AHEF-02,https://ouo.io/ready\n"):
             with self.subTest(all_pending=not active_row), tempfile.TemporaryDirectory() as temporary:

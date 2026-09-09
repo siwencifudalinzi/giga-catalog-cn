@@ -371,8 +371,8 @@ class SubtitleStateManifestTests(unittest.TestCase):
 
 
 class SubtitleDirectoryParserTests(unittest.TestCase):
-    def test_collection_directory_selects_only_available_reupload_sheets(self) -> None:
-        """Blue/red/orange series are usable; pink subtitles and black gaps are not."""
+    def test_collection_directory_includes_black_sheet_archives_but_not_subtitles(self) -> None:
+        """Black directory colors can be stale even when child rows have URLs."""
         parser = getattr(subtitle_module, "parse_collection_directory_html", None)
         self.assertTrue(callable(parser), "the collection directory parser is missing")
 
@@ -382,7 +382,9 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
             catalog_series={"AHEF", "AVGP", "CSFT", "PGHD", "SPSF"},
         )
 
-        self.assertEqual([source.series for source in sources], ["AHEF", "AVGP", "CSFT"])
+        self.assertEqual([source.series for source in sources], ["AHEF", "AVGP", "CSFT", "SPSF"])
+        self.assertTrue(sources[-1].archived)
+        self.assertFalse(sources[0].archived)
         self.assertEqual(
             sources[0].csv_url,
             "https://docs.google.com/spreadsheets/d/ahef-child/export?format=csv&gid=0",
@@ -395,6 +397,33 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
             sources[2].csv_url,
             "https://docs.google.com/spreadsheets/d/csft-child/export?format=csv&gid=7",
         )
+
+    def test_archive_child_imports_primary_links_and_reports_invalid_rows(self) -> None:
+        links, pending, diagnostics = subtitle_module.parse_collection_archive_csv(
+            "SPSF-01,https://ouo.io/primary,https://ouo.io/mirror,HARD SUB\n"
+            "SPSF-02,,MY TELEGRAM GROUP CHAT\n"
+            "SPSF-03,NEED ASK FOR REUP,https://ouo.io/old\n"
+            "SPSF-04,https://evil.example/link\n"
+            "OTHER-05,https://ouo.io/wrong\n"
+            "SPSF-06,https://[broken\n",
+            series="SPSF", catalog_codes={"SPSF-1", "SPSF-2", "SPSF-3", "SPSF-4"},
+        )
+        self.assertEqual(links, {"SPSF-1": "https://ouo.io/primary"})
+        self.assertEqual(pending, {"SPSF-3"})
+        self.assertEqual([item["row"] for item in diagnostics], [4, 5, 6])
+        duplicate_links, duplicate_pending, duplicate_notes = subtitle_module.parse_collection_archive_csv(
+            "SPSF-01,https://ouo.io/first\nSPSF-1,NEED ASK FOR REUP\n",
+            series="SPSF", catalog_codes={"SPSF-1"},
+        )
+        self.assertEqual(duplicate_links, {})
+        self.assertEqual(duplicate_pending, set())
+        self.assertEqual(len(duplicate_notes), 1)
+        self.assertEqual(subtitle_module.parse_collection_archive_csv(
+            "SPSF-01,\n", series="SPSF", catalog_codes={"SPSF-1"},
+        ), ({}, set(), []))
+        for text in ("<html>Error</html>", ""):
+            with self.subTest(text=text), self.assertRaises(SubtitleFormatError):
+                subtitle_module.parse_collection_archive_csv(text, series="SPSF", catalog_codes={"SPSF-1"})
 
     def test_collection_child_csv_accepts_only_empty_trailing_export_columns(self) -> None:
         parser = subtitle_module.parse_collection_child_csv

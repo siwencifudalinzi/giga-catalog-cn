@@ -87,6 +87,7 @@ class CollectionChildSource:
     series: str
     source_url: str
     csv_url: str
+    archived: bool = False
 
 
 @dataclass(frozen=True)
@@ -623,14 +624,21 @@ def parse_collection_directory_html(
     normalized_catalog_series = _normalized_series_set(catalog_series)
     sources: Dict[str, CollectionChildSource] = {}
     for cell in parser.cells:
-        if _cell_color(cell, class_colors) not in COLLECTION_LINK_COLORS:
+        archived = _cell_color(cell, class_colors) == "#000000"
+        if not archived and _cell_color(cell, class_colors) not in COLLECTION_LINK_COLORS:
             continue
         for anchor in cell.anchors:
             series = _normalize_series(anchor.text)
             if series is None or series not in normalized_catalog_series:
                 continue
             destination = _resolved_http_url(anchor.href)
-            csv_url = _collection_child_csv_url(destination)
+            try:
+                csv_url = _collection_child_csv_url(destination)
+            except SubtitleFormatError:
+                if archived:
+                    # Opaque series portals cannot be assigned to individual videos.
+                    continue
+                raise
             if series in sources:
                 raise SubtitleFormatError(
                     f"duplicate collection source for series {series}"
@@ -639,8 +647,60 @@ def parse_collection_directory_html(
                 series=series,
                 source_url=destination,
                 csv_url=csv_url,
+                archived=archived,
             )
     return tuple(sources[series] for series in sorted(sources))
+
+
+def parse_collection_archive_csv(
+    text: str, *, series: str, catalog_codes: Iterable[str],
+) -> Tuple[Dict[str, str], set[str], List[dict]]:
+    """Read primary CODE,URL columns in historical sheets with stale colors.
+
+    Later columns mix mirrors, edition labels and unrelated notes; they are not
+    assigned to providers or subtitles. Invalid rows are reported and skipped.
+    These optional archives may contain empty URL cells or no usable records.
+    """
+    normalized_series = _normalize_series(series)
+    if normalized_series is None:
+        raise SubtitleFormatError("invalid archive series")
+    if not isinstance(text, str) or not text.strip():
+        raise SubtitleFormatError("collection archive CSV is empty")
+    if text.lstrip().lower().startswith(("<!doctype html", "<html")):
+        raise SubtitleFormatError("collection archive returned HTML")
+    codes = {normalize_code(code) for code in catalog_codes}
+    links, pending, diagnostics = {}, set(), []
+    seen = set()
+    try:
+        for row_number, row in enumerate(csv.reader(StringIO(text), strict=True), 1):
+            if len(row) < 2 or not row[1].strip():
+                continue
+            code = normalize_code(row[0])
+            try:
+                if code is None or code.rsplit("-", 1)[0] != normalized_series:
+                    raise SubtitleFormatError("invalid code or wrong series prefix")
+                if code in seen:
+                    raise SubtitleFormatError("duplicate archive code")
+                seen.add(code)
+                waiting = row[1].strip().upper() == "NEED ASK FOR REUP"
+                if waiting:
+                    if len(row) > 2 and row[2].strip():
+                        _collection_source_url(row[2].strip())
+                    if code in codes:
+                        pending.add(code)
+                else:
+                    url = _collection_source_url(row[1].strip())
+                    if code in codes:
+                        links[code] = url
+            except SubtitleFormatError as error:
+                # Conflicting duplicate records must not leave an arbitrary first URL.
+                if code in links or code in pending:
+                    links.pop(code, None)
+                    pending.discard(code)
+                diagnostics.append({"series": series, "row": row_number, "reason": str(error)})
+    except csv.Error as error:
+        raise SubtitleFormatError("collection archive CSV is malformed") from error
+    return dict(sorted(links.items())), pending, diagnostics
 
 
 def parse_collection_child_csv(
@@ -1356,11 +1416,11 @@ def _collection_source_url(value: str) -> str:
         raise SubtitleFormatError("collection source URL is empty")
     if any(character.isspace() or ord(character) < 32 for character in value):
         raise SubtitleFormatError("collection source URL contains unsafe characters")
-    parsed = urlparse(value)
     try:
+        parsed = urlparse(value)
         port = parsed.port
     except ValueError as error:
-        raise SubtitleFormatError("collection source URL has an invalid port") from error
+        raise SubtitleFormatError("collection source URL is malformed") from error
     if (
         parsed.scheme != "https"
         or parsed.hostname != "ouo.io"

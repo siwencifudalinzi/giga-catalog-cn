@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import sys
+import requests
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Callable, Dict, List, Mapping, Optional, Sequence, Tuple
@@ -26,6 +27,7 @@ from src.giga_catalog.subtitles import (  # noqa: E402
     SubtitleFormatError,
     download_subtitle_source,
     parse_collection_child_csv,
+    parse_collection_archive_csv,
     parse_collection_directory_html,
     parse_subtitle_child_csv,
     parse_subtitle_directory_html,
@@ -208,7 +210,23 @@ def run_refresh(
     )
     collection_links = {}
     collection_pending_codes = set()
+    collection_diagnostics = []
     for child in collection_sources:
+        if child.archived:
+            try:
+                child_text = collection_downloader(
+                    child.csv_url, timeout=options.timeout, retries=options.retries,
+                    delay_seconds=options.delay,
+                )
+                child_links, pending, diagnostics = parse_collection_archive_csv(
+                    child_text, series=child.series, catalog_codes=catalog_codes,
+                )
+                collection_links.update(child_links)
+                collection_pending_codes.update(pending)
+                collection_diagnostics.extend(diagnostics)
+            except (requests.RequestException, SubtitleFormatError) as error:
+                collection_diagnostics.append({"series": child.series, "reason": str(error)})
+            continue
         child_text = collection_downloader(
             child.csv_url,
             timeout=options.timeout,
@@ -378,7 +396,7 @@ def run_refresh(
             "sha256": _hash_bytes(collection_html.encode("utf-8")),
             "childSheets": len(collection_sources),
             "linkKeys": len(collection_links),
-            "diagnostics": [],
+            "diagnostics": collection_diagnostics,
         },
         "subtitles": {
             "url": options.subtitle_url,
