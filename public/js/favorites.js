@@ -1,3 +1,6 @@
+import { compareVideoCodes } from "./catalog.js";
+import { getLocalStorage } from "./storage.js";
+
 export const FAVORITES_STORAGE_KEY = "giga_favorites_v2";
 
 function isFavoriteState(value) {
@@ -21,7 +24,7 @@ function normalizeCode(value) {
     : "";
 }
 
-export function loadFavorites(storage = globalThis.localStorage) {
+export function loadFavorites(storage = getLocalStorage()) {
   try {
     const parsed = JSON.parse(storage?.getItem(FAVORITES_STORAGE_KEY));
     return isFavoriteRecord(parsed) ? { ...parsed } : {};
@@ -30,7 +33,7 @@ export function loadFavorites(storage = globalThis.localStorage) {
   }
 }
 
-export function createFavoritesStore(storage = globalThis.localStorage) {
+export function createFavoritesStore(storage = getLocalStorage()) {
   let state = loadFavorites(storage);
 
   function persist(next) {
@@ -76,7 +79,7 @@ export function getFavoriteVideos(favorites, getVideo) {
   return Object.entries(favorites)
     .filter(([, state]) => state === 1 || state === 2)
     .sort(([leftCode, leftState], [rightCode, rightState]) => {
-      return leftState - rightState || leftCode.localeCompare(rightCode);
+      return leftState - rightState || compareVideoCodes({ code: leftCode }, { code: rightCode });
     })
     .flatMap(([code, state]) => {
       const video = getVideo(code);

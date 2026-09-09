@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { loadUiPreferences } from "../../public/js/app.js";
 
 import {
   FAVORITES_STORAGE_KEY,
@@ -21,6 +22,34 @@ class MemoryStorage {
     this.entries.set(key, String(value));
   }
 }
+
+test("blocked localStorage access preserves browsing defaults and session favorites", () => {
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    get() { throw new DOMException("Storage blocked", "SecurityError"); },
+  });
+  try {
+    assert.deepEqual(loadFavorites(), {});
+    assert.equal(loadUiPreferences(undefined, false).theme, "light");
+    const favorites = createFavoritesStore();
+    assert.equal(favorites.cycle("SPSF-2"), 1);
+    assert.equal(favorites.getState("SPSF-2"), 1);
+    assert.equal(favorites.getCount(), 1);
+  } finally {
+    if (descriptor) Object.defineProperty(globalThis, "localStorage", descriptor);
+    else delete globalThis.localStorage;
+  }
+});
+
+test("favorites sort codes numerically within each watch-state group", () => {
+  const favorites = { "SPSF-10": 1, "SPSF-2": 1, "SPSF-1": 1,
+    "ABGD-10": 2, "ABGD-2": 2 };
+  assert.deepEqual(
+    getFavoriteVideos(favorites, code => ({ code })).map(entry => entry.video.code),
+    ["SPSF-1", "SPSF-2", "SPSF-10", "ABGD-2", "ABGD-10"],
+  );
+});
 
 test("legacy favorite state objects load unchanged", () => {
   const legacy = {

@@ -10,6 +10,7 @@ import {
   unmountSeries,
 } from "./render.js";
 import { createFavoritesStore, getFavoriteVideos } from "./favorites.js";
+import { getLocalStorage } from "./storage.js";
 import { openCatalogCache } from "./catalog-cache.js";
 import { createRuntimeCatalogStore } from "./runtime-catalog.js";
 import { createRuntimeLoader } from "./runtime-loader.js";
@@ -694,7 +695,7 @@ export function applyCoverFallback(image) {
 }
 
 export function loadUiPreferences(
-  storage = globalThis.localStorage,
+  storage = getLocalStorage(),
   prefersDark = globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches ??
     true,
 ) {
@@ -941,11 +942,12 @@ function startApplication() {
     return;
   }
 
+  const storage = getLocalStorage();
   const preferences = loadUiPreferences(
-    globalThis.localStorage,
+    storage,
     globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches ?? true,
   );
-  const favorites = createFavoritesStore(globalThis.localStorage);
+  const favorites = createFavoritesStore(storage);
   const state = {
     store: null,
     bootstrap: null,
@@ -993,7 +995,7 @@ function startApplication() {
 
   function persistPreferences() {
     try {
-      localStorage.setItem(UI_STORAGE_KEY, JSON.stringify(state.preferences));
+      storage?.setItem(UI_STORAGE_KEY, JSON.stringify(state.preferences));
     } catch {
       // Preferences remain usable for this session when storage is blocked.
     }
