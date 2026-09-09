@@ -152,7 +152,11 @@ export function createRuntimeLoader({
           });
           const parsed = parser(await responsePayload(response));
           if (activeBootstrap?.generation !== bootstrap.generation) throw abortError();
-          await runtimeCache.putArtifact(bootstrap.generation, path, parsed);
+          try {
+            await runtimeCache.putArtifact(bootstrap.generation, path, parsed);
+          } catch {
+            // Cache quota or transaction failures must not discard valid network data.
+          }
           return parsed;
         } catch (error) {
           throw error;
@@ -168,7 +172,8 @@ export function createRuntimeLoader({
   }
 
   async function start({ signal, onCached, onFresh, onRefresh } = {}) {
-    const network = fetchBootstrap(signal);
+    // Attach rejection handling immediately, before waiting for IndexedDB.
+    const network = Promise.allSettled([fetchBootstrap(signal)]);
     const cached = cachePromise.then(async (runtimeCache) => {
       try {
         const value = await runtimeCache.getLatestBootstrap();
@@ -182,7 +187,7 @@ export function createRuntimeLoader({
       setBootstrap(cachedValue);
       onCached?.(cachedValue);
     }
-    const networkResult = await Promise.allSettled([network]);
+    const networkResult = await network;
     const networkOutcome = networkResult[0];
     const networkValue = networkOutcome.status === "fulfilled" ? networkOutcome.value : null;
     if (networkValue) {

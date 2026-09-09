@@ -128,6 +128,35 @@ function abortError(error) {
   return error?.name === "AbortError";
 }
 
+test("valid network artifacts remain usable when cache writes fail", async () => {
+  const value = bootstrap("a".repeat(64));
+  for (const [kind, payload] of [["Search", searchPayload(value)],
+    ["Tags", tagsPayload(value)], ["Series", seriesPayload(value)]]) {
+    const cache = memoryCache();
+    cache.putArtifact = async () => { throw new DOMException("Full", "QuotaExceededError"); };
+    const loader = createRuntimeLoader({ cache, fetcher: async () => response(payload) });
+    loader.setBootstrap(value);
+    const result = await loader[`ensure${kind}`](...(kind === "Series" ? ["SPSF"] : []));
+    assert.equal(result.generation, value.generation, kind);
+  }
+});
+
+test("immediate offline failure is handled while the cache is still opening", async () => {
+  const value = bootstrap("a".repeat(64));
+  const cache = new Promise(resolve => setTimeout(() => resolve(memoryCache(value)), 25));
+  const seen = [];
+  const loader = createRuntimeLoader({
+    cache,
+    fetcher: async () => { throw new Error("Offline"); },
+  });
+  const result = await loader.start({
+    onCached: item => seen.push(item.generation),
+    onRefresh: outcome => seen.push(outcome.outcome),
+  });
+  assert.equal(result.generation, value.generation);
+  assert.deepEqual(seen, [value.generation, "failed"]);
+});
+
 test("start renders a valid cache before a different valid network generation", async () => {
   const oldBootstrap = bootstrap("a".repeat(64));
   const newBootstrap = bootstrap("b".repeat(64));
