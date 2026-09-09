@@ -648,11 +648,13 @@ def parse_collection_child_csv(
     *,
     series: str,
     catalog_codes: Iterable[str],
+    pending_codes: Optional[set[str]] = None,
 ) -> Dict[str, str]:
     """Parse CODE,URL with optional HARDSUB note and empty export padding.
 
     HARDSUB is a source annotation, not evidence of a standalone subtitle URL.
-    NEED ASK FOR REUP records are validated but supply no available link.
+    NEED ASK FOR REUP records supply no available link. Matching catalog codes
+    are added to pending_codes only after the entire sheet passes validation.
     Unknown populated columns still fail rather than being silently discarded.
     """
     normalized_series = _normalize_series(series)
@@ -671,6 +673,7 @@ def parse_collection_child_csv(
 
     links: Dict[str, str] = {}
     seen_codes = set()
+    pending_catalog_codes = set()
     try:
         rows = csv.reader(StringIO(text))
         for row_number, row in enumerate(rows, 1):
@@ -703,14 +706,18 @@ def parse_collection_child_csv(
                 )
             seen_codes.add(code)
             if pending_reupload:
+                if code in normalized_catalog_codes:
+                    pending_catalog_codes.add(code)
                 continue
             url = _collection_source_url(row[1].strip())
             if code in normalized_catalog_codes:
                 links[code] = url
     except csv.Error as error:
         raise SubtitleFormatError("collection child CSV is malformed") from error
-    if not links:
+    if not links and not pending_catalog_codes:
         raise SubtitleFormatError("collection child CSV contains no catalog links")
+    if pending_codes is not None:
+        pending_codes.update(pending_catalog_codes)
     return dict(sorted(links.items()))
 
 

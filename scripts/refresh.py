@@ -207,6 +207,7 @@ def run_refresh(
         catalog_series=catalog_series,
     )
     collection_links = {}
+    collection_pending_codes = set()
     for child in collection_sources:
         child_text = collection_downloader(
             child.csv_url,
@@ -221,6 +222,7 @@ def run_refresh(
                 child_text,
                 series=child.series,
                 catalog_codes=catalog_codes,
+                pending_codes=collection_pending_codes,
             )
         except SubtitleFormatError as error:
             raise RefreshError(f"collection series {child.series}: {error}") from error
@@ -230,6 +232,9 @@ def run_refresh(
                 "duplicate collection video codes: " + ", ".join(duplicate_codes)
             )
         collection_links.update(child_links)
+    for code in collection_pending_codes:
+        if code in selected_links:
+            selected_links[code].pop("reupload", None)
     selected_links = _overlay_links(
         selected_links,
         {

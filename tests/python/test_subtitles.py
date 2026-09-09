@@ -476,6 +476,27 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
                 parser("GGTB-01,https://ouo.io/ready\n" + pending,
                        series="GGTB", catalog_codes={"GGTB-1", "GGTB-7"})
 
+    def test_collection_child_all_pending_is_valid_but_empty_is_not(self) -> None:
+        parser = subtitle_module.parse_collection_child_csv
+        for row in ("GGTB-07,NEED ASK FOR REUP", "GGTB-07,NEED ASK FOR REUP,https://ouo.io/old"):
+            with self.subTest(row=row):
+                pending = set()
+                self.assertEqual(parser(row, series="GGTB", catalog_codes={"GGTB-7"},
+                                        pending_codes=pending), {})
+                self.assertEqual(pending, {"GGTB-7"})
+        for row in ("", ",,\n", "<html>Error</html>", "GGTB-08,NEED ASK FOR REUP"):
+            with self.subTest(row=row), self.assertRaises(SubtitleFormatError):
+                parser(row, series="GGTB", catalog_codes={"GGTB-7"})
+
+    def test_collection_child_invalid_sheet_does_not_publish_partial_pending(self) -> None:
+        pending = set()
+        with self.assertRaises(SubtitleFormatError):
+            subtitle_module.parse_collection_child_csv(
+                "GGTB-07,NEED ASK FOR REUP\nGGTB-08,https://evil.example/link",
+                series="GGTB", catalog_codes={"GGTB-7", "GGTB-8"}, pending_codes=pending,
+            )
+        self.assertEqual(pending, set())
+
     def setUp(self) -> None:
         self.html = DIRECTORY_FIXTURE.read_text(encoding="utf-8")
 
