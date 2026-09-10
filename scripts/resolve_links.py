@@ -34,7 +34,13 @@ def parse_args(argv=None):
     parser.add_argument("--output", type=Path, default=ROOT / "public/data/resolved-links.json")
     parser.add_argument("--write", action="store_true", help="Atomically write the public manifest")
     parser.add_argument("--browser", action="store_true", help="Collect pending links with persistent Chrome")
-    parser.add_argument("--headless", action="store_true")
+    browser_mode = parser.add_mutually_exclusive_group()
+    browser_mode.add_argument("--headless", action="store_true")
+    browser_mode.add_argument(
+        "--background-window",
+        action="store_true",
+        help="Run headed Chrome minimized and offscreen without taking focus",
+    )
     parser.add_argument("--max-links", type=int, default=0, help="0 processes every pending candidate")
     parser.add_argument("--delay", type=float, default=1.0)
     parser.add_argument("--workers", type=int, default=1)
@@ -49,7 +55,11 @@ async def run_browser(args, candidates, state, previous_manifest):
     try:
         for index in range(args.workers):
             profile = args.profile_dir if args.workers == 1 else args.profile_dir.with_name(f"{args.profile_dir.name}-{index + 1}")
-            resolvers.append(await PlaywrightOuoResolver.launch(profile, headless=args.headless))
+            resolvers.append(await PlaywrightOuoResolver.launch(
+                profile,
+                headless=args.headless,
+                background_window=args.background_window,
+            ))
 
         def checkpoint(current_state):
             atomic_write_json(args.state, current_state)

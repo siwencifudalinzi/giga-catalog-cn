@@ -161,6 +161,18 @@ async def collect_candidates_parallel(
     return len(pending)
 
 
+def build_browser_launch_options(*, headless: bool = False, background_window: bool = False):
+    options = {
+        "channel": "chrome",
+        "headless": headless,
+        "viewport": {"width": 1280, "height": 900},
+        "accept_downloads": False,
+    }
+    if background_window and not headless:
+        options["args"] = ["--start-minimized", "--window-position=-32000,-32000"]
+    return options
+
+
 class PlaywrightOuoResolver:
     """Execute ouo's normal two-button flow and return only an allowlisted landing page."""
 
@@ -170,7 +182,14 @@ class PlaywrightOuoResolver:
         self.page = context.pages[0] if context.pages else None
 
     @classmethod
-    async def launch(cls, profile_dir: Path, *, headless: bool = False, timeout_ms: int = 45_000):
+    async def launch(
+        cls,
+        profile_dir: Path,
+        *,
+        headless: bool = False,
+        background_window: bool = False,
+        timeout_ms: int = 45_000,
+    ):
         try:
             from playwright.async_api import async_playwright
         except ImportError as error:
@@ -178,10 +197,10 @@ class PlaywrightOuoResolver:
         manager = await async_playwright().start()
         context = await manager.chromium.launch_persistent_context(
             str(profile_dir),
-            channel="chrome",
-            headless=headless,
-            viewport={"width": 1280, "height": 900},
-            accept_downloads=False,
+            **build_browser_launch_options(
+                headless=headless,
+                background_window=background_window,
+            ),
         )
         instance = cls(context, timeout_ms=timeout_ms)
         instance._manager = manager

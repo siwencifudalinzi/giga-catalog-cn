@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import AsyncMock
 
+from src.giga_catalog import resolved_links_browser
 from src.giga_catalog.resolved_links import (
     atomic_write_json,
     build_manifest,
@@ -198,6 +199,16 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
 
 
 class ResolvedLinkCollectorTests(unittest.IsolatedAsyncioTestCase):
+    def test_background_browser_uses_headed_chrome_offscreen_without_focus(self):
+        build_options = getattr(resolved_links_browser, "build_browser_launch_options", None)
+        self.assertIsNotNone(build_options)
+        options = build_options(headless=False, background_window=True)
+        self.assertFalse(options["headless"])
+        self.assertEqual(
+            options["args"],
+            ["--start-minimized", "--window-position=-32000,-32000"],
+        )
+
     def test_localized_cloudflare_title_is_human_verification(self):
         self.assertTrue(is_human_verification_title("请稍候…"))
         self.assertTrue(is_human_verification_title("Just a moment..."))
