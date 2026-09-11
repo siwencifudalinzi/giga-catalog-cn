@@ -93,6 +93,17 @@
             查看目录
           </button>
           <button
+            id="link-updates-toggle"
+            class="button button--quiet header-control"
+            type="button"
+            data-action="open-link-updates"
+            aria-haspopup="dialog"
+            aria-label="查看链接更新日志"
+          >
+            <span class="control-glyph control-glyph--updates" aria-hidden="true">↻</span>
+            <span data-control-label>更新日志</span>
+          </button>
+          <button
             id="density-toggle"
             class="button button--quiet header-control"
             type="button"
@@ -251,6 +262,35 @@
           <p id="series-search-status" role="status" aria-live="polite"></p>
         </div>
         <div id="series-drawer-list" class="series-index series-index--drawer"></div>
+      </div>
+    </dialog>
+
+    <dialog
+      id="link-updates-dialog"
+      class="drawer-dialog link-updates-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="link-updates-title"
+    >
+      <div class="drawer-panel link-updates-panel">
+        <header class="drawer-panel__header">
+          <div>
+            <span class="state-kicker">LINK ACTIVITY</span>
+            <h2 id="link-updates-title">链接更新日志</h2>
+          </div>
+          <button class="icon-button" type="button" data-action="close-link-updates" aria-label="关闭链接更新日志">
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+        <p id="link-updates-summary" class="link-updates-summary" role="status" aria-live="polite">
+          打开后载入最近 30 天的记录。
+        </p>
+        <div class="link-update-filters" role="group" aria-label="筛选更新来源">
+          <button class="button button--quiet" type="button" data-action="filter-link-updates" data-source="all" aria-pressed="true">全部</button>
+          <button class="button button--quiet" type="button" data-action="filter-link-updates" data-source="catalog" aria-pressed="false">表格导入</button>
+          <button class="button button--quiet" type="button" data-action="filter-link-updates" data-source="resolved" aria-pressed="false">直达解析</button>
+        </div>
+        <div id="link-updates-content" class="link-update-list"></div>
       </div>
     </dialog>
 

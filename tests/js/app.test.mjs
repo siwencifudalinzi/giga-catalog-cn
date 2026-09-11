@@ -11,6 +11,28 @@ test("the public shell exposes an accessible official tag index tab", () => {
   assert.match(html, />\s*标签索引\s*</u);
 });
 
+test("the shell exposes a lazy accessible link update log", () => {
+  const html = readFileSync(
+    new URL("../../public/index.html", import.meta.url),
+    "utf8",
+  );
+  const source = readFileSync(
+    new URL("../../public/js/app.js", import.meta.url),
+    "utf8",
+  );
+  const css = readFileSync(
+    new URL("../../public/css/style.css", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(html, /data-action="open-link-updates"/u);
+  assert.match(html, /id="link-updates-dialog"[\s\S]*aria-labelledby="link-updates-title"/u);
+  assert.doesNotMatch(html, /modulepreload[^>]+link-updates\.js/u);
+  assert.match(source, /import\("\.\/link-updates\.js"\)/u);
+  assert.match(css, /\.link-update-list/u);
+  assert.match(css, /\.link-update-item/u);
+});
+
 test("startup preloads only the bootstrap and its V3 module graph", () => {
   const source = readFileSync(
     new URL("../../public/js/app.js", import.meta.url),

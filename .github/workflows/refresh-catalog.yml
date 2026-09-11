@@ -69,6 +69,8 @@ jobs:
         run: |
           set -euo pipefail
 
+          cp public/data/catalog.json "$RUNNER_TEMP/catalog-before.json"
+
           MODE=""
           REFRESH_ARGS=()
 
@@ -124,6 +126,9 @@ jobs:
         timeout-minutes: 90
         run: python scripts/sync_official_tags.py --max-products 50
 
+      - name: Record public link changes
+        run: python scripts/update_link_changelog.py --source catalog --before "$RUNNER_TEMP/catalog-before.json" --after public/data/catalog.json --history public/data/link-updates.json
+
       - name: Validate generated catalog
         run: python -m unittest discover -s tests/python -v && npm run test:js
 
@@ -132,7 +137,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -- data/raw data/state data/update-summary.json public/data/catalog.json public/data/catalog-core.json public/data/catalog-tags.json public/data/catalog-bootstrap.json public/data/featured-covers.json public/data/runtime public/media/featured-covers
+          git add -- data/raw data/state data/update-summary.json public/data/catalog.json public/data/catalog-core.json public/data/catalog-tags.json public/data/catalog-bootstrap.json public/data/link-updates.json public/data/featured-covers.json public/data/runtime public/media/featured-covers
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Catalog data is unchanged."

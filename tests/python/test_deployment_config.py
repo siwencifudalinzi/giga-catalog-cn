@@ -159,6 +159,8 @@ class RefreshWorkflowConfigTests(unittest.TestCase):
             self.workflow.index('python scripts/refresh.py --mode "$MODE"'),
             self.workflow.index("python scripts/sync_official_tags.py --max-products 50"),
         )
+        self.assertIn("update_link_changelog.py --source catalog", self.workflow)
+        self.assertIn("catalog-before.json", self.workflow)
         run_blocks = "\n".join(
             line for line in self.workflow.splitlines() if not line.lstrip().startswith("env:")
         )
@@ -177,6 +179,7 @@ class RefreshWorkflowConfigTests(unittest.TestCase):
             "git add -- data/raw data/state data/update-summary.json "
             "public/data/catalog.json public/data/catalog-core.json "
             "public/data/catalog-tags.json public/data/catalog-bootstrap.json "
+            "public/data/link-updates.json "
             "public/data/featured-covers.json public/data/runtime "
             "public/media/featured-covers"
         )
@@ -409,6 +412,10 @@ class NetlifyConfigTests(unittest.TestCase):
 
         self.assertEqual(
             self._header_values("/data/catalog-bootstrap.json")["Cache-Control"],
+            "public, max-age=300, must-revalidate",
+        )
+        self.assertEqual(
+            self._header_values("/data/link-updates.json")["Cache-Control"],
             "public, max-age=300, must-revalidate",
         )
         self.assertEqual(

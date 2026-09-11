@@ -2161,6 +2161,87 @@ body[data-view="tags"] .series-rail {
   .tag-results { padding-bottom: 5rem; }
 }
 
+.link-updates-panel {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.link-update-filters {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4) 0;
+}
+
+.link-update-filters .button {
+  min-height: 44px;
+  flex: 1;
+}
+
+.link-update-filters .button[aria-pressed="true"] {
+  color: var(--text);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.link-updates-summary {
+  margin: 0;
+  padding: var(--sp-3) var(--sp-4);
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.link-update-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--sp-4) var(--sp-4);
+}
+
+.link-update-date {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  padding: var(--sp-3) 0 var(--sp-2);
+  color: var(--muted);
+  background: var(--surface-raised);
+  font-size: var(--fs-1);
+}
+
+.link-update-item {
+  display: grid;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.link-update-item__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.link-update-code { letter-spacing: 0.04em; }
+.link-update-description { margin: 0; color: var(--muted); font-size: var(--fs-1); }
+.link-update-source {
+  padding: 0.2rem 0.5rem;
+  color: var(--text);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+.link-update-source--resolved { background: var(--success-soft, var(--accent-soft)); }
+.link-update-more { width: 100%; min-height: 44px; margin-top: var(--sp-2); }
+
+@media (max-width: 47.99rem) {
+  .link-updates-panel { width: min(100%, 32rem); }
+  .link-update-list { padding-inline: var(--sp-3); }
+  .link-update-filters { padding-inline: var(--sp-3); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

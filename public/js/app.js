@@ -928,6 +928,9 @@ function startApplication() {
     seriesRail: document.querySelector("#series-rail-list"),
     seriesDrawer: document.querySelector("#series-drawer"),
     seriesDrawerList: document.querySelector("#series-drawer-list"),
+    linkUpdatesDialog: document.querySelector("#link-updates-dialog"),
+    linkUpdatesContent: document.querySelector("#link-updates-content"),
+    linkUpdatesSummary: document.querySelector("#link-updates-summary"),
     videoDialog: document.querySelector("#video-detail"),
     videoDialogContent: document.querySelector("#video-detail-content"),
     toast: document.querySelector("#toast"),
@@ -991,6 +994,12 @@ function startApplication() {
     detailHydration: null,
     detailOpenPromises: new Map(),
     activeDialogCode: null,
+    linkUpdatesTrigger: null,
+    linkUpdates: null,
+    linkUpdatesTools: null,
+    linkUpdatesSource: "all",
+    linkUpdatesVisible: 100,
+    linkUpdatesLoad: null,
   };
 
   function persistPreferences() {
@@ -2485,6 +2494,81 @@ function startApplication() {
     }
   }
 
+  const providerLabels = Object.freeze({
+    reupload: "重传链接",
+    streamtape: "Streamtape",
+    player4me: "Player4me",
+    vidara: "Vidara",
+    gofile: "Gofile",
+  });
+
+  function renderLinkUpdates() {
+    if (!state.linkUpdatesTools) return;
+    const all = state.linkUpdates?.entries ?? [];
+    const filtered = state.linkUpdatesTools.filterLinkUpdates(all, state.linkUpdatesSource);
+    const visible = filtered.slice(0, state.linkUpdatesVisible);
+    const fragment = document.createDocumentFragment();
+    if (!visible.length) {
+      fragment.append(createElement("p", "empty-state", "最近 30 天没有链接变化。"));
+    }
+    for (const group of state.linkUpdatesTools.groupLinkUpdates(visible)) {
+      const section = createElement("section", "link-update-group");
+      section.append(createElement("h3", "link-update-date", group.date));
+      for (const item of group.items) {
+        const row = createElement("article", "link-update-item");
+        const heading = createElement("div", "link-update-item__heading");
+        heading.append(
+          createElement("strong", "link-update-code", item.code),
+          createElement("span", `link-update-source link-update-source--${item.source}`, item.sourceLabel),
+        );
+        row.append(
+          heading,
+          createElement(
+            "p",
+            "link-update-description",
+            `${item.actionLabel} · ${item.editionLabel} · ${providerLabels[item.provider] ?? item.provider}`,
+          ),
+        );
+        section.append(row);
+      }
+      fragment.append(section);
+    }
+    if (visible.length < filtered.length) {
+      const more = createElement("button", "button button--quiet link-update-more", "加载更多");
+      more.type = "button";
+      more.dataset.action = "load-more-link-updates";
+      more.setAttribute("aria-label", `加载更多更新记录，当前显示 ${visible.length} 条`);
+      fragment.append(more);
+    }
+    ui.linkUpdatesContent.replaceChildren(fragment);
+    const filteredNote = state.linkUpdatesSource === "all"
+      ? ""
+      : `，当前筛选 ${formatNumber(filtered.length)} 条`;
+    ui.linkUpdatesSummary.textContent = `最近 30 天共 ${formatNumber(all.length)} 条链接变化${filteredNote}，不显示真实链接地址。`;
+  }
+
+  async function openLinkUpdates(trigger) {
+    state.linkUpdatesTrigger = trigger;
+    ui.linkUpdatesDialog.showModal();
+    document.body.classList.add("modal-open");
+    ui.linkUpdatesDialog.querySelector("[data-action='close-link-updates']").focus();
+    if (state.linkUpdates) return;
+    ui.linkUpdatesSummary.textContent = "正在载入更新记录…";
+    ui.linkUpdatesContent.replaceChildren();
+    state.linkUpdatesLoad ??= import("./link-updates.js")
+      .then(async (tools) => {
+        const { fetchLinkUpdates } = tools;
+        state.linkUpdates = await fetchLinkUpdates();
+        state.linkUpdatesTools = tools;
+        renderLinkUpdates();
+      })
+      .catch(() => {
+        state.linkUpdatesLoad = null;
+        ui.linkUpdatesSummary.textContent = "更新日志载入失败，请稍后重试。";
+      });
+    await state.linkUpdatesLoad;
+  }
+
   async function copyCode(code) {
     try {
       if (navigator.clipboard?.writeText) {
@@ -2530,6 +2614,23 @@ function startApplication() {
         state.preferences.density === "compact" ? "comfortable" : "compact";
       persistPreferences();
       applyPreferences();
+    } else if (action === "open-link-updates") {
+      void openLinkUpdates(control);
+    } else if (action === "close-link-updates") {
+      ui.linkUpdatesDialog.close();
+    } else if (action === "load-more-link-updates") {
+      state.linkUpdatesVisible += 100;
+      renderLinkUpdates();
+      ui.linkUpdatesContent.querySelector("[data-action='load-more-link-updates']")?.focus();
+    } else if (action === "filter-link-updates") {
+      state.linkUpdatesSource = ["catalog", "resolved"].includes(control.dataset.source)
+        ? control.dataset.source
+        : "all";
+      state.linkUpdatesVisible = 100;
+      for (const button of ui.linkUpdatesDialog.querySelectorAll("[data-action='filter-link-updates']")) {
+        button.setAttribute("aria-pressed", String(button.dataset.source === state.linkUpdatesSource));
+      }
+      renderLinkUpdates();
     } else if (action === "open-drawer") {
       state.drawerTrigger = control;
       ui.seriesDrawer.showModal();
@@ -2782,13 +2883,14 @@ function startApplication() {
       event.key === "Escape" &&
       !ui.videoDialog.open &&
       !ui.seriesDrawer.open &&
+      !ui.linkUpdatesDialog.open &&
       (state.query || ui.search.value)
     ) {
       clearSearch({ focus: true, resetView: true });
     }
   });
 
-  for (const dialog of [ui.videoDialog, ui.seriesDrawer]) {
+  for (const dialog of [ui.videoDialog, ui.seriesDrawer, ui.linkUpdatesDialog]) {
     dialog.addEventListener("keydown", trapDialogFocus);
     dialog.addEventListener("click", (event) => {
       if (event.target === dialog) {
@@ -2816,6 +2918,14 @@ function startApplication() {
       state.drawerTrigger.focus();
     }
     state.drawerTrigger = null;
+  });
+
+  ui.linkUpdatesDialog.addEventListener("close", () => {
+    document.body.classList.remove("modal-open");
+    if (state.linkUpdatesTrigger?.isConnected) {
+      state.linkUpdatesTrigger.focus();
+    }
+    state.linkUpdatesTrigger = null;
   });
 
   window.addEventListener("offline", () => {
