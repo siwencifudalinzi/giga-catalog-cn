@@ -87,6 +87,12 @@ export function filterLinkUpdates(entries, source = "all") {
   return [...entries];
 }
 
+export function linkUpdateSummary(total, filtered, source = "all") {
+  const format = (value) => new Intl.NumberFormat("zh-CN").format(value);
+  const filteredNote = source === "all" ? "" : `，当前筛选 ${format(filtered)} 条`;
+  return `最近 30 天已记录 ${format(total)} 条（最多保留 5,000 条）${filteredNote}，不显示真实链接地址。`;
+}
+
 export async function fetchLinkUpdates(fetchImpl = globalThis.fetch) {
   const response = await fetchImpl(new URL("../data/link-updates.json", import.meta.url), {
     cache: "no-cache",

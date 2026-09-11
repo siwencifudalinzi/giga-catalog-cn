@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   filterLinkUpdates,
   groupLinkUpdates,
+  linkUpdateSummary,
   parseLinkUpdates,
 } from "../../public/js/link-updates.js";
 
@@ -15,6 +16,13 @@ const validEntry = Object.freeze({
   slot: "standard.reupload",
   action: "resolved",
   provider: "streamtape",
+});
+
+test("summary states the bounded history instead of claiming an exact total", () => {
+  assert.equal(
+    linkUpdateSummary(5000, 3542, "catalog"),
+    "最近 30 天已记录 5,000 条（最多保留 5,000 条），当前筛选 3,542 条，不显示真实链接地址。",
+  );
 });
 
 test("source filter separates spreadsheet imports from resolved links", () => {

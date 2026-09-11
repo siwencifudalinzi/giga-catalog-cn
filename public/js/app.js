@@ -2541,10 +2541,11 @@ function startApplication() {
       fragment.append(more);
     }
     ui.linkUpdatesContent.replaceChildren(fragment);
-    const filteredNote = state.linkUpdatesSource === "all"
-      ? ""
-      : `，当前筛选 ${formatNumber(filtered.length)} 条`;
-    ui.linkUpdatesSummary.textContent = `最近 30 天共 ${formatNumber(all.length)} 条链接变化${filteredNote}，不显示真实链接地址。`;
+    ui.linkUpdatesSummary.textContent = state.linkUpdatesTools.linkUpdateSummary(
+      all.length,
+      filtered.length,
+      state.linkUpdatesSource,
+    );
   }
 
   async function openLinkUpdates(trigger) {
