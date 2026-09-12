@@ -741,7 +741,10 @@ def parse_collection_child_csv(
                 continue
             while len(row) > 2 and not row[-1].strip():
                 row.pop()
-            pending_reupload = len(row) >= 2 and row[1].strip().upper() == "NEED ASK FOR REUP"
+            pending_reupload = len(row) >= 2 and (
+                not row[1].strip()
+                or row[1].strip().upper() == "NEED ASK FOR REUP"
+            )
             if pending_reupload and len(row) == 3:
                 _collection_source_url(row[2].strip())
                 row.pop()

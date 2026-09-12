@@ -438,6 +438,44 @@ class RefreshPipelineTests(unittest.TestCase):
                                  "https://ouo.io/ready" if active_row else "https://ouo.io/unchanged")
                 self.assertEqual(result["internal"]["sources"]["collection"]["linkKeys"], int(bool(active_row)))
 
+    def test_blank_collection_url_marks_only_that_video_pending(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            output = root / "public"
+            write_previous(
+                output,
+                products=[product("AHEF-1"), product("AHEF-2", productId=2)],
+                links={
+                    "AHEF-1": {"reupload": "https://ouo.io/stale"},
+                    "AHEF-2": {"reupload": "https://ouo.io/older"},
+                },
+            )
+            directory = EMPTY_COLLECTION_DIRECTORY_HTML.replace(
+                "</tbody>",
+                '<tr><td class="blue"><a href="https://docs.google.com/'
+                'spreadsheets/d/ahef-child/edit?gid=0#gid=0">AHEF</a></td></tr></tbody>',
+            ).replace("</style>", ".waffle .blue { color: #1155cc; }</style>")
+
+            def download(url, **kwargs):
+                if url == SUBTITLE_DIRECTORY_URL:
+                    return directory
+                return "AHEF-01,\nAHEF-02,https://ouo.io/fresh\n"
+
+            result = run_refresh(
+                ["--mode", "links-only", "--output-root", str(output),
+                 "--data-root", str(root / "private")],
+                sheet_downloader=lambda *args, **kwargs: SHEET_HEADER,
+                collection_downloader=download,
+                featured_cover_refresher=lambda *args, **kwargs: {"published": False},
+                clock=lambda: GENERATED_AT,
+            )
+
+            catalog = json.loads((output / "data" / "catalog.json").read_text(encoding="utf-8"))
+            videos = {v["code"]: v for s in catalog["series"] for v in s["videos"]}
+            self.assertFalse(videos["AHEF-1"].get("links"))
+            self.assertEqual(videos["AHEF-2"]["links"]["reupload"], "https://ouo.io/fresh")
+            self.assertEqual(result["internal"]["sources"]["collection"]["linkKeys"], 1)
+
     def test_available_collection_child_overlays_reupload_without_erasing_old_links(self) -> None:
         """A current blue sheet adds one external reupload slot and preserves providers."""
         with tempfile.TemporaryDirectory() as temporary_directory:

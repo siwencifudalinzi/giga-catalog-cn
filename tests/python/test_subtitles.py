@@ -439,7 +439,6 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
         for row in (
             "GATE-01,https://ouo.io/example,,note",
             ",GATE-01,https://ouo.io/example",
-            "GATE-01,,",
         ):
             with self.subTest(row=row), self.assertRaises(SubtitleFormatError):
                 parser(row, series="GATE", catalog_codes={"GATE-1"})
