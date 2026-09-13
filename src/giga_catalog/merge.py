@@ -275,6 +275,9 @@ def _canonical_product(source: Mapping[str, object]) -> Tuple[Optional[dict], di
         preview_count = _positive_int(source.get("previewCount"))
         if preview_count is not None:
             canonical["previewCount"] = preview_count
+    preview_images = source.get("previewImages")
+    if isinstance(preview_images, list) and preview_images:
+        canonical["previewImages"] = copy.deepcopy(preview_images)
     if "tagIds" in source:
         tag_ids = source.get("tagIds")
         if isinstance(tag_ids, list):
@@ -775,12 +778,16 @@ def _build_series(
             groups[series_code],
             key=lambda video: (video["number"], video["code"]),
         )
-        dates = [str(video.get("releaseDate") or "") for video in ordered]
+        dates = [
+            video["releaseDate"]
+            for video in ordered
+            if isinstance(video.get("releaseDate"), str) and video["releaseDate"]
+        ]
         item = {
             "code": series_code,
             "count": len(ordered),
-            "firstReleaseDate": min(dates),
-            "latestReleaseDate": max(dates),
+            "firstReleaseDate": min(dates) if dates else "",
+            "latestReleaseDate": max(dates) if dates else "",
             "videos": ordered,
         }
         selected_links = (series_links or {}).get(series_code)

@@ -1,0 +1,5814 @@
+{
+  "method": "HTTP HEAD only; response bodies were not requested",
+  "inputClass": "历史条目，状态待核实",
+  "candidateCount": 314,
+  "completedCount": 314,
+  "records": {
+    "ANIX-7": {
+      "code": "ANIX-7",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/anix/anix07/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:43:57+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/anix/anix7/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:43:58+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/anix/anix007/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:43:59+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "ATHB-11": {
+      "code": "ATHB-11",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/athb/athb11/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:43:59+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/athb/athb11/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:00+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/athb/athb011/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:00+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "AVGP-9": {
+      "code": "AVGP-9",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/avgp/avgp009/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "154163",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:01+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "DHRY-17": {
+      "code": "DHRY-17",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/dhry/dhry17/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "89773",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:01+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "DHRY-18": {
+      "code": "DHRY-18",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/dhry/dhry18/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "87378",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:01+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "DHRY-8": {
+      "code": "DHRY-8",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/dhry/dhry08/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "288047",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:02+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GAMD-2": {
+      "code": "GAMD-2",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gamd/gamd02/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "72340",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:02+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GATE-39": {
+      "code": "GATE-39",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gate/gate39/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "318787",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:02+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDBS-22": {
+      "code": "GDBS-22",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdbs/gdbs22/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "73921",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:03+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDBS-30": {
+      "code": "GDBS-30",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdbs/gdbs30/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "94206",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:03+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDBS-31": {
+      "code": "GDBS-31",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdbs/gdbs31/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "98524",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:03+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDBS-32": {
+      "code": "GDBS-32",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdbs/gdbs32/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "90238",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:04+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDBS-39": {
+      "code": "GDBS-39",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdbs/gdbs39/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "398578",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:04+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDBS-47": {
+      "code": "GDBS-47",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdbs/gdbs47/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:04+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdbs/gdbs47/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:05+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdbs/gdbs047/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:05+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDSC-11": {
+      "code": "GDSC-11",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdsc/gdsc11/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "17784",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:06+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDSC-22": {
+      "code": "GDSC-22",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdsc/gdsc22/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "69624",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:06+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDSC-25": {
+      "code": "GDSC-25",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdsc/gdsc25/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "253449",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:06+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDSC-29": {
+      "code": "GDSC-29",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdsc/gdsc29/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "58568",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:07+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDSC-38": {
+      "code": "GDSC-38",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdsc/gdsc38/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "262779",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:07+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDSC-39": {
+      "code": "GDSC-39",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdsc/gdsc39/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "98948",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:07+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDSC-43": {
+      "code": "GDSC-43",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdsc/gdsc43/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "232699",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:08+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDSC-44": {
+      "code": "GDSC-44",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdsc/gdsc44/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "80176",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:08+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GDSC-50": {
+      "code": "GDSC-50",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gdsc/gdsc50/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "18701",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:08+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GEXP-2": {
+      "code": "GEXP-2",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp02/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "68133",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:09+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GEXP-37": {
+      "code": "GEXP-37",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp37/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "107002",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:09+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GEXP-38": {
+      "code": "GEXP-38",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp38/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "74676",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:09+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GEXP-45": {
+      "code": "GEXP-45",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp45/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "72579",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:10+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GEXP-46": {
+      "code": "GEXP-46",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp46/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "20878",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:10+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GEXP-55": {
+      "code": "GEXP-55",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp55/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "112587",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:10+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GEXP-62": {
+      "code": "GEXP-62",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp62/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "100110",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:11+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GEXP-71": {
+      "code": "GEXP-71",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp71/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:11+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp71/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:11+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp071/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:12+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GEXP-95": {
+      "code": "GEXP-95",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gexp/gexp95/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "82583",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:12+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GGTB-25": {
+      "code": "GGTB-25",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ggtb/ggtb25/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "94031",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:13+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-18": {
+      "code": "GHKO-18",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko18/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "279166",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:13+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-29": {
+      "code": "GHKO-29",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko29/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "90771",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:13+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-3": {
+      "code": "GHKO-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko03/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "327086",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:14+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-5": {
+      "code": "GHKO-5",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko05/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "327827",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:14+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-57": {
+      "code": "GHKO-57",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko57/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "101394",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:14+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-58": {
+      "code": "GHKO-58",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko58/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "119045",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:15+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-60": {
+      "code": "GHKO-60",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko60/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "279590",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:15+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-67": {
+      "code": "GHKO-67",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko67/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "318838",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:15+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-69": {
+      "code": "GHKO-69",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko69/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "105819",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:16+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-78": {
+      "code": "GHKO-78",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko78/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "317946",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:16+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-79": {
+      "code": "GHKO-79",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko79/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "126672",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:16+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-91": {
+      "code": "GHKO-91",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko91/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "509850",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:17+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKO-97": {
+      "code": "GHKO-97",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghko/ghko97/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "451953",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:17+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-16": {
+      "code": "GHKP-16",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp16/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "351345",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:17+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-31": {
+      "code": "GHKP-31",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp31/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "274883",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:18+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-33": {
+      "code": "GHKP-33",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp33/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "255030",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:18+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-4": {
+      "code": "GHKP-4",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp04/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "130210",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:18+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-42": {
+      "code": "GHKP-42",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp42/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "313628",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:18+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-49": {
+      "code": "GHKP-49",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp49/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "358866",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:19+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-57": {
+      "code": "GHKP-57",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp57/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "270009",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:19+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-58": {
+      "code": "GHKP-58",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp58/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "220461",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:19+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-6": {
+      "code": "GHKP-6",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp06/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "110556",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:20+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-60": {
+      "code": "GHKP-60",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp60/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "104979",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:20+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-66": {
+      "code": "GHKP-66",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp66/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "275950",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:20+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-74": {
+      "code": "GHKP-74",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp74/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "102009",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:21+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-79": {
+      "code": "GHKP-79",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp79/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "496225",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:21+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-94": {
+      "code": "GHKP-94",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp94/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "521785",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:21+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKP-98": {
+      "code": "GHKP-98",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkp/ghkp98/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "454875",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:22+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-13": {
+      "code": "GHKQ-13",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq13/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "148419",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:22+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-29": {
+      "code": "GHKQ-29",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq29/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "562781",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:22+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-35": {
+      "code": "GHKQ-35",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq35/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "309439",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:23+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-38": {
+      "code": "GHKQ-38",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq38/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "297530",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:23+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-4": {
+      "code": "GHKQ-4",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq04/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "249924",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:23+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-42": {
+      "code": "GHKQ-42",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq42/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "237883",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:24+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-52": {
+      "code": "GHKQ-52",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq52/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "347341",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:24+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-54": {
+      "code": "GHKQ-54",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq54/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "297198",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:24+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-6": {
+      "code": "GHKQ-6",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq06/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "298314",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:25+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-60": {
+      "code": "GHKQ-60",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq60/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "275145",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:25+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-70": {
+      "code": "GHKQ-70",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq70/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "288508",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:25+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-71": {
+      "code": "GHKQ-71",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq71/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "258085",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:26+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-77": {
+      "code": "GHKQ-77",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq77/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "81838",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:26+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-82": {
+      "code": "GHKQ-82",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq82/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "66568",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:27+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKQ-83": {
+      "code": "GHKQ-83",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkq/ghkq83/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "106909",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:28+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKR-32": {
+      "code": "GHKR-32",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkr/ghkr32/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "59765",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:29+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKR-70": {
+      "code": "GHKR-70",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkr/ghkr70/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "403868",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:29+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHKR-95": {
+      "code": "GHKR-95",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghkr/ghkr95/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "420770",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:30+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-36": {
+      "code": "GHLS-36",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls36/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "327577",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:30+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-41": {
+      "code": "GHLS-41",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls41/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "362854",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:30+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-43": {
+      "code": "GHLS-43",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls43/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "419590",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:31+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-54": {
+      "code": "GHLS-54",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls54/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "418167",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:31+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-55": {
+      "code": "GHLS-55",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls55/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "343196",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:31+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-57": {
+      "code": "GHLS-57",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls57/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "180604",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:32+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-70": {
+      "code": "GHLS-70",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls70/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "419709",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:32+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-73": {
+      "code": "GHLS-73",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls73/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "268762",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:32+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-83": {
+      "code": "GHLS-83",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls83/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "342324",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:33+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-84": {
+      "code": "GHLS-84",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls84/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "162774",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:33+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-86": {
+      "code": "GHLS-86",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls86/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "377203",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:33+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-9": {
+      "code": "GHLS-9",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls09/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "346280",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:33+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHLS-97": {
+      "code": "GHLS-97",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghls/ghls97/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "396933",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:34+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHMT-26": {
+      "code": "GHMT-26",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghmt/ghmt26/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "355034",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:34+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHMT-35": {
+      "code": "GHMT-35",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghmt/ghmt35/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "113189",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:34+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHMT-45": {
+      "code": "GHMT-45",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghmt/ghmt45/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "135016",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:35+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHMT-53": {
+      "code": "GHMT-53",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghmt/ghmt53/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "114099",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:35+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHMT-60": {
+      "code": "GHMT-60",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghmt/ghmt60/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "147882",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:35+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHMT-66": {
+      "code": "GHMT-66",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghmt/ghmt66/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "111683",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:36+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHMT-69": {
+      "code": "GHMT-69",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghmt/ghmt69/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "98317",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:36+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHMT-71": {
+      "code": "GHMT-71",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghmt/ghmt71/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "126654",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:36+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHNU-3": {
+      "code": "GHNU-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghnu/ghnu03/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "97702",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:37+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHNU-80": {
+      "code": "GHNU-80",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghnu/ghnu80/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "146480",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:37+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-10": {
+      "code": "GHOR-10",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor10/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "95093",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:37+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-2": {
+      "code": "GHOR-2",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor02/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "92405",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:38+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-26": {
+      "code": "GHOR-26",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor26/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "87438",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:38+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-30": {
+      "code": "GHOR-30",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor30/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "88889",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:38+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-32": {
+      "code": "GHOR-32",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor32/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "466905",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:39+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-37": {
+      "code": "GHOR-37",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor37/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:39+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor37/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:39+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor037/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:40+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-47": {
+      "code": "GHOR-47",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor47/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "300757",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:40+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-69": {
+      "code": "GHOR-69",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor69/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "308542",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:41+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-72": {
+      "code": "GHOR-72",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor72/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "336827",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:41+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-73": {
+      "code": "GHOR-73",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor73/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "306822",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:41+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-75": {
+      "code": "GHOR-75",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor75/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "327372",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:42+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-79": {
+      "code": "GHOR-79",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor79/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "377327",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:42+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHOR-8": {
+      "code": "GHOR-8",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghor/ghor08/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "126366",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:42+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-1": {
+      "code": "GHPM-1",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm01/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "102525",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:43+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-12": {
+      "code": "GHPM-12",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm12/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "63946",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:43+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-30": {
+      "code": "GHPM-30",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm30/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "90924",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:43+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-38": {
+      "code": "GHPM-38",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm38/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "116260",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:44+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-41": {
+      "code": "GHPM-41",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm41/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "94105",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:44+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-50": {
+      "code": "GHPM-50",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm50/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "104494",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:44+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-64": {
+      "code": "GHPM-64",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm64/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "107177",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:45+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-78": {
+      "code": "GHPM-78",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm78/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "102647",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:45+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-8": {
+      "code": "GHPM-8",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm08/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "125651",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:45+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-89": {
+      "code": "GHPM-89",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm89/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "98290",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:46+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GHPM-98": {
+      "code": "GHPM-98",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ghpm/ghpm98/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "108776",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:46+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIGP-12": {
+      "code": "GIGP-12",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gigp/gigp12/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "112162",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:46+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIGP-19": {
+      "code": "GIGP-19",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gigp/gigp19/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "331750",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:47+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIGP-22": {
+      "code": "GIGP-22",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gigp/gigp22/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "354908",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:47+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIGP-4": {
+      "code": "GIGP-4",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gigp/gigp04/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "409966",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:47+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIGP-5": {
+      "code": "GIGP-5",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gigp/gigp05/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "698497",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:48+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIGP-8": {
+      "code": "GIGP-8",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gigp/gigp08/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "278395",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:48+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-11": {
+      "code": "GIMG-11",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg11/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "70562",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:48+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-13": {
+      "code": "GIMG-13",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg13/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "62426",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:49+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-16": {
+      "code": "GIMG-16",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg16/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:49+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg16/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:49+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg016/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:50+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-3": {
+      "code": "GIMG-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg03/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "101869",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:50+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-30": {
+      "code": "GIMG-30",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg30/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:51+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg30/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:51+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg030/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:52+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-36": {
+      "code": "GIMG-36",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg36/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "89013",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:52+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-43": {
+      "code": "GIMG-43",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg43/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "61928",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:52+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-50": {
+      "code": "GIMG-50",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg50/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "52703",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:53+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-65": {
+      "code": "GIMG-65",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg65/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "254127",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:53+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIMG-9": {
+      "code": "GIMG-9",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gimg/gimg09/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "68090",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:53+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-27": {
+      "code": "GIRO-27",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro27/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "96592",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:54+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-29": {
+      "code": "GIRO-29",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro29/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "85703",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:54+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-31": {
+      "code": "GIRO-31",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro31/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "92898",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:54+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-40": {
+      "code": "GIRO-40",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro40/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "106556",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:55+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-62": {
+      "code": "GIRO-62",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro62/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "101957",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:55+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-65": {
+      "code": "GIRO-65",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro65/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "98510",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:55+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-79": {
+      "code": "GIRO-79",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro79/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "131187",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:56+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-87": {
+      "code": "GIRO-87",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro87/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "131987",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:56+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-89": {
+      "code": "GIRO-89",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro89/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "113401",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:56+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-9": {
+      "code": "GIRO-9",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro09/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "83704",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:57+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GIRO-92": {
+      "code": "GIRO-92",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/giro/giro92/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "116533",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:57+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GMMD-5": {
+      "code": "GMMD-5",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gmmd/gmmd05/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "361392",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:57+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-11": {
+      "code": "GOMK-11",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk11/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "67548",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:58+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-17": {
+      "code": "GOMK-17",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk17/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "85286",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:58+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-38": {
+      "code": "GOMK-38",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk38/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "87752",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:58+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-39": {
+      "code": "GOMK-39",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk39/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:59+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk39/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:44:59+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk039/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:00+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-44": {
+      "code": "GOMK-44",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk44/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "171038",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:00+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-60": {
+      "code": "GOMK-60",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk60/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "126212",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:00+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-61": {
+      "code": "GOMK-61",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk61/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "408298",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:01+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-65": {
+      "code": "GOMK-65",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk65/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "145939",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:01+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-73": {
+      "code": "GOMK-73",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk73/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "409178",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:01+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-76": {
+      "code": "GOMK-76",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk76/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "134594",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:02+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-78": {
+      "code": "GOMK-78",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk78/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "139081",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:02+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-95": {
+      "code": "GOMK-95",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk95/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "309850",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:02+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-96": {
+      "code": "GOMK-96",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk96/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "85445",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:03+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GOMK-98": {
+      "code": "GOMK-98",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gomk/gomk98/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "79813",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:03+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GPTM-22": {
+      "code": "GPTM-22",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gptm/gptm22/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:03+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gptm/gptm22/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:04+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gptm/gptm022/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:04+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GPTM-38": {
+      "code": "GPTM-38",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gptm/gptm38/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "288342",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:05+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GRET-26": {
+      "code": "GRET-26",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gret/gret26/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "299350",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:05+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GRET-5": {
+      "code": "GRET-5",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gret/gret05/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "399932",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:05+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GRET-7": {
+      "code": "GRET-7",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gret/gret07/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "283293",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:06+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GSAD-3": {
+      "code": "GSAD-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gsad/gsad03/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "102119",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:06+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GSHE-10": {
+      "code": "GSHE-10",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gshe/gshe10/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "58557",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:06+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GSHE-2": {
+      "code": "GSHE-2",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gshe/gshe02/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "108699",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:07+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GSHE-3": {
+      "code": "GSHE-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gshe/gshe03/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "160777",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:07+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GSHE-4": {
+      "code": "GSHE-4",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gshe/gshe04/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "209518",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:07+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GSHE-8": {
+      "code": "GSHE-8",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gshe/gshe08/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "88394",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:08+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GTRL-1": {
+      "code": "GTRL-1",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl01/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:08+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl1/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:09+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl001/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:09+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GTRL-10": {
+      "code": "GTRL-10",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl10/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "90521",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:10+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GTRL-2": {
+      "code": "GTRL-2",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl02/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:10+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl2/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:10+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl002/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:11+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GTRL-24": {
+      "code": "GTRL-24",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl24/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "94310",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:11+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GTRL-3": {
+      "code": "GTRL-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl03/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:12+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl3/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:12+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl003/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:13+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GTRL-47": {
+      "code": "GTRL-47",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl47/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "111510",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:13+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GTRL-52": {
+      "code": "GTRL-52",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gtrl/gtrl52/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "546773",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:13+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-20": {
+      "code": "GVRD-20",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd20/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "113571",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:14+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-27": {
+      "code": "GVRD-27",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd27/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "75662",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:14+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-32": {
+      "code": "GVRD-32",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd32/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "85299",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:14+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-33": {
+      "code": "GVRD-33",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd33/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "326630",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:15+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-37": {
+      "code": "GVRD-37",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd37/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "268027",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:15+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-44": {
+      "code": "GVRD-44",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd44/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "329889",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:16+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-48": {
+      "code": "GVRD-48",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd48/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "274482",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:17+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-49": {
+      "code": "GVRD-49",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd49/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "329511",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:20+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-58": {
+      "code": "GVRD-58",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd58/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "83702",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:21+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-60": {
+      "code": "GVRD-60",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd60/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "99557",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:21+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-69": {
+      "code": "GVRD-69",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd69/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "92900",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:21+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GVRD-81": {
+      "code": "GVRD-81",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gvrd/gvrd81/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "408436",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:21+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GXXD-2": {
+      "code": "GXXD-2",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gxxd/gxxd02/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "33073",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:22+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GXXD-4": {
+      "code": "GXXD-4",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gxxd/gxxd04/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "138080",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:22+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "GXXD-79": {
+      "code": "GXXD-79",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/gxxd/gxxd79/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "85639",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:22+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-29": {
+      "code": "JMSZ-29",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz29/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "122680",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:23+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-32": {
+      "code": "JMSZ-32",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz32/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "126675",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:23+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-34": {
+      "code": "JMSZ-34",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz34/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "111887",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:23+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-42": {
+      "code": "JMSZ-42",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz42/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "382961",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:24+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-50": {
+      "code": "JMSZ-50",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz50/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "341965",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:24+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-55": {
+      "code": "JMSZ-55",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz55/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "105083",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:24+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-56": {
+      "code": "JMSZ-56",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz56/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "116472",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:25+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-57": {
+      "code": "JMSZ-57",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz57/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "123636",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:25+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-83": {
+      "code": "JMSZ-83",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz83/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "414794",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:25+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "JMSZ-86": {
+      "code": "JMSZ-86",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/jmsz/jmsz86/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "437439",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:26+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "MEBO-3": {
+      "code": "MEBO-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/mebo/mebo03/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "322648",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:26+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "MNFC-10": {
+      "code": "MNFC-10",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/mnfc/mnfc10/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "311917",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:26+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "MNFC-19": {
+      "code": "MNFC-19",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/mnfc/mnfc19/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "199063",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:27+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "MNFC-4": {
+      "code": "MNFC-4",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/mnfc/mnfc04/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "103723",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:27+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "NTSP-2": {
+      "code": "NTSP-2",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ntsp/ntsp02/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "15273",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:27+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "NTSP-3": {
+      "code": "NTSP-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ntsp/ntsp03/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "169512",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:28+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "RYOJ-17": {
+      "code": "RYOJ-17",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ryoj/ryoj17/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "144750",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:28+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "RYOJ-2": {
+      "code": "RYOJ-2",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ryoj/ryoj02/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "119928",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:28+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "SGKA-11": {
+      "code": "SGKA-11",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/sgka/sgka11/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:29+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/sgka/sgka11/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:29+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/sgka/sgka011/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:30+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "SNGM-4": {
+      "code": "SNGM-4",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/sngm/sngm04/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "140099",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:30+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "STAK-18": {
+      "code": "STAK-18",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/stak/stak18/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "82578",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:30+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "STAK-21": {
+      "code": "STAK-21",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/stak/stak21/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "123908",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:31+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "STAK-23": {
+      "code": "STAK-23",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/stak/stak23/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "86659",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:31+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "STAK-9": {
+      "code": "STAK-9",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/stak/stak09/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "97950",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:31+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-28": {
+      "code": "TBB-28",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb28/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "23003",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:32+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-29": {
+      "code": "TBB-29",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb29/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "90397",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:32+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-45": {
+      "code": "TBB-45",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb45/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:32+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb45/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:33+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb045/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:33+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-71": {
+      "code": "TBB-71",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb71/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "107190",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:34+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-74": {
+      "code": "TBB-74",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb74/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "114704",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:34+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-75": {
+      "code": "TBB-75",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb75/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "85854",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:34+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-87": {
+      "code": "TBB-87",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb87/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "99144",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:35+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-88": {
+      "code": "TBB-88",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb88/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "89345",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:35+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-93": {
+      "code": "TBB-93",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb93/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "329252",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:35+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBB-97": {
+      "code": "TBB-97",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbb/tbb97/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "143579",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:36+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBW-30": {
+      "code": "TBW-30",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbw/tbw30/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:36+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbw/tbw30/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:37+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbw/tbw030/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:37+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBXX-14": {
+      "code": "TBXX-14",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbxx/tbxx14/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "77957",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:38+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBXX-19": {
+      "code": "TBXX-19",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbxx/tbxx19/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "86457",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:38+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TBXX-9": {
+      "code": "TBXX-9",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tbxx/tbxx09/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "113364",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:38+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TDLN-134": {
+      "code": "TDLN-134",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln134/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "71842",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:38+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TDLN-37": {
+      "code": "TDLN-37",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln37/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:39+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln37/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:39+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln037/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:40+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TDLN-41": {
+      "code": "TDLN-41",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln41/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:40+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln41/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:41+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln041/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:41+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TDLN-49": {
+      "code": "TDLN-49",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln49/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "337888",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:42+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TDLN-62": {
+      "code": "TDLN-62",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln62/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "343449",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:42+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TDLN-72": {
+      "code": "TDLN-72",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln72/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "98882",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:43+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TDLN-76": {
+      "code": "TDLN-76",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln76/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "28825",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:43+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TDLN-80": {
+      "code": "TDLN-80",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tdln/tdln80/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "29394",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:43+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGGP-37": {
+      "code": "TGGP-37",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp37/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "88202",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:44+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGGP-40": {
+      "code": "TGGP-40",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp40/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:44+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp40/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:44+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp040/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:45+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGGP-59": {
+      "code": "TGGP-59",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp59/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "106955",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:45+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGGP-62": {
+      "code": "TGGP-62",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp62/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "152660",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:46+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGGP-76": {
+      "code": "TGGP-76",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp76/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "139917",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:46+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGGP-8": {
+      "code": "TGGP-8",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp08/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:46+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp8/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:47+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp008/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:47+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGGP-81": {
+      "code": "TGGP-81",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp81/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "400972",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:48+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGGP-94": {
+      "code": "TGGP-94",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp94/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "345859",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:48+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGGP-95": {
+      "code": "TGGP-95",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tggp/tggp95/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "370402",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:48+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TGHR-4": {
+      "code": "TGHR-4",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tghr/tghr04/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "100677",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:49+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THH-13": {
+      "code": "THH-13",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thh/thh13/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "131738",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:49+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THH-5": {
+      "code": "THH-5",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thh/thh05/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "97114",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:49+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THP-10": {
+      "code": "THP-10",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thp/thp10/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "91353",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:50+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THP-41": {
+      "code": "THP-41",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thp/thp41/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "80386",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:50+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THP-52": {
+      "code": "THP-52",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thp/thp52/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "95185",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:50+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THP-63": {
+      "code": "THP-63",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thp/thp63/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "131367",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:51+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THP-67": {
+      "code": "THP-67",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thp/thp67/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "117840",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:51+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THP-74": {
+      "code": "THP-74",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thp/thp74/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "498155",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:51+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THP-88": {
+      "code": "THP-88",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thp/thp88/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "121999",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:52+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THZ-41": {
+      "code": "THZ-41",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thz/thz41/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:52+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/thz/thz41/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:52+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/thz/thz041/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:53+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THZ-5": {
+      "code": "THZ-5",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thz/thz05/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:53+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/thz/thz5/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:54+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/thz/thz005/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:54+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THZ-64": {
+      "code": "THZ-64",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thz/thz64/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "112345",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:55+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THZ-67": {
+      "code": "THZ-67",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thz/thz67/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "545967",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:55+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "THZ-79": {
+      "code": "THZ-79",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/thz/thz79/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "432429",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:56+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TKVR-3": {
+      "code": "TKVR-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tkvr/tkvr03/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "118759",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:56+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TLTD-67": {
+      "code": "TLTD-67",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tltd/tltd67/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "88321",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:56+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TMS-21": {
+      "code": "TMS-21",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tms/tms21/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "31641",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:57+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRE-43": {
+      "code": "TRE-43",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre43/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "69167",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:57+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRE-48": {
+      "code": "TRE-48",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre48/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "64054",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:57+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRE-5": {
+      "code": "TRE-5",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre05/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "72924",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:57+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRE-50": {
+      "code": "TRE-50",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre50/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:58+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre50/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:58+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre050/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:59+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRE-56": {
+      "code": "TRE-56",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre56/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "80626",
+          "location": "",
+          "checkedAt": "2026-09-12T21:45:59+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRE-65": {
+      "code": "TRE-65",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre65/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "99323",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:00+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRE-76": {
+      "code": "TRE-76",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre76/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "78907",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:00+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRE-77": {
+      "code": "TRE-77",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre77/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "87497",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:00+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRE-92": {
+      "code": "TRE-92",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tre/tre92/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "297523",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:01+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRH-17": {
+      "code": "TRH-17",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/trh/trh17/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "98752",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:01+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRSH-41": {
+      "code": "TRSH-41",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh41/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "204399",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:01+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRSH-43": {
+      "code": "TRSH-43",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh43/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "99319",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:02+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRSH-45": {
+      "code": "TRSH-45",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh45/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "84896",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:02+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRSH-50": {
+      "code": "TRSH-50",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh50/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:02+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh50/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:03+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh050/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:03+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRSH-60": {
+      "code": "TRSH-60",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh60/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:04+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh60/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:04+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh060/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:05+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRSH-70": {
+      "code": "TRSH-70",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh70/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "264265",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:05+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TRSH-71": {
+      "code": "TRSH-71",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/trsh/trsh71/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "45657",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:05+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSW-103": {
+      "code": "TSW-103",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw103/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "97871",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:06+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSW-104": {
+      "code": "TSW-104",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw104/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "25027",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:06+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSW-126": {
+      "code": "TSW-126",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw126/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "75895",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:06+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSW-138": {
+      "code": "TSW-138",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw138/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "68282",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:07+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSW-30": {
+      "code": "TSW-30",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw30/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "127911",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:07+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSW-73": {
+      "code": "TSW-73",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw73/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:07+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw73/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:08+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw073/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:08+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSW-97": {
+      "code": "TSW-97",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw97/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "101878",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:09+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSW-99": {
+      "code": "TSW-99",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tsw/tsw99/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "32212",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:09+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-1": {
+      "code": "TSWN-1",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn001/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "76678",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:09+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-10": {
+      "code": "TSWN-10",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn010/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "72987",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:10+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-12": {
+      "code": "TSWN-12",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn012/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "74683",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:10+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-2": {
+      "code": "TSWN-2",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn002/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "91907",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:11+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-3": {
+      "code": "TSWN-3",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn003/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "72557",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:11+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-37": {
+      "code": "TSWN-37",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn037/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "125556",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:11+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-39": {
+      "code": "TSWN-39",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn039/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "197967",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:12+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-4": {
+      "code": "TSWN-4",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn004/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "77718",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:12+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-6": {
+      "code": "TSWN-6",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn006/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "81766",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:13+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TSWN-9": {
+      "code": "TSWN-9",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 3,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tswn/tswn009/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "72611",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:15+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TTRE-8": {
+      "code": "TTRE-8",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/ttre/ttre08/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "224523",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:15+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TZZ-22": {
+      "code": "TZZ-22",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tzz/tzz22/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:15+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tzz/tzz22/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:16+08:00",
+          "error": ""
+        },
+        {
+          "url": "https://www.giga-web.jp/db_titles/tzz/tzz022/pac_s.jpg",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1",
+          "contentLength": "",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:16+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TZZ-25": {
+      "code": "TZZ-25",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tzz/tzz25/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "108839",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:17+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TZZ-30": {
+      "code": "TZZ-30",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tzz/tzz30/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "110819",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:17+08:00",
+          "error": ""
+        }
+      ]
+    },
+    "TZZ-34": {
+      "code": "TZZ-34",
+      "currentDirectoryAbsent": true,
+      "asiaEvidence": true,
+      "preferredWidth": 2,
+      "probes": [
+        {
+          "url": "https://www.giga-web.jp/db_titles/tzz/tzz34/pac_s.jpg",
+          "status": 200,
+          "contentType": "image/jpeg",
+          "contentLength": "297060",
+          "location": "",
+          "checkedAt": "2026-09-12T21:46:17+08:00",
+          "error": ""
+        }
+      ]
+    }
+  }
+}

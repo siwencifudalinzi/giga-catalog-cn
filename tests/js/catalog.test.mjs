@@ -909,6 +909,23 @@ test("preview URLs are derived in bounded batches only when requested", () => {
   );
 });
 
+test("explicit AsiaMonstr preview images are preferred and batched without guessing filenames", () => {
+  const video = videoFixture(92, {
+    previewBase: "https://www.giga-web.jp/db_titles/giro/giro92/sample/",
+    previewCount: 18,
+    previewImages: [
+      "https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2015/05/GIRO92_01.jpg",
+      "https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2015/05/GIRO92_02.jpg",
+      "https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2015/05/GIRO92_03.jpg",
+    ],
+  });
+
+  assert.deepEqual(derivePreviewUrls(video, { start: 1, limit: 2 }), [
+    "https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2015/05/GIRO92_02.jpg",
+    "https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2015/05/GIRO92_03.jpg",
+  ]);
+});
+
 test("mounting another series unmounts the previous one", () => {
   const first = containerFixture();
   const second = containerFixture();

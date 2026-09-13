@@ -162,9 +162,9 @@ def validate_catalog(
                         )
 
             release_date = video.get("releaseDate")
-            if not _valid_date(release_date):
+            if release_date is not None and not _valid_date(release_date):
                 errors.append(f"{video_path}.releaseDate is not a real ISO date")
-            else:
+            elif release_date is not None:
                 dates.append(release_date)
                 if isinstance(min_release_date, str) and release_date < min_release_date:
                     errors.append(
@@ -215,6 +215,29 @@ def validate_catalog(
                 errors.append(
                     f"{video_path}.previewBase and previewCount must be provided together"
                 )
+            preview_images = video.get("previewImages")
+            if preview_images is not None:
+                if (
+                    not isinstance(preview_images, list)
+                    or not preview_images
+                    or len(preview_images) > 99
+                ):
+                    errors.append(
+                        f"{video_path}.previewImages must contain 1 to 99 URLs"
+                    )
+                else:
+                    seen_preview_images = set()
+                    for preview_index, preview_url in enumerate(preview_images):
+                        if not _valid_asiamonstr_preview(preview_url):
+                            errors.append(
+                                f"{video_path}.previewImages[{preview_index}] "
+                                "is not an HTTPS AsiaMonstr upload URL"
+                            )
+                        elif preview_url in seen_preview_images:
+                            errors.append(
+                                f"{video_path}.previewImages[{preview_index}] is duplicated"
+                            )
+                        seen_preview_images.add(preview_url)
 
         if dates:
             if series.get("firstReleaseDate") != min(dates):
@@ -770,6 +793,22 @@ def _valid_http_url(value: object) -> bool:
         return False
     parsed = urlparse(value)
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def _valid_asiamonstr_preview(value: object) -> bool:
+    if not isinstance(value, str) or not value or any(
+        character.isspace() or ord(character) < 32 for character in value
+    ):
+        return False
+    parsed = urlparse(value)
+    return bool(
+        parsed.scheme == "https"
+        and parsed.netloc.lower() == "i0.wp.com"
+        and parsed.path.startswith("/www.asiamonstr.com/wp-content/uploads/")
+        and parsed.path.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))
+        and not parsed.query
+        and not parsed.fragment
+    )
 
 
 def _valid_drive_url(value: object) -> bool:

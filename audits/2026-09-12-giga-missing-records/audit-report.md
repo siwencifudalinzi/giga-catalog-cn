@@ -1,0 +1,900 @@
+# GIGA Catalog 缺失影片条目审计报告
+
+## 基准与范围
+
+- 线上快照：https://siwencifudalinzi.github.io/giga-catalog-cn/data/catalog.json
+- 获取时间：2026-09-12T17:52:16+08:00
+- SHA-256：`41c2ca5c14bdbfbdf914d49a3b993b2a068942125a825005950b7fc6b8c6ab17`
+- 系列数：137；影片数：3796
+- AsiaMonstr 分类遍历完成，共 198 页。
+
+## 核心发现
+
+- 当前官方目录明确存在、线上目录未收录：431 条。
+- 当前官方目录已移除且存在官方历史资源残留：288 条。
+- 仍需核实：124 条，其中包括没有存在证据的空号和仅有第三方线索的条目。
+- ‘确认官方下架’在本报告中只表示：完整扫描当前官网目录未收录，同时官网域名下的对应历史封面仍返回真实图像。未发现官方下架公告，也不推测下架时间或原因。
+- 431 条可补录记录的发行日期均早于项目默认最早日期 `2007-12-07`，呈现明显的历史日期截断效应。
+
+## 结论清单
+
+- 可补录：431
+- 有依据标下架：288
+- 仍需核实：124
+
+### 可补录
+
+- `JHHD-1` — 确认漏收录：ヒロイン排泄地獄Vol.01
+- `JHHD-2` — 确认漏收录：ヒロイン排泄地獄Vol.02
+- `JHHD-3` — 确认漏收录：ヒロイン排泄地獄Vol.03
+- `PMID-20` — 确认漏收录：ショタコン 第二巻
+- `PMID-29` — 确认漏收录：男女・交錯 第二巻
+- `PMID-7` — 确认漏收录：巨大女 第一巻
+- `PMID-77` — 确认漏收录：憑依 第一巻
+- `PMID-78` — 确认漏收录：憑依 第二巻
+- `PMID-8` — 确认漏收录：巨大女 第二巻
+- `PMID-81` — 确认漏收录：透明人間 第一巻
+- `PMID-82` — 确认漏收录：透明人間 第二巻
+- `PMID-87` — 确认漏收录：ショタコン 第四巻
+- `PMID-88` — 确认漏收录：改造人間 第四巻
+- `PMID-9` — 确认漏收录：巨大女 第三巻
+- `TBB-1` — 确认漏收录：ヒロイン討伐Vol.01
+- `TBB-10` — 确认漏收录：ヒロイン討伐Vol.10
+- `TBB-11` — 确认漏收录：TBB-11 Heroine Suppression Vol.11
+- `TBB-12` — 确认漏收录：TBB-12 Heroine Suppression Vol.12, Sakurada Sakura
+- `TBB-13` — 确认漏收录：TBB-13 Heroine Suppression Vol.13
+- `TBB-14` — 确认漏收录：TBB-14 Heroine Suppression Vol.14
+- `TBB-15` — 确认漏收录：TBB-15 Heroine Suppression Vol.15 Patty Kate
+- `TBB-16` — 确认漏收录：TBB-16 Heroine Suppression Vol.16, Tachibana Riko
+- `TBB-17` — 确认漏收录：TBB-17 Heroine Suppression Vol.17
+- `TBB-18` — 确认漏收录：TBB-18 Heroine Suppression Vol.18, Kinoshita Chinatsu
+- `TBB-19` — 确认漏收录：TBB-19 Heroine Suppression Vol.19, Komine Yui
+- `TBB-2` — 确认漏收录：ヒロイン討伐Vol.02
+- `TBB-20` — 确认漏收录：TBB-20 Heroine Suppression Vol.20 YOU
+- `TBB-21` — 确认漏收录：TBB-21 Heroine Suppression Vol.21, Asou Misaki
+- `TBB-22` — 确认漏收录：TBB-22 Heroine Suppression Vol.22
+- `TBB-23` — 确认漏收录：TBB-23 Heroine Suppression Vol.23, Shiina Riku
+- `TBB-24` — 确认漏收录：TBB-24 Heroine Suppression Vol.24
+- `TBB-25` — 确认漏收录：TBB-25 Heroine Suppression Vol.25, Ousawa Mahiru
+- `TBB-26` — 确认漏收录：TBB-26 Heroine Suppression Vol.26, Imokawa Naoko
+- `TBB-27` — 确认漏收录：TBB-27 Heroine Suppression Vol.27
+- `TBB-3` — 确认漏收录：ヒロイン討伐Vol.03
+- `TBB-30` — 确认漏收录：TBB-30 Heroine Suppression
+- `TBB-31` — 确认漏收录：TBB-31 Heroine Suppression Vol.31
+- `TBB-32` — 确认漏收录：TBB-32 Heroine Suppression Vol.32, Ousawa Mahiru, Arakawa Maimi
+- `TBB-4` — 确认漏收录：ヒロイン討伐Vol.04
+- `TBB-5` — 确认漏收录：ヒロイン討伐Vol.05
+- `TBB-6` — 确认漏收录：ヒロイン討伐Vol.06
+- `TBB-7` — 确认漏收录：ヒロイン討伐Vol.07
+- `TBB-8` — 确认漏收录：ヒロイン討伐Vol.08
+- `TBB-9` — 确认漏收录：ヒロイン討伐Vol.09
+- `TBW-1` — 确认漏收录：TBW-01 Heroine Brainwash 01, Miyuu Honoka, Satomi Nakayama
+- `TBW-2` — 确认漏收录：TBW-02 Heroine Brainwash 02, Eri Sakuragi
+- `TDLN-1` — 确认漏收录：TDLN-01 Heroine in Hell with Subjugation-Hungry Demon
+- `TDLN-10` — 确认漏收录：TDLN-10 Woman combatant SP
+- `TDLN-11` — 确认漏收录：スーパーヒロイン危機一髪!!ＳＰ２
+- `TDLN-12` — 确认漏收录：TDLN-12 Heroine in Hell with Subjugation-Hungry Demon Vol.04
+- `TDLN-13` — 确认漏收录：スーパーヒロイン電マ Vol.03
+- `TDLN-14` — 确认漏收录：悪のスーパーヒロイン危機一髪!!ＳＰ２
+- `TDLN-15` — 确认漏收录：TDLN-15 Super Heroine Electric Massage Torture Vol.04
+- `TDLN-16` — 确认漏收录：TDLN-16 Close call Super Heroine
+- `TDLN-17` — 确认漏收录：TDLN-17 Super-heroine near miss SP3 of evil
+- `TDLN-18` — 确认漏收录：スーパーヒロイン危機一髪!!ＳＰ４
+- `TDLN-19` — 确认漏收录：TDLN-19 HEROINE subjugation hungry demon hell Vol.05
+- `TDLN-2` — 确认漏收录：TDLN-02 Super Heroine Electric Massage Torture Vol.01
+- `TDLN-20` — 确认漏收录：スーパーヒロインこぶ縄Vol.01
+- `TDLN-21` — 确认漏收录：スーパーヒロイン電マ Vol.05
+- `TDLN-22` — 确认漏收录：スーパーヒロインキューティーバトルＳＰ
+- `TDLN-23` — 确认漏收录：TDLN-23 Super-twilight girl heroine SP
+- `TDLN-24` — 确认漏收录：TDLN-24 Heroine subjugation hungry demon hell Vol.06
+- `TDLN-25` — 确认漏收录：TDLN-25 Hiroindomine-shon
+- `TDLN-26` — 确认漏收录：スーパーヒロイン電マ Vol.06
+- `TDLN-27` — 确认漏收录：TDLN-27 Super-heroine near miss of evil SP4
+- `TDLN-28` — 确认漏收录：TDLN-28 Superheroine Body Blow 2
+- `TDLN-29` — 确认漏收录：TDLN-29 Super-heroine misasagikatajikena SP1
+- `TDLN-3` — 确认漏收录：スーパーヒロインボディーブロー
+- `TDLN-30` — 确认漏收录：スーパーヒロイン危機一髪!!ＳＰ５
+- `TDLN-31` — 确认漏收录：TDLN-31 Super-heroine misasagikatajikena SP2
+- `TDLN-32` — 确认漏收录：スーパーヒロイン危機一髪!!ＳＰ６
+- `TDLN-33` — 确认漏收录：スーパーヒロインこぶ縄Vol.02
+- `TDLN-34` — 确认漏收录：TDLN-34 Heroine subjugation hungry demon hell 7
+- `TDLN-36` — 确认漏收录：TDLN-36 Super-heroine misasagikatajikena SP3
+- `TDLN-38` — 确认漏收录：TDLN-38 Super-heroine misasagikatajikena SP4
+- `TDLN-39` — 确认漏收录：TDLN-39 Super-heroine near miss SP7
+- `TDLN-4` — 确认漏收录：TDLN-04 Heroine in Hell with Subjugation-Hungry Demon 2
+- `TDLN-40` — 确认漏收录：TDLN-40 Heroine subjugation hungry demon hell 8
+- `TDLN-43` — 确认漏收录：TDLN-43 Super Heroine Misasagikatajikena SP6
+- `TDLN-44` — 确认漏收录：スーパーヒロイン電マ８
+- `TDLN-45` — 确认漏收录：TDLN-45 Super Heroine Insult Special 07
+- `TDLN-46` — 确认漏收录：TDLN-46 Heroine subjugation hungry demon hell 9
+- `TDLN-47` — 确认漏收录：TDLN-47 Heroine subjugation hungry demon hell 10
+- `TDLN-48` — 确认漏收录：TDLN-48 Super Heroine Insult Special 08
+- `TDLN-5` — 确认漏收录：TDLN-05 Super-heroine near miss SP1
+- `TDLN-51` — 确认漏收录：TDLN-51 Super Heroine Insult Special 11
+- `TDLN-52` — 确认漏收录：TDLN-52 Heroine Suppression the Dead in Hell 11
+- `TDLN-53` — 确认漏收录：スーパーヒロイン電マ Vol.09
+- `TDLN-54` — 确认漏收录：TDLN-54 Super Heroine Insult Special 12
+- `TDLN-55` — 确认漏收录：TDLN-55 Mashumaruga
+- `TDLN-56` — 确认漏收录：TDLN-56 Super Heroine Insult Special 13
+- `TDLN-57` — 确认漏收录：TDLN-57 Super Heroine Surrender Special 14
+- `TDLN-58` — 确认漏收录：TDLN-58 Super Heroine Insult Special 15
+- `TDLN-59` — 确认漏收录：TDLN-59 Super Heroine Insult Special 16
+- `TDLN-6` — 确认漏收录：TDLN-06 Heroine subjugation hungry demon hell 3
+- `TDLN-60` — 确认漏收录：TDLN-60 Super Heroine Insult Special 17
+- `TDLN-61` — 确认漏收录：スーパーヒロイン電マ Vol.10
+- `TDLN-63` — 确认漏收录：TDLN-63 Super Heroine Insult Special 19
+- `TDLN-64` — 确认漏收录：TDLN-64 Super Heroine Insult Special 20
+- `TDLN-65` — 确认漏收录：TDLN-65 Heroine Suppression the Dead in Hell 12
+- `TDLN-66` — 确认漏收录：TDLN-66 Super Heroine Insult Special 21
+- `TDLN-67` — 确认漏收录：TDLN-67 Cutie Girl
+- `TDLN-8` — 确认漏收录：TDLN-08 Super-heroine near miss of evil
+- `TDLN-9` — 确认漏收录：スーパーヒロイン電マ２
+- `TGS-1` — 确认漏收录：TGS-01 Erufu Princess Virgin of catching
+- `TGS-2` — 确认漏收录：TGS-02 DESIRE IN THE DARK Sadistic Heroine
+- `TGS-3` — 确认漏收录：TGS-03 Tanatos Play Heroine of Cyber-space
+- `THH-1` — 确认漏收录：THH-01 Super Heroine Domination
+- `THH-10` — 确认漏收录：THH-10 SUPER Heroine Domination 10
+- `THH-11` — 确认漏收录：THH-11 SUPER Heroine Domination 11
+- `THH-2` — 确认漏收录：THH-02 SUPER Heroine Domination 02
+- `THH-3` — 确认漏收录：THH-03 SUPER Heroine Domination 03
+- `THH-4` — 确认漏收录：THH-04 SUPER Heroine Domination 04
+- `THH-6` — 确认漏收录：THH-06 SUPER Heroine Domination
+- `THH-7` — 确认漏收录：THH-07 Shiomi Yuna – Super Heroine Domination
+- `THH-8` — 确认漏收录：THH-08 SUPER Heroine Domination
+- `THH-9` — 确认漏收录：THH-09 SUPER Heroine Domination 09, Sara Ogawa
+- `THP-1` — 确认漏收录：THP-01 Super Heroine in Big Crisis 01
+- `THP-12` — 确认漏收录：THP-12 Super-heroine near miss. Vol.12 black girl, Adachi Momoko
+- `THP-13` — 确认漏收录：THP-13 Super-heroine near miss Vol.13, Shiomi Yuuna
+- `THP-14` — 确认漏收录：THP-14 Super Heroine in Big Crisis 14, Okamoto Nagisa
+- `THP-15` — 确认漏收录：THP-15 Heroine Big Crisis
+- `THP-16` — 确认漏收录：THP-16 Super Heroine in Big Crisis 16
+- `THP-17` — 确认漏收录：THP-17 Super Heroine in Big Crisis 17, Minami Momoka
+- `THP-18` — 确认漏收录：THP-18 Super Heroine in Big Crisis 18, Shoko Yokoyama
+- `THP-19` — 确认漏收录：THP-19 Super Heroine in Big Crisis
+- `THP-2` — 确认漏收录：THP-02 Super Heroine in Big Crisis 02
+- `THP-20` — 确认漏收录：THP-20 Super Heroine Close Call, Aurora VOL.20 Masked Girl, Yuuki Rina
+- `THP-3` — 确认漏收录：THP-03 Super Heroine in Big Crisis 03
+- `THP-4` — 确认漏收录：THP-04 Super Heroine-close call
+- `THP-5` — 确认漏收录：THP-05 One Super-heroine near miss, Asou Misaki
+- `THP-6` — 确认漏收录：THP-06 One Super-heroine near miss, Andou Bio
+- `THP-7` — 确认漏收录：THP-07 Super-heroine near miss, Ousawa Mahiru
+- `THP-8` — 确认漏收录：THP-08 Super-heroine near miss, Hidaka Yuria
+- `THP-9` — 确认漏收录：THP-09 Super-heroine near miss, Ichinose Yuki
+- `THZ-1` — 确认漏收录：THZ-01 Super Heroine in Big Crisis
+- `THZ-10` — 确认漏收录：THZ-10 Super-heroine desperation
+- `THZ-11` — 确认漏收录：THZ-11 Super-heroine desperation Vol.11, Shiina Riku
+- `THZ-12` — 确认漏收录：THZ-12 Absolute death Super Heroine
+- `THZ-13` — 确认漏收录：THZ-13 Super Heroine in Big Crisis
+- `THZ-14` — 确认漏收录：THZ-14 Super Heroine in Big Crisis! Vol.14, Serizawa Yuuho
+- `THZ-15` — 确认漏收录：THZ-15 ENG Super Heroine in Big Crisis, Kasumi Matsumura
+- `THZ-16` — 确认漏收录：THZ-16 Super Heroine in Big Crisis ! Vol.16
+- `THZ-17` — 确认漏收录：THZ-17 Super Heroine in Big Crisis ! Vol.17
+- `THZ-18` — 确认漏收录：THZ-18 Super Heroine in Big Crisis, Nakamura Momo
+- `THZ-2` — 确认漏收录：THZ-02 Super Heroine in Big Crisis
+- `THZ-3` — 确认漏收录：THZ-03 Super Heroine in Big Crisis ! Vol.03
+- `THZ-4` — 确认漏收录：THZ-04 Super-heroine desperation Vol.04
+- `THZ-6` — 确认漏收录：THZ-06 Super-heroine desperation Vol.06 Yume Nomura
+- `THZ-7` — 确认漏收录：THZ-07 Super Heroine to have one’s back against
+- `THZ-8` — 确认漏收录：THZ-08 Super Heroine to have one’s back against the wall Pretty Heart
+- `THZ-9` — 确认漏收录：THZ-09 Super-heroine desperation Vol.09 combat W, Hibino Yuuki
+- `TJH-1` — 确认漏收录：熟女ﾋﾛｲﾝ1
+- `TJH-10` — 确认漏收录：TJH-10 Mature woman heroine EPISODE10
+- `TJH-11` — 确认漏收录：TJH-11 Mature woman heroine EPISODE11
+- `TJH-12` — 确认漏收录：TJH-12 Kaori Namwon milf heroine, Minamihara Kaori
+- `TJH-13` — 确认漏收录：TJH-13 Mature woman heroine EPISODE 13
+- `TJH-14` — 确认漏收录：TJH-14 Middle-aged Heroine 14
+- `TJH-15` — 确认漏收录：TJH-15 Middle-aged Heroine 15
+- `TJH-2` — 确认漏收录：熟女ﾋﾛｲﾝ2
+- `TJH-3` — 确认漏收录：熟女ﾋﾛｲﾝ3
+- `TJH-4` — 确认漏收录：熟女ﾋﾛｲﾝ4
+- `TJH-5` — 确认漏收录：TJH-05 Middle-aged Heroine 05
+- `TJH-6` — 确认漏收录：TJH-06 Middle-aged Heroine 06
+- `TJH-7` — 确认漏收录：TJH-07 Middle-aged Heroine 07
+- `TJH-8` — 确认漏收录：TJH-08 Middle-aged Heroine 08
+- `TJH-9` — 确认漏收录：TJH-09 Middle-aged Heroine 09
+- `TML-1` — 确认漏收录：TML-01 Super Mask Heroine 01
+- `TMS-1` — 确认漏收录：ULTRA HEROINE サンダーガール Vol.1
+- `TMS-10` — 确认漏收录：ミルキーファイター ACT.1
+- `TMS-11` — 确认漏收录：ミルキーファイター ACT.2
+- `TMS-12` — 确认漏收录：TMS-12 Mermaid Huey
+- `TMS-13` — 确认漏收录：TMS-13 Samuraiger
+- `TMS-14` — 确认漏收录：TMS-14 Warrior in Battle Zone [First Part]
+- `TMS-15` — 确认漏收录：TMS-15 Warrior in Battle Zone [Last Part]
+- `TMS-16` — 确认漏收录：TMS-16 Beautiful Kamen Aurora
+- `TMS-17` — 确认漏收录：TMS-17 Gale Hissatsu – Sword Girl, Saotome Minaki
+- `TMS-18` — 确认漏收录：TMS-18 White Kamen Sarina
+- `TMS-19` — 确认漏收录：TMS-19 Mirror Lady
+- `TMS-2` — 确认漏收录：ULTRA HEROINE サンダーガール Vol.2
+- `TMS-20` — 确认漏收录：TMS-20 Red Lady
+- `TMS-22` — 确认漏收录：TMS-22 Super Bird Five
+- `TMS-23` — 确认漏收录：TMS-23 Lady Next, Sakuragi Eri
+- `TMS-24` — 确认漏收录：TMS-24 Return of Leon
+- `TMS-25` — 确认漏收录：TMS-25 Astral Lady
+- `TMS-26` — 确认漏收录：TMS-26 Aurora Sisters
+- `TMS-27` — 确认漏收录：TMS-27 Atomic Lady
+- `TMS-28` — 确认漏收录：TMS-28 Star Lady, Himekawa Rina
+- `TMS-3` — 确认漏收录：ULTRA HEROINE サンダーガール Vol.3
+- `TMS-4` — 确认漏收录：電撃戦隊パーフェクトレンジャーRETURNS ACT 1
+- `TMS-5` — 确认漏收录：電撃戦隊パーフェクトレンジャーRETURNS ACT 2
+- `TMS-6` — 确认漏收录：電撃戦隊パーフェクトレンジャーRETURNS ACT 3
+- `TMS-7` — 确认漏收录：超人戦隊バードファイブ ACT.1
+- `TMS-8` — 确认漏收录：超人戦隊バードファイブ ACT.2
+- `TMS-9` — 确认漏收录：超人戦隊バードファイブ ACT.3
+- `TNI-1` — 确认漏收录：忍者Vol.1
+- `TNI-10` — 确认漏收录：忍者Vol.10
+- `TNI-11` — 确认漏收录：忍者Vol.11
+- `TNI-12` — 确认漏收录：忍者Vol.12
+- `TNI-13` — 确认漏收录：忍者Vol.13
+- `TNI-14` — 确认漏收录：忍者Vol.14
+- `TNI-15` — 确认漏收录：忍者Vol.15
+- `TNI-16` — 确认漏收录：忍者Vol.16
+- `TNI-17` — 确认漏收录：忍者Vol.17
+- `TNI-18` — 确认漏收录：忍者Vol.18
+- `TNI-19` — 确认漏收录：忍者Vol.19
+- `TNI-2` — 确认漏收录：忍者Vol.2
+- `TNI-20` — 确认漏收录：忍者Vol.20
+- `TNI-21` — 确认漏收录：忍者Vol.21
+- `TNI-22` — 确认漏收录：忍者Vol.22
+- `TNI-23` — 确认漏收录：TNI-23 Ninja 23
+- `TNI-24` — 确认漏收录：忍者Vol.24
+- `TNI-25` — 确认漏收录：忍者Vol.25
+- `TNI-26` — 确认漏收录：忍者Vol.26
+- `TNI-27` — 确认漏收录：忍者Vol.27
+- `TNI-28` — 确认漏收录：忍者Vol.28
+- `TNI-29` — 确认漏收录：忍者Vol.29
+- `TNI-3` — 确认漏收录：忍者Vol.3
+- `TNI-30` — 确认漏收录：忍者Vol.30
+- `TNI-31` — 确认漏收录：忍者Vol.31
+- `TNI-32` — 确认漏收录：忍者Vol.32
+- `TNI-33` — 确认漏收录：忍者Vol.33
+- `TNI-34` — 确认漏收录：忍者Vol.34
+- `TNI-35` — 确认漏收录：TNI-35 Ninja 35
+- `TNI-36` — 确认漏收录：TNI-36 Ninja 36
+- `TNI-37` — 确认漏收录：TNI-37 Ninja 37
+- `TNI-38` — 确认漏收录：TNI-38 Ninja 38
+- `TNI-39` — 确认漏收录：TNI-39 Ninja 39
+- `TNI-4` — 确认漏收录：忍者Vol.4
+- `TNI-40` — 确认漏收录：TNI-40 Ninja 40
+- `TNI-41` — 确认漏收录：TNI-41 Ninja 41
+- `TNI-42` — 确认漏收录：TNI-42 Ninja 42
+- `TNI-43` — 确认漏收录：TNI-43 Ninja 43
+- `TNI-44` — 确认漏收录：TNI-44 Ninja 44
+- `TNI-45` — 确认漏收录：TNI-45 Ninja 45
+- `TNI-5` — 确认漏收录：忍者Vol.5
+- `TNI-6` — 确认漏收录：忍者Vol.6
+- `TNI-7` — 确认漏收录：忍者Vol.7
+- `TNI-8` — 确认漏收录：忍者Vol.8
+- `TNI-9` — 确认漏收录：忍者Vol.9
+- `TOR-1` — 确认漏收录：サイバー戦隊ジャスティオン
+- `TOR-10` — 确认漏收录：聖戦美少女アルテミスZ ACT.01
+- `TOR-12` — 确认漏收录：聖戦美少女アルテミスZ ACT.03
+- `TOR-13` — 确认漏收录：バトルプリンセススパンデクサー Act.01
+- `TOR-14` — 确认漏收录：バトルプリンセススパンデクサー Act.02
+- `TOR-15` — 确认漏收录：バトルプリンセススパンデクサー Act.03
+- `TOR-16` — 确认漏收录：美少女コマンダーサイバローザ VOL.01
+- `TOR-17` — 确认漏收录：美少女コマンダーサイバローザ VOL.02
+- `TOR-18` — 确认漏收录：美少女コマンダーサイバローザ VOL.03
+- `TOR-19` — 确认漏收录：電撃戦隊パーフェクトレンジャーACT.01
+- `TOR-2` — 确认漏收录：サイバー戦隊ジャスティオン ACT.Ⅱ
+- `TOR-20` — 确认漏收录：電撃戦隊パーフェクトレンジャーACT.02
+- `TOR-21` — 确认漏收录：電撃戦隊パーフェクトレンジャーACT.03
+- `TOR-22` — 确认漏收录：電撃戦隊パーフェクトレンジャーACT.04
+- `TOR-23` — 确认漏收录：電撃戦隊パーフェクトレンジャーACT.05
+- `TOR-24` — 确认漏收录：電撃戦隊パーフェクトレンジャーACT.06
+- `TOR-25` — 确认漏收录：サイバー戦隊スーパージャスティオン ACT.01
+- `TOR-26` — 确认漏收录：サイバー戦隊スーパージャスティオン ACT.02
+- `TOR-27` — 确认漏收录：サイバー戦隊スーパージャスティオン ACT.03
+- `TOR-28` — 确认漏收录：闇の天使ダークガールACT.01
+- `TOR-29` — 确认漏收录：闇の天使ダークガールACT.02
+- `TOR-3` — 确认漏收录：サイバー戦隊ジャスティオン ACT.Ⅲ
+- `TOR-30` — 确认漏收录：闇の天使ダークガールACT.03
+- `TOR-31` — 确认漏收录：麗幻の騎士クレセントナイツ 01
+- `TOR-32` — 确认漏收录：麗幻の騎士クレセントナイツ 02
+- `TOR-33` — 确认漏收录：麗幻の騎士クレセントナイツ 03
+- `TOR-34` — 确认漏收录：愛の化身レガリアン 01
+- `TOR-35` — 确认漏收录：愛の化身レガリアン 02
+- `TOR-36` — 确认漏收录：愛の化身レガリアン 03
+- `TOR-37` — 确认漏收录：バトルプリンセス スパンデクサーグレート ACT.01
+- `TOR-38` — 确认漏收录：バトルプリンセス スパンデクサーグレート ACT.02
+- `TOR-39` — 确认漏收录：バトルプリンセス スパンデクサーグレート ACT.03
+- `TOR-4` — 确认漏收录：電脳特捜インスペクターG1
+- `TOR-40` — 确认漏收录：銀河プリンセス ロジータ ACT.01
+- `TOR-41` — 确认漏收录：銀河プリンセス ロジータ ACT.02
+- `TOR-42` — 确认漏收录：銀河プリンセス ロジータ ACT.03
+- `TOR-43` — 确认漏收录：宇宙の戦士 コスモウーマン ACT.01
+- `TOR-44` — 确认漏收录：宇宙の戦士 コスモウーマン ACT.02
+- `TOR-45` — 确认漏收录：宇宙の戦士 コスモウーマン ACT.03
+- `TOR-46` — 确认漏收录：TOR-46 Cyber Special Agent Inspector Z 01
+- `TOR-47` — 确认漏收录：TOR-47 Cyber Special Agent Inspector Z 02
+- `TOR-48` — 确认漏收录：TOR-48 Cyber Special Agent Inspector Z 03
+- `TOR-49` — 确认漏收录：TOR-49 Tsuyo Ranger ACT 01 Shouko Mikami
+- `TOR-5` — 确认漏收录：電脳特捜インスペクターG ACT02
+- `TOR-50` — 确认漏收录：TOR-50 Tsuyo Ranger ACT 02
+- `TOR-51` — 确认漏收录：TOR-51 Tsuyo Ranger ACT 03 Riko Tachibana
+- `TOR-52` — 确认漏收录：TOR-52 Samuraiger 01
+- `TOR-53` — 确认漏收录：TOR-53 Samuraiger 02
+- `TOR-54` — 确认漏收录：TOR-54 Samuraiger 03
+- `TOR-55` — 确认漏收录：TOR-55 Bato Ranger ACT 01
+- `TOR-56` — 确认漏收录：TOR-56 Bato Ranger ACT 02
+- `TOR-57` — 确认漏收录：TOR-57 Tsuyo Ranger ACT 03, Misaki Aso
+- `TOR-6` — 确认漏收录：電脳特捜インスペクターG ACT03
+- `TOR-7` — 确认漏收录：美少女戦隊プリムテウス ACT.０１
+- `TOR-8` — 确认漏收录：美少女戦隊プリムテウス ACT.02
+- `TOR-9` — 确认漏收录：美少女戦隊プリムテウス ACT.03
+- `TRE-1` — 确认漏收录：TRE-01 Heroine Insult!
+- `TRE-2` — 确认漏收录：TRE-02 Heroine Insult! Vol.02
+- `TRE-3` — 确认漏收录：TRE-03 Heroine Insult! Vol.03
+- `TRE-4` — 确认漏收录：TRE-04 Heroine Insult! Vol.04
+- `TRH-1` — 确认漏收录：帰って来たスーパーヒロイン 01
+- `TRH-10` — 确认漏收录：TRH-10 Super Heroine Returns 10, Kiyohara Ryou
+- `TRH-11` — 确认漏收录：TRH-11 Super Heroine Returns 11, Yatou Aki
+- `TRH-12` — 确认漏收录：TRH-12 Super Heroine Returns 12, Komine Yui
+- `TRH-13` — 确认漏收录：TRH-13 Super Heroine Returns 13 Nene Tokiwa
+- `TRH-14` — 确认漏收录：TRH-14 Super Heroine Returns 14
+- `TRH-2` — 确认漏收录：帰って来たスーパーヒロイン 02
+- `TRH-3` — 确认漏收录：帰って来たスーパーヒロイン 03
+- `TRH-4` — 确认漏收录：帰って来たスーパーヒロイン04
+- `TRH-5` — 确认漏收录：TRH-05 Super Heroine Returns 05, Ikeda Kozue
+- `TRH-6` — 确认漏收录：TRH-06 Super Heroine Returns 06
+- `TRH-7` — 确认漏收录：TRH-07 Super Heroine Returns 07, Kikuhara Madoka
+- `TRH-8` — 确认漏收录：TRH-08 Super Heroine Returns 08, Kikugawa Ren
+- `TRH-9` — 确认漏收录：TRH-09 Super Heroine Returns 09
+- `TSW-1` — 确认漏收录：TSW-01 Space Woman
+- `TSW-10` — 确认漏收录：TSW-10 Perfect Ranger Edition Vol.2
+- `TSW-11` — 确认漏收录：TSW-11 Iron Doll Milaider Edition
+- `TSW-12` — 确认漏收录：TSW-12 Mask saver FLASH Edition
+- `TSW-13` — 确认漏收录：TSW-13 Heroine electricity massage machine torture Vol.6
+- `TSW-14` — 确认漏收录：TSW-14 Super Heroine Crash 2 Lesbian Version-White Stone
+- `TSW-15` — 确认漏收录：TSW-15 Riveal Suppression
+- `TSW-16` — 确认漏收录：TSW-16 Reveal & Cosplayder – Lesbian [First Part]
+- `TSW-17` — 确认漏收录：TSW-17 Cosplayder – Insult
+- `TSW-18` — 确认漏收录：TSW-18 Ninjya Ayame
+- `TSW-19` — 确认漏收录：TSW-19 Overheating first volume
+- `TSW-2` — 确认漏收录：TSW-02 Zombie Hazard
+- `TSW-20` — 确认漏收录：TSW-20 Shanzerian 2 Special Edition [First Part]
+- `TSW-21` — 确认漏收录：ヒロイン電気マッサージ器 Vol.7
+- `TSW-22` — 确认漏收录：TSW-22 Shanzerian 3 Special Edition [First Part]
+- `TSW-23` — 确认漏收录：TSW-23 Heroine electricity massage machine torture Vol.8
+- `TSW-24` — 确认漏收录：TSW-24 Super Heroine Returns – Radio Wave Lady Beegle
+- `TSW-25` — 确认漏收录：ヒロイン排泄SP
+- `TSW-26` — 确认漏收录：TSW-26 Female Ninja Nishiki & Purple – Lesbian [First Part]
+- `TSW-28` — 确认漏收录：TSW-28 Woman Ninja Nishiki [Demons in Hell]
+- `TSW-29` — 确认漏收录：TSW-29 Spandexer & Logita – Lesbian [First Part]
+- `TSW-3` — 确认漏收录：TSW-03 Wonder Jane
+- `TSW-31` — 确认漏收录：TSW-31 Suppression – Female Ninja Purple
+- `TSW-32` — 确认漏收录：TSW-32 Heroine Beating & Choking – Logita
+- `TSW-33` — 确认漏收录：TSW-33 Heroine electricity massage machine torture Vol.9
+- `TSW-34` — 确认漏收录：TSW-34 Ninja net limited edition first volume
+- `TSW-36` — 确认漏收录：TSW-36 Heroine Excretion Torture Captude
+- `TSW-37` — 确认漏收录：TSW-37 White Swan – Insult
+- `TSW-38` — 确认漏收录：TSW-38 Cherry Queen – Suppression
+- `TSW-39` — 确认漏收录：TSW-39 Red Condor – Demons in Hell
+- `TSW-4` — 确认漏收录：TSW-04 Heroine electricity massage machine torture 1
+- `TSW-41` — 确认漏收录：TSW-41 Costume Play Lesbian – Blue Sailor Striker Ann & Blue
+- `TSW-42` — 确认漏收录：ヒロインマスク剥ぎSP
+- `TSW-43` — 确认漏收录：TSW-43 White Swan chapter of subjugation
+- `TSW-44` — 确认漏收录：TSW-44 Battle Pink – Insult
+- `TSW-45` — 确认漏收录：TSW-45 Anika – Demons in Hell
+- `TSW-46` — 确认漏收录：TSW-46 Blue Sailor Stricker – Bumpy Rope Torture
+- `TSW-47` — 确认漏收录：TSW-47 Cherry Queen – Insult
+- `TSW-48` — 确认漏收录：TSW-48 Heroine subjugation 1~5 summarizing program
+- `TSW-49` — 确认漏收录：TSW-49 The Lady Soldiers SP
+- `TSW-5` — 确认漏收录：TSW-05 Heroine electricity massage machine torture 2
+- `TSW-50` — 确认漏收录：TSW-50 Red Condor vol.1
+- `TSW-51` — 确认漏收录：TSW-51 Red Condor vol.2
+- `TSW-52` — 确认漏收录：TSW-52 Red Condor vol.3
+- `TSW-53` — 确认漏收录：TSW-53 Galaxy Woman – Insult
+- `TSW-54` — 确认漏收录：TSW-54 Miss Heroine vol.1
+- `TSW-55` — 确认漏收录：TSW-55 Miss Heroine vol.2
+- `TSW-56` — 确认漏收录：TSW-56 Miss Heroine vol.3
+- `TSW-57` — 确认漏收录：TSW-57 Heroine Bumpy Rope – Anika
+- `TSW-58` — 确认漏收录：TSW-58 Heroine electricity massage machine torture 10
+- `TSW-59` — 确认漏收录：TSW-59 Heroine Suppression – Blue Seider
+- `TSW-6` — 确认漏收录：TSW-06 Heroine electricity massage machine torture 3
+- `TSW-60` — 确认漏收录：TSW-60 Heroine Suppression Red Condor
+- `TSW-61` — 确认漏收录：TSW-61 Heroine Bumpy Rope – Galaxy Woman
+- `TSW-62` — 确认漏收录：TSW-62 Heroine in Hell – Battle Pink
+- `TSW-63` — 确认漏收录：TSW-63 Lesbian heroine SP 6
+- `TSW-64` — 确认漏收录：TSW-64 Cyber Fighter Ultra Justion Vol.01
+- `TSW-65` — 确认漏收录：TSW-65 Cyber Fighter Ultra Justion Vol.02
+- `TSW-66` — 确认漏收录：TSW-66 Cyber Fighter Ultra Justion Vol.03
+- `TSW-67` — 确认漏收录：TSW-67 Heroine Insult SP – Blue Seider
+- `TSW-68` — 确认漏收录：TSW-68 Heroine electricity massage machine torture Vol.11
+- `TSW-69` — 确认漏收录：TSW-69 Heroine in Hell – Infinia Black
+- `TSW-7` — 确认漏收录：TSW-07 Heroine electricity massage machine torture Vol.4
+- `TSW-70` — 确认漏收录：TSW-70 Heroine MIX – Galaxy Woman Rin Aoyama
+- `TSW-71` — 确认漏收录：TSW-71 Heroine Bumpy Rope – Battle Pink
+- `TSW-72` — 确认漏收录：TSW-72 Anika – Insult
+- `TSW-74` — 确认漏收录：ヒロイン討伐総集編vol.6～vol.10
+- `TSW-75` — 确认漏收录：TSW-75 Heroine in Hell – Bunny the Bride
+- `TSW-76` — 确认漏收录：TSW-76 Heroine MIX – Lala
+- `TSW-77` — 确认漏收录：TSW-77 Cyber Special Agent Inspector J Vol.01
+- `TSW-78` — 确认漏收录：TSW-78 Cyber Special Agent Inspector J Vol.02
+- `TSW-79` — 确认漏收录：TSW-79 Cyber Special Agent Inspector J Vol.02 Mikan Tokonatsu
+- `TSW-8` — 确认漏收录：TSW-08 Heroine electricity massage machine torture Vol.5
+- `TSW-80` — 确认漏收录：TSW-80 Heroine Bumpy Rope – Sword Girl Tsubasa Haneda
+- `TSW-81` — 确认漏收录：TSW-81 Spandexer marvelous Vol.01
+- `TSW-82` — 确认漏收录：TSW-82 Spandexer marvelous Vol.02
+- `TSW-83` — 确认漏收录：TSW-83 Spandexer marvelous Vol.03
+- `TSW-84` — 确认漏收录：TSW-84 Mask saver G Vol.01
+- `TSW-85` — 确认漏收录：TSW-85 Mask saver G Vol.02
+- `TSW-86` — 确认漏收录：TSW-86 Mask saver G Vol.03
+- `TSW-87` — 确认漏收录：TSW-87 Heroine Bumpy Rope – Astro Pink
+- `TSW-88` — 确认漏收录：TSW-88 White Mask Forever Vol.01
+- `TSW-89` — 确认漏收录：TSW-89 White Mask Forever Vol.02
+- `TSW-9` — 确认漏收录：TSW-09 Perfect Ranger Edition Vol.1
+- `TSW-90` — 确认漏收录：TSW-90 White Mask Forever Vol.03
+- `TSW-91` — 确认漏收录：TSW-91 Dirty Angel
+- `TSW-92` — 确认漏收录：TSW-92 Yellow Princess
+- `TSW-94` — 确认漏收录：TSW-94 Pinky Mask
+- `TSW-98` — 确认漏收录：TSW-98 Spandexer Emi
+- `TZZ-1` — 确认漏收录：TZZ-01 Zenda Girl
+- `TZZ-10` — 确认漏收录：TZZ-10 Special Agent Gun Saver Starring Misaki, Miharu
+- `TZZ-11` — 确认漏收录：TZZ-11 Space Detective Nakeder, Kikuhara Madoka
+- `TZZ-12` — 确认漏收录：TZZ-12 Blue Sailor Stricker Ami, Ogawa Ami
+- `TZZ-13` — 确认漏收录：TZZ-13 Mask Investigator Knight Angel
+- `TZZ-14` — 确认漏收录：TZZ-14 Cavalryman Four Saver
+- `TZZ-15` — 确认漏收录：TZZ-15 Star in Celine
+- `TZZ-16` — 确认漏收录：TZZ-16 The Ribbon Fighter, Kurusu Yuu
+- `TZZ-17` — 确认漏收录：TZZ-17 Condor Lady, Komine Yui
+- `TZZ-18` — 确认漏收录：TZZ-18 dark eyes shining blue lotus robo
+- `TZZ-19` — 确认漏收录：TZZ-19 Ms.Milk Ladybull, Asou Misaki
+- `TZZ-2` — 确认漏收录：TZZ-02 Star Silver Sayaka Kusunoki, Shouko Mikami
+- `TZZ-20` — 确认漏收录：TZZ-20 Beautiful Kamen Aurora Returns, Nanase Mayumi
+- `TZZ-21` — 确认漏收录：TZZ-21 Ms. Marshall, Yuzuki Hikaru
+- `TZZ-23` — 确认漏收录：TZZ-23 Masked girl Aurora FOREVER
+- `TZZ-24` — 确认漏收录：TZZ-24 Phantom Thief Linx, Mizuna Anri
+- `TZZ-26` — 确认漏收录：TZZ-26 Sailor Moon Adventures
+- `TZZ-27` — 确认漏收录：TZZ-27 Bounty Hunter
+- `TZZ-28` — 确认漏收录：TZZ-28 Plasma Woman, Yamabuki Senri
+- `TZZ-29` — 确认漏收录：TZZ-29 Emeralda the Thief, Kawakami Rie
+- `TZZ-3` — 确认漏收录：TZZ-03 Cosplayder
+- `TZZ-4` — 确认漏收录：TZZ-04 Girl named Riveal, Yaguchi Emiri
+- `TZZ-5` — 确认漏收录：TZZ-05 Kamen Sister Maria, Ikeda Kozue
+- `TZZ-6` — 确认漏收录：TZZ-06 Vam Dead, Kanai Ryou
+- `TZZ-7` — 确认漏收录：TZZ-07 Heroic Beautiful Girl Rosen Kroeuz
+- `TZZ-8` — 确认漏收录：TZZ-08 Cosplayder 2
+- `TZZ-9` — 确认漏收录：TZZ-09 Bulsaider Starring, Runa Hayama
+
+### 有依据标下架
+
+- `AVGP-9` — 确认官方下架：AVGP-009 Kidou Sentai Ranger Cross
+- `DHRY-17` — 确认官方下架：DHRY-17 Doujin Heroine 16 -Blue Fenril/Ryo Aoi
+- `DHRY-18` — 确认官方下架：DHRY-18 Doujin Heroine 17 Mai Hidaka -Shameful Bondage
+- `DHRY-8` — 确认官方下架：DHRY-08 Doujin Heroine 08 Female Investigator
+- `GAMD-2` — 确认官方下架：GAMD-02 Naked Heroine Ace Act2 – The Madoka War, Kanamori Mina
+- `GATE-39` — 确认官方下架：GATE-39 Naked heroine Asada banana
+- `GDBS-22` — 确认官方下架：GDBS-22 The Highlights Of Gigantic Heroine
+- `GDBS-30` — 确认官方下架：GDBS-30 Highlights of Yellow Sentai
+- `GDBS-31` — 确认官方下架：GDBS-31 Highlights of Blue Sentai
+- `GDBS-32` — 确认官方下架：GDBS-32 Highlights of Melpure and Beautiful Heroines
+- `GDBS-39` — 确认官方下架：GDBS-39 Best of Yurina Ayashiro
+- `GDSC-11` — 确认官方下架：GDSC-11 Super Lady
+- `GDSC-22` — 确认官方下架：GDSC-22 Female Sworder Rafina
+- `GDSC-25` — 确认官方下架：GDSC-25 Gosoldier Soldier Pink, Moe Fujisaki
+- `GDSC-29` — 确认官方下架：GDSC-29 Beauty God Christina
+- `GDSC-38` — 确认官方下架：GDSC-38 Daytona Pink The Electroshock Cunnilingus Hell, Yurina Ayashiro
+- `GDSC-39` — 确认官方下架：GDSC-39 Lui, the Attractive Investigator
+- `GDSC-43` — 确认官方下架：GDSC-43 SUPERLADY, Rena Konishi
+- `GDSC-44` — 确认官方下架：GDSC-44 Marvelous Mask, Leg Fetish, Shizuku Hasegawa
+- `GDSC-50` — 确认官方下架：GDSC-50 Kunoichi Homura, Chizuru Sakura
+- `GEXP-2` — 确认官方下架：GEXP-02 New Star Unit Ryuseiger After story
+- `GEXP-37` — 确认官方下架：GEXP-37 Black Dress Temptation 2 Holy Peach Contaminated
+- `GEXP-38` — 确认官方下架：GEXP-38 SPLENDID GIRL
+- `GEXP-45` — 确认官方下架：GEXP-45 Cyber Special Agent Inspector Ablaze
+- `GEXP-46` — 确认官方下架：GEXP-46 Witch Beautiful Fighter Fontane
+- `GEXP-55` — 确认官方下架：GEXP-55 Heroine Insulting Combatant Back Miss Mershal
+- `GEXP-62` — 确认官方下架：GEXP-62 Evil High-Ranking Member And Heroine Intersecting
+- `GEXP-95` — 确认官方下架：GEXP-95 Heroine White Eye Blackout Hell – Invincible Unit Earth Ranger
+- `GGTB-25` — 确认官方下架：GGTB-25 Heroine Cunnilingus Torture The Fighter
+- `GHKO-18` — 确认官方下架：GHKO-18 Heroine Bondage -SUPER WOMAN RELIA
+- `GHKO-29` — 确认官方下架：GHKO-29 THE SUPERLADY
+- `GHKO-3` — 确认官方下架：GHKO-03 Queen Decker The Trap of Hypnosis Insult
+- `GHKO-5` — 确认官方下架：GHKO-05 Justice Low-Ranking Fighter Torture
+- `GHKO-57` — 确认官方下架：GHKO-57 Female Cadre Ruin Story
+- `GHKO-58` — 确认官方下架：GHKO-58 SUPER MORPHINE IRON RANGER -IRON RANGER
+- `GHKO-60` — 确认官方下架：GHKO-60 Pretty Luminous
+- `GHKO-67` — 确认官方下架：GHKO-67 Tentacle Monster Swallowing Torture Sailor Flare
+- `GHKO-69` — 确认官方下架：GHKO-69 Sailor Troopers modern – Domination Hell
+- `GHKO-78` — 确认官方下架：GHKO-78 Infernal Slave Heroine Camp -Wonder Lady
+- `GHKO-79` — 确认官方下架：GHKO-79 Sailor Prism Again – Devil Tentacle Pot Hell
+- `GHKO-91` — 确认官方下架：GHKO-91 American Comic Heroine-GO！GO！POWER WOMAN
+- `GHKO-97` — 确认官方下架：GHKO-97 New Female Combatant Nylon66
+- `GHKP-16` — 确认官方下架：GHKP-16 Future Ninja Nintector-Beautiful Ninja Pleasure Torture
+- `GHKP-31` — 确认官方下架：GHKP-31 Art Guardian Mio VS Monster Namenba
+- `GHKP-33` — 确认官方下架：GHKP-33 Ray Storm Akari Mitani
+- `GHKP-4` — 确认官方下架：GHKP-04 Freshness Melpure Pure Healing -Pleasure Hell Fallen
+- `GHKP-42` — 确认官方下架：GHKP-42 Cruel Shame Domination Asterios
+- `GHKP-49` — 确认官方下架：GHKP-49 Beautiful Witch Girl Rena
+- `GHKP-57` — 确认官方下架：GHKP-57 Priestess Fighter Kaguya
+- `GHKP-58` — 确认官方下架：GHKP-58 Wonder Stella Akari Mitani, Rina Utimura
+- `GHKP-6` — 确认官方下架：GHKP-06 Superheroine Domination Hell 31 -Beautiful Witch Girl
+- `GHKP-60` — 确认官方下架：GHKP-60 Female Cadre Zora -Hero Insult- Zora’s Birth Story
+- `GHKP-66` — 确认官方下架：GHKP-66 Love Fighter Battler K
+- `GHKP-74` — 确认官方下架：GHKP-74 Female Cadre Zora -Hero Insult-
+- `GHKP-79` — 确认官方下架：GHKP-79 Tales of Vastinarve -Episode. ZERO-
+- `GHKP-94` — 确认官方下架：GHKP-94 Blade Three -Blade Pink Temptation Punishment Ai Tsukimoto
+- `GHKP-98` — 确认官方下架：GHKP-98 Punishment Princess Blade -Former Female Wrestler
+- `GHKQ-13` — 确认官方下架：GHKQ-13 Sailor Arutorius -Fierce Battle for Etherium
+- `GHKQ-29` — 确认官方下架：GHKQ-29 Female Combatant Hunting
+- `GHKQ-35` — 确认官方下架：GHKQ-35 Illusion Mask
+- `GHKQ-38` — 确认官方下架：GHKQ-38 Evil Female Cadre Zaroma -Hero Insult- Miori Matsushita
+- `GHKQ-4` — 确认官方下架：GHKQ-04 Side Story of Spandexer -ZORA’s Birth Story
+- `GHKQ-42` — 确认官方下架：GHKQ-42 SPANDEXER SUN ANGEL
+- `GHKQ-52` — 确认官方下架：GHKQ-52 The Record of Hero Insulted Training -Perfect Queen
+- `GHKQ-54` — 确认官方下架：GHKQ-54 Hermaphrodite Female Low-Ranking Ninja –
+- `GHKQ-6` — 确认官方下架：GHKQ-06 Hermaphrodite Heroine -Battle Excite Z -Miss. Excellent
+- `GHKQ-60` — 确认官方下架：GHKQ-60 Young Wife Heroine -Red and Pink are a Couple
+- `GHKQ-70` — 确认官方下架：GHKQ-70 Half Monster Detective Yukihime -Revenge for Parents
+- `GHKQ-71` — 确认官方下架：GHKQ-71 Evil Female Cadre VS Hero Battle!
+- `GHKQ-77` — 确认官方下架：GHKQ-77 Female Combatant Diol
+- `GHKQ-82` — 确认官方下架：GHKQ-82 Saint Force after.1 -Picked-Up Holy Bud-
+- `GHKQ-83` — 确认官方下架：GHKQ-83 Superheroine Domination Hell 36 -Dyna Woman Hana Misora
+- `GHKR-32` — 确认官方下架：GHKR-32 Power Lady 3 -Planed False Accusation- Misato Nonomiya
+- `GHKR-70` — 确认官方下架：GHKR-70 Fighting Heroine Mai Hidaka VS Soldier from Another
+- `GHKR-95` — 确认官方下架：GHKR-95 Sadistic Female Fighter Mai Hidaka -Evil Handsome
+- `GHLS-36` — 确认官方下架：GHLS-36 Spandexer Neo3 -Moon Angel and Erotic Spell
+- `GHLS-41` — 确认官方下架：GHLS-41 The Memorial Movie of 25th Anniversary 06
+- `GHLS-43` — 确认官方下架：GHLS-43 Cuckolded Sexy Housewife Heroine
+- `GHLS-54` — 确认官方下架：GHLS-54 Heroine Writhe in Pain
+- `GHLS-55` — 确认官方下架：GHLS-55 Beautiful Brave Woman Vehement Mask Sisters
+- `GHLS-57` — 确认官方下架：GHLS-57 Female Combatant Polymer
+- `GHLS-70` — 确认官方下架：GHLS-70 Legenmirror -The Evil God Surrender
+- `GHLS-73` — 确认官方下架：GHLS-73 Saint Force Memories.2 -Holy Women’s Unknown
+- `GHLS-83` — 确认官方下架：GHLS-83 Low-Ranking Female Corp
+- `GHLS-84` — 确认官方下架：GHLS-84 Sexy Mask -The Tower of Disgrace
+- `GHLS-86` — 确认官方下架：GHLS-86 Spandexer Neo Zero -Spandexer and the Body Stigma-
+- `GHLS-9` — 确认官方下架：GHLS-09 Night Fever V – Ms. Exceed -Incomplete Transformation
+- `GHLS-97` — 确认官方下架：GHLS-97 The Memorial Movie of 25th Anniversary 11 -Sailor Mermaid & Dark Pink -Vorarephilia Hell
+- `GHMT-26` — 确认官方下架：GHMT-26 METHOROUS
+- `GHMT-35` — 确认官方下架：GHMT-35 Superheroine Domination Hell 47 -Attack of The Split Alien
+- `GHMT-45` — 确认官方下架：GHMT-45 Legenmirror Episode 17 “Untransformable! Blue Fenril! Beautiful Fighters Fierce Pinch”
+- `GHMT-53` — 确认官方下架：GHMT-53 Mrs. Milkredible -Celeb Heroine Possessed by God of Poverty-
+- `GHMT-60` — 确认官方下架：GHMT-60 Sailor Aquas Brainwash -The Last Day of Sailor Diore
+- `GHMT-66` — 确认官方下架：GHMT-66 Magical Holy Fighter Fontaine Slender -Super Slender and Beautiful Girl Fighter Fainting Ecstasy-
+- `GHMT-69` — 确认官方下架：GHMT-69 Star Shine
+- `GHMT-71` — 确认官方下架：GHMT-71 Magnaman -Targeted Magna Pink and Magna Yellow –
+- `GHNU-3` — 确认官方下架：GHNU-03 Beautiful Witch Girl Fontaine -The Trap of Fake Fontaine-
+- `GHNU-80` — 确认官方下架：GHNU-80 Heroine Drunk and Lecherous Fall -Pure Sailor’s Evil Alcohol Seduction-
+- `GHOR-10` — 确认官方下架：GHOR-10 Amira
+- `GHOR-2` — 确认官方下架：GHOR-02 Heroine Twisty Bondage
+- `GHOR-26` — 确认官方下架：GHOR-26 Galaxy Investigator Daytona Pink
+- `GHOR-30` — 确认官方下架：GHOR-30 Making an Adorable Heroine Your Slave Ⅴ
+- `GHOR-32` — 确认官方下架：GHOR-32 Heroine Lesbian SM -Two Female Benevolent thief-
+- `GHOR-47` — 确认官方下架：GHOR-47 Making an Adorable Heroine Your Slave 3 REMAKE
+- `GHOR-69` — 确认官方下架：GHOR-69 Rescue Heroine Five Laser
+- `GHOR-72` — 确认官方下架：GHOR-72 Heroine Twisty Bondage Bird 3
+- `GHOR-73` — 确认官方下架：GHOR-73 Vehement Mask Apprentice -The First Battle-
+- `GHOR-75` — 确认官方下架：GHOR-75 Female Commander Perfect Training
+- `GHOR-79` — 确认官方下架：GHOR-79 Judicial Heroine Judgelia
+- `GHOR-8` — 确认官方下架：GHOR-08 Heroine Cutie Battle Pink Feather VS Evil Lady
+- `GHPM-1` — 确认官方下架：GHPM-01 Triple Soldier
+- `GHPM-12` — 确认官方下架：GHPM-12 Fantastic Ai
+- `GHPM-30` — 确认官方下架：GHPM-30 Non-Transforming Heroine Diana
+- `GHPM-38` — 确认官方下架：GHPM-38 Heroine 4 Short Episode – Sexy Mask, Fontaine
+- `GHPM-41` — 确认官方下架：GHPM-41 Tied Up Heroine –Wonder Lady
+- `GHPM-50` — 确认官方下架：GHPM-50 Sailor Gemini Premier and Aquas Insult Part
+- `GHPM-64` — 确认官方下架：GHPM-64 Heroine Twisty Bondage Sailor Heroines Sailor Angelina
+- `GHPM-78` — 确认官方下架：GHPM-78 Heroine Twisty Bondage Miss Heart
+- `GHPM-8` — 确认官方下架：GHPM-08 Heroine Twisty Bondage
+- `GHPM-89` — 确认官方下架：GHPM-89 Heroine Twisty Bondage Beautiful Brave Woman
+- `GHPM-98` — 确认官方下架：GHPM-98 Black Dress Temptation Vol.9 Beautiful Mask Aurora
+- `GIGP-12` — 确认官方下架：GIGP-12 Spandexer -Extra Domination-
+- `GIGP-19` — 确认官方下架：GIGP-19 Sexy Mask -Seven Perverts
+- `GIGP-22` — 确认官方下架：GIGP-22 Sailor Tifana and Melius -Sexually Corrupted Sailor Suit
+- `GIGP-4` — 确认官方下架：GIGP-04 Evil Female Cadre Wizabell Reika Hashimoto, Yua Nanami
+- `GIGP-5` — 确认官方下架：GIGP-05 U.S.A. Super Heroine -Accel Girl VS Dyna Woman Miki Sunohara, Hana Misora
+- `GIGP-8` — 确认官方下架：GIGP-08 Power Lady2 -Stolen Love Juice! Heroine Incest Plan! Misato Nonomiya
+- `GIMG-11` — 确认官方下架：GIMG-11 Heroine Image Factory11 Marvelous Mask
+- `GIMG-13` — 确认官方下架：GIMG-13 Heroine Image Factory Daytona Pink
+- `GIMG-3` — 确认官方下架：GIMG-03 Heroine image factory Sailor sapphire, Saya Aika
+- `GIMG-36` — 确认官方下架：GIMG-36 Heroine Image Factory Kunoichi
+- `GIMG-43` — 确认官方下架：GIMG-43 Heroine Image Factory The Fighter Of Love And Peace
+- `GIMG-50` — 确认官方下架：GIMG-50 Heroine Image Factory Daytona Pink
+- `GIMG-65` — 确认官方下架：GIMG-65 Heroine Image Factory65 Pure Healing
+- `GIMG-9` — 确认官方下架：GIMG-09 Heroine Image Factory Beauty God Christina
+- `GIRO-27` — 确认官方下架：GIRO-27 Kaguya the Masked Tramsformer
+- `GIRO-29` — 确认官方下架：GIRO-29 Heroine Bukkake Torture Sailor Topaz
+- `GIRO-31` — 确认官方下架：GIRO-31 Heroine Applicant Charge Mermaid
+- `GIRO-40` — 确认官方下架：GIRO-40 Non-Transforming Heroine – Andrzei Yellow Ema Part 2
+- `GIRO-62` — 确认官方下架：GIRO-62 Armored Heroine Kinbaku Domination –ANGELA-
+- `GIRO-65` — 确认官方下架：GIRO-65 Revenge of the Combatants – The Fall of Daytona Pink
+- `GIRO-79` — 确认官方下架：GIRO-79 Black Dress Temptation Vol.08 Saint Scent Stained
+- `GIRO-87` — 确认官方下架：GIRO-87 Primteus
+- `GIRO-89` — 确认官方下架：GIRO-89 Sailor Legend V Part 1
+- `GIRO-9` — 确认官方下架：GIRO-09 Citi Link the Phantom Thief – Tickling Torture Sana Tujii
+- `GIRO-92` — 确认官方下架：GIRO-92 Sailor Legend V Part 2
+- `GMMD-5` — 确认官方下架：GMMD-05 Contemptuous Heroine – Desperate Endurance
+- `GOMK-11` — 确认官方下架：GOMK-11 Bolero combatant woman
+- `GOMK-17` — 确认官方下架：GOMK-17 Charge Mermaid VS Galaxy Special Agent Ally
+- `GOMK-38` — 确认官方下架：GOMK-38 Blue Streak Force Pulser Pink
+- `GOMK-44` — 确认官方下架：GOMK-44 Black Dress Temptation – Holy Star That Falls Into Evil Alice
+- `GOMK-60` — 确认官方下架：GOMK-60 Female Combatant Bolero 2
+- `GOMK-61` — 确认官方下架：GOMK-61 Tied Up Heroine Ninja Closer NO.3 Flower Shadow
+- `GOMK-65` — 确认官方下架：GOMK-65 III first rare ESP girl Misa Noah
+- `GOMK-73` — 确认官方下架：GOMK-73 Rape Hunter Development Project File 5
+- `GOMK-76` — 确认官方下架：GOMK-76 Beautiful Witch Girl Fontane
+- `GOMK-78` — 确认官方下架：GOMK-78 Beautiful Mask Aurora
+- `GOMK-95` — 确认官方下架：GOMK-95 Marvelous Mask the first part
+- `GOMK-96` — 确认官方下架：GOMK-96 Monoclinous Heroine – Space Agent Androcross, An Mizuki, Mika Osaki
+- `GOMK-98` — 确认官方下架：GOMK-98 Marvelous Mask
+- `GPTM-38` — 确认官方下架：GPTM-38 Saint Force after.3 -Broken Hope
+- `GRET-26` — 确认官方下架：GRET-26 Gigantic Heroine (R) Next Lady
+- `GRET-5` — 确认官方下架：GRET-05 Giant Heroine Fire Woman
+- `GRET-7` — 确认官方下架：GRET-07 Super Cocky Heroine Completely Defeated Insult Princess Noa
+- `GSAD-3` — 确认官方下架：GSAD-03 SUPER HEROINE Action Wars – Toki Force Sanseijer The Dangers Target
+- `GSHE-10` — 确认官方下架：GSHE-10 20th Anniversary Thanks to You! The History of GIGA
+- `GSHE-2` — 确认官方下架：GSHE-02 Highlights of Heroines Fainting
+- `GSHE-3` — 确认官方下架：GSHE-03 Top 20 User’s Choice 2013
+- `GSHE-4` — 确认官方下架：GSHE-04 Highlights of the Sailor Fighters
+- `GSHE-8` — 确认官方下架：GSHE-08 Charge Mermaid Highlights
+- `GTRL-10` — 确认官方下架：GTRL-10 Sailor Heroines Vol.01 Sailor Crysta and Voltes
+- `GTRL-24` — 确认官方下架：GTRL-24 JK Investigator Blu-sailor Striker 03
+- `GTRL-47` — 确认官方下架：GTRL-47 Rape Hunter BEAST Vol.2 Beautiful Brave Woman
+- `GTRL-52` — 确认官方下架：GTRL-52 The Stallion Monster Trilogy Vol.1 -Bird Force Bird Swan Hana Misora
+- `GVRD-20` — 确认官方下架：GVRD-20 The Evil Empress Teaches Lesbianism to a Superheroine, Rei Ayana, Ai Ishihara
+- `GVRD-27` — 确认官方下架：GVRD-27 Queen Mask
+- `GVRD-32` — 确认官方下架：GVRD-32 Monoclinous Heroine – GaoMaru – The Wonder Man, An Mizuki
+- `GVRD-33` — 确认官方下架：GVRD-33 Heroine Showery Insult Sailor Dolphin
+- `GVRD-37` — 确认官方下架：GVRD-37 Merupure Tied Up Insult
+- `GVRD-44` — 确认官方下架：GVRD-44 Sailor-Fighters Tentacle Monster Swallowing
+- `GVRD-48` — 确认官方下架：GVRD-48 Ame-Comi Heroine Double Rape
+- `GVRD-49` — 确认官方下架：GVRD-49 Sailor-Fighters Tentacle Monster Swallowing
+- `GVRD-58` — 确认官方下架：GVRD-58 Heroine’s Monster Transformation Project
+- `GVRD-60` — 确认官方下架：GVRD-60 Tied Up Heroine -Good Bye Super Woman Episode 2
+- `GVRD-69` — 确认官方下架：GVRD-69 Completely Clothed Heroine Insult – Battle of the Future, Yurina Ayashiro
+- `GVRD-81` — 确认官方下架：GVRD-81 Battle of Future – Bondage Rape
+- `GXXD-2` — 确认官方下架：GXXD-02 Ninja Force High Ranger
+- `GXXD-4` — 确认官方下架：GXXD-04 Hermaphrodite Heroine – Galaxy Girl, Akira Ithinose
+- `GXXD-79` — 确认官方下架：GXXD-79 Heroine Awakening – Slutty Masked Heroine
+- `JMSZ-29` — 确认官方下架：JMSZ-29 Targeted Super Heroine -Tragic Fate Awaited Shuriff Pink
+- `JMSZ-32` — 确认官方下架：JMSZ-32 Princess Fighter Pure Blazer Angel Blazer
+- `JMSZ-34` — 确认官方下架：JMSZ-34 Justice Five Fallen Justice Pink
+- `JMSZ-42` — 确认官方下架：JMSZ-42 Miori Hara, Hitomi Maisaka Holy Goddess Fighter Saint
+- `JMSZ-50` — 确认官方下架：JMSZ-50 The Sovereign Princess in Grave Danger
+- `JMSZ-55` — 确认官方下架：JMSZ-55 Beautiful Middle-Aged Fontaine -Spell of Stallion Mask-
+- `JMSZ-56` — 确认官方下架：JMSZ-56 Plump Wife Heroine -Housewife Pink Fallen
+- `JMSZ-57` — 确认官方下架：JMSZ-57 Female Cadre Larussa -Force Red Reverse Insult
+- `JMSZ-83` — 确认官方下架：JMSZ-83 Hero Insult -Female Cadre Vel Maria –
+- `JMSZ-86` — 确认官方下架：JMSZ-86 Miracle Momo Episode.0
+- `MEBO-3` — 确认官方下架：MEBO-03 We are the Third Force! Reserve Ranger
+- `MNFC-10` — 确认官方下架：MNFC-10 Heroine Insult Club 10 -Dimension Female Fighter Helena Yurika Amane
+- `MNFC-19` — 确认官方下架：MNFC-19 Heroine Surrender Club -Spandexer Cosmo Angel –
+- `MNFC-4` — 确认官方下架：MNFC-04 Heroine Insult Club 04 Spandexer Cosmo Angel
+- `NTSP-2` — 确认官方下架：NTSP-02 Fatal Force – The Legend of the Fire Eagle Pack
+- `NTSP-3` — 确认官方下架：NTSP-03 Bushido Girls
+- `RYOJ-17` — 确认官方下架：RYOJ-17 Heroine Insult Vol.117 -Sailor Diana
+- `RYOJ-2` — 确认官方下架：RYOJ-02 Heroine Insult Vol.102 -Spider Lady
+- `SNGM-4` — 确认官方下架：SNGM-04 Dark Elf Knight Arnas
+- `STAK-18` — 确认官方下架：STAK-18 Hinawa-Gun
+- `STAK-21` — 确认官方下架：STAK-21 Road Breakers
+- `STAK-23` — 确认官方下架：STAK-23 Dreamy Lily the Magical Idol
+- `STAK-9` — 确认官方下架：STAK-09 Gekiretsu Space Pirate
+- `TBB-28` — 确认官方下架：TBB-28 Heroine Suppression Vol.28
+- `TBB-29` — 确认官方下架：TBB-29 Heroine Suppression Vol.29, Mochida Akane
+- `TBB-71` — 确认官方下架：TBB-71 Heroine Subjugation Vol.71
+- `TBB-74` — 确认官方下架：TBB-74 Heroine Suppression Vol.74
+- `TBB-75` — 确认官方下架：TBB-75 Heroine Suppression Vol.75
+- `TBB-87` — 确认官方下架：TBB-87 Heroine Suppression Vol.87 New Star Unit Ryuseijer -Ryusei Pink Erina Ichihashi
+- `TBB-88` — 确认官方下架：TBB-88 Heroine Suppression Vol.88 -Bird Force Bird Swan
+- `TBB-93` — 确认官方下架：TBB-93 Heroine Suppression Vol.93 Mach Ranger -Cooking Suppression
+- `TBB-97` — 确认官方下架：TBB-97 Heroine Suppression Vol.97 -Legenmirror Episode 24 Eliminate Blue Fenril-
+- `TBXX-14` — 确认官方下架：TBXX-14 Heroine Wars – One Year War of the Naked Teacher, Ai Ishihara
+- `TBXX-19` — 确认官方下架：TBXX-19 Heroine Sexual Harassment – Target Daytona Pink
+- `TBXX-9` — 确认官方下架：TBXX-09 What’s Your Job, Shizuku Hasegawa
+- `TDLN-134` — 确认官方下架：TDLN-134 Heroine Orgasm Face Hell
+- `TDLN-49` — 确认官方下架：TDLN-49 Super Heroine Insult Special 09
+- `TDLN-62` — 确认官方下架：TDLN-62 Super Heroine Insult Special 18
+- `TDLN-72` — 确认官方下架：TDLN-72 Heroine Suppression the Dead in Hell 13
+- `TDLN-76` — 确认官方下架：TDLN-76 Sailor Flare
+- `TDLN-80` — 确认官方下架：TDLN-80 Chargeman Charge Phoenix
+- `TGGP-37` — 确认官方下架：TGGP-37 Fighting Holy Princess Seira
+- `TGGP-59` — 确认官方下架：TGGP-59 Double Sailor Fighters039; Hard Tentacles Domination!
+- `TGGP-62` — 确认官方下架：TGGP-62 Heroine’s Pregnancy – Execution by Stomach Punching
+- `TGGP-76` — 确认官方下架：TGGP-76 Beautiful Brave Women Vehement Mask Gorgeous
+- `TGGP-81` — 确认官方下架：TGGP-81 Female fighter Incontinence Rape -Ryuka-
+- `TGGP-94` — 确认官方下架：TGGP-94 Wonder Lady W -Inherited Power-
+- `TGGP-95` — 确认官方下架：TGGP-95 Beautiful Girl Fighter Sailor Knights
+- `TGHR-4` — 确认官方下架：TGHR-04 Superheroine Begins – Super Unit Fleet Gorzel Five Akane Mochida
+- `THH-13` — 确认官方下架：THH-13 Super Heroine Domination 13
+- `THH-5` — 确认官方下架：THH-05 SUPER Heroine Domination 05
+- `THP-10` — 确认官方下架：THP-10 Super-heroine near miss Vol.10
+- `THP-41` — 确认官方下架：THP-41 – Super Heroine Close Call – Alien Puppets
+- `THP-52` — 确认官方下架：THP-52 Superheroine In Grave Danger Vol.52
+- `THP-63` — 确认官方下架：THP-63 Super Heroine In Grave Danger! Vol.63 Captain Marshall
+- `THP-67` — 确认官方下架：THP-67 Super Heroine in Grave Danger Vol.67
+- `THP-74` — 确认官方下架：THP-74 Super Heroine in Grave Danger Vol.74 -Soldier Pink!
+- `THP-88` — 确认官方下架：THP-88 Super Heroine in Grave Danger!! Vol.88 Sailor Aquas W -Fight Future Me…!-
+- `THZ-64` — 确认官方下架：THZ-64 Super Heroine in Grave Danger!! Vol.64 Galaxy
+- `THZ-67` — 确认官方下架：THZ-67 Super Heroine in Grave Danger!! Vol.67
+- `THZ-79` — 确认官方下架：THZ-79 Super Heroine in Grave Danger!! Vol.79 Legenmirror -Blue Fenril
+- `TKVR-3` — 确认官方下架：TKVR-03 Encouragement of Heroine Neck Torture
+- `TLTD-67` — 确认官方下架：TLTD-67 Heroine Twisted Bondage Diana
+- `TMS-21` — 确认官方下架：TMS-21 Ultra Hyper Woman Henshin
+- `TRE-43` — 确认官方下架：TRE-43 Heroine Sexual Insult Vol.43 Cyber Force
+- `TRE-48` — 确认官方下架：TRE-48 Heroine Insult Vol.48 Seiger – Saiger Yellow Fights Back
+- `TRE-5` — 确认官方下架：TRE-05 Heroine Insult! Vol.05
+- `TRE-56` — 确认官方下架：TRE-56 Heroine Insult Vol.56 Sound Wave Human Being Attack
+- `TRE-65` — 确认官方下架：TRE-65 Heroine Insult Vol.65 Beautiful Fighter Sailor Hermes
+- `TRE-76` — 确认官方下架：TRE-76 Heroine Insult Vol.76 Mirage Scanty
+- `TRE-77` — 确认官方下架：TRE-77 Heroine Insult Vol.77 SUPERLADY
+- `TRE-92` — 确认官方下架：TRE-92 Heroine Insult Vol.92 Nude St. Brave Vehement Mask First
+- `TRH-17` — 确认官方下架：TRH-17 Super Heroine Returns 17, Shiraiaya Kaori
+- `TRSH-41` — 确认官方下架：TRSH-41 Specializing in Heroine Torture Hell
+- `TRSH-43` — 确认官方下架：TRSH-43 Battle Insult Jerking Off One-Game Match !!
+- `TRSH-45` — 确认官方下架：TRSH-45 Heroine gang rape hell
+- `TRSH-70` — 确认官方下架：TRSH-70 Heroine Training Story
+- `TRSH-71` — 确认官方下架：TRSH-71 Heroine Gang Rape
+- `TSW-103` — 确认官方下架：TSW-103 Sailor angel
+- `TSW-104` — 确认官方下架：TSW-104 Five Sentai Heroine Might Exploding Boy, Izumi Marin
+- `TSW-126` — 确认官方下架：TSW-126 heroine heroine tokusatsu Laboratories Limited VER multiple personality
+- `TSW-138` — 确认官方下架：TSW-138 Rape heroine to fall in sex slaves
+- `TSW-30` — 确认官方下架：TSW-30 Heroine Suppression – Spandexer Marvelous
+- `TSW-97` — 确认官方下架：TSW-97 Justion Blue Swan
+- `TSW-99` — 确认官方下架：TSW-99 SPIDEY LADY, Izumi Marin
+- `TSWN-1` — 确认官方下架：TSWN-001 Exciting Heroine Star Decker, Kitada Yuuho
+- `TSWN-10` — 确认官方下架：TSWN-010 Space Agent Anis In Danger Adult Version
+- `TSWN-12` — 确认官方下架：TSWN-012 Misty Ranger In Grave Danger Adult Version, Kanno Yuria
+- `TSWN-2` — 确认官方下架：TSWN-002 Bird Fighter – Bird Pink in Crisis Adult Ver, Suma Anri
+- `TSWN-3` — 确认官方下架：TSWN-003 Exciting Heroine Sailor Lumiere Magic, Katou Yume
+- `TSWN-37` — 确认官方下架：TSWN-037 Lolita Heroine Lolider Ren Azumi
+- `TSWN-39` — 确认官方下架：TSWN-039 Heroine Insult Until she degrades herself and becomes a sex slave
+- `TSWN-4` — 确认官方下架：TSWN-004 Exciting Heroine Gaia lady Adult Ver
+- `TSWN-6` — 确认官方下架：TSWN-006 Exciting Heroine Electro-Mechanical Fighter Redoll
+- `TSWN-9` — 确认官方下架：TSWN-009 Exciting Heroine – Color Ranger – Adult Version, Shiro Seyuyu
+- `TTRE-8` — 确认官方下架：TTRE-08 Heroine Tentacle Insult Vol 08
+- `TZZ-25` — 确认官方下架：TZZ-25 – Sentai Slut Fuck Cosplay Debauchery
+- `TZZ-30` — 确认官方下架：TZZ-30 Astro Ranger Neo, Uehara Chinatsu, Mochida Akane
+- `TZZ-34` — 确认官方下架：TZZ-34 Space Investigator Anika Mochida Akane
+
+### 仍需核实
+
+- `AKBD-10` — 无证据空号：标题未知
+- `AKBD-9` — 无证据空号：标题未知
+- `ANIX-7` — 历史条目，状态待核实：ANIX-07 Dream Melpure, Machida Minami
+- `ATHB-11` — 历史条目，状态待核实：ATHB-11 Super Windy Heroine Battle
+- `GDBS-10` — 无证据空号：标题未知
+- `GDBS-11` — 无证据空号：标题未知
+- `GDBS-13` — 无证据空号：标题未知
+- `GDBS-3` — 无证据空号：标题未知
+- `GDBS-47` — 历史条目，状态待核实：GDBS-47 THE DIGEST OF G1 GRAND PRIX
+- `GDBS-7` — 无证据空号：标题未知
+- `GDGA-10` — 无证据空号：标题未知
+- `GDGA-11` — 无证据空号：标题未知
+- `GDGA-12` — 无证据空号：标题未知
+- `GDGA-18` — 无证据空号：标题未知
+- `GDGA-22` — 无证据空号：标题未知
+- `GDGA-23` — 无证据空号：标题未知
+- `GDGA-24` — 无证据空号：标题未知
+- `GDGA-25` — 无证据空号：标题未知
+- `GDGA-26` — 无证据空号：标题未知
+- `GDGA-27` — 无证据空号：标题未知
+- `GDGA-28` — 无证据空号：标题未知
+- `GDGA-29` — 无证据空号：标题未知
+- `GDGA-30` — 无证据空号：标题未知
+- `GDGA-31` — 无证据空号：标题未知
+- `GDGA-32` — 无证据空号：标题未知
+- `GDGA-33` — 无证据空号：标题未知
+- `GEXP-71` — 历史条目，状态待核实：GEXP-71 Witch Beautiful Girl Fighter Fontane
+- `GHOR-37` — 历史条目，状态待核实：GHOR-37 Witch Angel Magical Mask -The Second Nightmare-
+- `GIMG-16` — 历史条目，状态待核实：GIMG-16 Heroine Image Factory16 Rui, the Attractive Investigator An Mizuki
+- `GIMG-30` — 历史条目，状态待核实：GIMG-30 Heroine Image Factory BUSHIDO GIRLS
+- `GOMK-39` — 历史条目，状态待核实：GOMK-39 KUNOICHI – Misty Oshichi
+- `GPTM-22` — 历史条目，状态待核实：GPTM-22 Giant Heroine Sophia
+- `GTRL-1` — 历史条目，状态待核实：GTRL-01 New Star Unit Ryuseiger Suppression
+- `GTRL-2` — 历史条目，状态待核实：GTRL-02 New Star Unit Ryuseiger Lesbian insult Sumire
+- `GTRL-3` — 历史条目，状态待核实：GTRL-03 New Star Unit Ryuseiger Humiliation white insult
+- `GXXD-58` — 无证据空号：标题未知
+- `JDSD-2` — 无证据空号：标题未知
+- `JDSD-9` — 无证据空号：标题未知
+- `JHHD-13` — 无证据空号：标题未知
+- `JMSZ-3` — 无证据空号：标题未知
+- `JMSZ-7` — 无证据空号：标题未知
+- `PDLN-129` — 无证据空号：标题未知
+- `PDLN-130` — 无证据空号：标题未知
+- `PDLN-131` — 无证据空号：标题未知
+- `PDLN-132` — 无证据空号：标题未知
+- `PDLN-133` — 无证据空号：标题未知
+- `PDLN-135` — 无证据空号：标题未知
+- `PDLN-137` — 无证据空号：标题未知
+- `PDLN-139` — 无证据空号：标题未知
+- `PDLN-142` — 无证据空号：标题未知
+- `PMID-102` — 无证据空号：标题未知
+- `PMID-103` — 无证据空号：标题未知
+- `PMID-104` — 无证据空号：标题未知
+- `PMID-105` — 无证据空号：标题未知
+- `PMID-110` — 无证据空号：标题未知
+- `PMID-111` — 无证据空号：标题未知
+- `PMID-114` — 无证据空号：标题未知
+- `PMID-115` — 无证据空号：标题未知
+- `PMID-116` — 无证据空号：标题未知
+- `PMID-119` — 无证据空号：标题未知
+- `PMID-120` — 无证据空号：标题未知
+- `PMID-121` — 无证据空号：标题未知
+- `PMID-123` — 无证据空号：标题未知
+- `PMID-84` — 无证据空号：标题未知
+- `PMID-85` — 无证据空号：标题未知
+- `PMID-86` — 无证据空号：标题未知
+- `PMID-89` — 无证据空号：标题未知
+- `PMID-91` — 无证据空号：标题未知
+- `PMID-97` — 无证据空号：标题未知
+- `PMID-99` — 无证据空号：标题未知
+- `SGKA-11` — 历史条目，状态待核实：SGKA-11 Hand Picked Scenes Over 200 Minutes Jav Film Sex
+- `SGKA-12` — 无证据空号：标题未知
+- `SGKA-15` — 无证据空号：标题未知
+- `SGKA-9` — 无证据空号：标题未知
+- `TBB-45` — 历史条目，状态待核实：TBB-45 Super heroine
+- `TBW-30` — 历史条目，状态待核实：TBW-30 Heroine Brainwash Vol.30 -Silfina, Sneaky Trap!
+- `TCC-2` — 无证据空号：标题未知
+- `TDLN-130` — 无证据空号：标题未知
+- `TDLN-37` — 历史条目，状态待核实：TDLN-37 Hiroindomine-shon Vol.02
+- `TDLN-41` — 历史条目，状态待核实：TDLN-41 Super Heroine Insult SP5
+- `TGGP-38` — 无证据空号：标题未知
+- `TGGP-40` — 历史条目，状态待核实：TGGP-40 Super Heroine
+- `TGGP-8` — 历史条目，状态待核实：TGGP-08 Galaxy-Investigator Jasper
+- `THZ-41` — 历史条目，状态待核实：THZ-41 Super heroine In Grave Danger Vol.41
+- `THZ-5` — 历史条目，状态待核实：THZ-05 Super-heroine desperation Vol.05
+- `TKVR-11` — 无证据空号：标题未知
+- `TKVR-12` — 无证据空号：标题未知
+- `TKVR-20` — 无证据空号：标题未知
+- `TKVR-7` — 无证据空号：标题未知
+- `TKVR-8` — 无证据空号：标题未知
+- `TLTD-70` — 无证据空号：标题未知
+- `TLTD-72` — 无证据空号：标题未知
+- `TLTD-74` — 无证据空号：标题未知
+- `TLTD-81` — 无证据空号：标题未知
+- `TRE-50` — 历史条目，状态待核实：TRE-50 Security-Star
+- `TRSH-50` — 历史条目，状态待核实：TRSH-50 Heroine Milking Torture
+- `TRSH-60` — 历史条目，状态待核实：TRSH-60 Lethal Weapon Torture Hell
+- `TRSH-76` — 无证据空号：标题未知
+- `TRSH-83` — 无证据空号：标题未知
+- `TSW-118` — 无证据空号：标题未知
+- `TSW-119` — 无证据空号：标题未知
+- `TSW-120` — 无证据空号：标题未知
+- `TSW-121` — 无证据空号：标题未知
+- `TSW-122` — 无证据空号：标题未知
+- `TSW-123` — 无证据空号：标题未知
+- `TSW-124` — 无证据空号：标题未知
+- `TSW-125` — 无证据空号：标题未知
+- `TSW-127` — 无证据空号：标题未知
+- `TSW-128` — 无证据空号：标题未知
+- `TSW-129` — 无证据空号：标题未知
+- `TSW-130` — 无证据空号：标题未知
+- `TSW-131` — 无证据空号：标题未知
+- `TSW-132` — 无证据空号：标题未知
+- `TSW-133` — 无证据空号：标题未知
+- `TSW-134` — 无证据空号：标题未知
+- `TSW-135` — 无证据空号：标题未知
+- `TSW-136` — 无证据空号：标题未知
+- `TSW-137` — 无证据空号：标题未知
+- `TSW-139` — 无证据空号：标题未知
+- `TSW-140` — 无证据空号：标题未知
+- `TSW-141` — 无证据空号：标题未知
+- `TSW-142` — 无证据空号：标题未知
+- `TSW-73` — 历史条目，状态待核实：TSW-73 A huge masturbation
+- `TZZ-22` — 历史条目，状态待核实：TZZ-22 Freedom Fighter Phoenix, Hinata Arisa
+
+## 数据限制
+
+- 空号只表示编号不连续，不证明影片存在或已下架。
+- AsiaMonstr 文章只作为历史存在或条目线索；官方状态需由当前官方记录或明确下架依据确认。
+- 403、404、超时和搜索无结果均不单独作为下架证据。
+- 本审计仅核查元数据，未访问播放或下载资源。
+## 来源覆盖摘要
+
+| 来源 | 覆盖结果 | 进入缺失候选 |
+|---|---:|---:|
+| 线上基准 | 137 系列 / 3796 影片 | — |
+| AsiaMonstr GIGA 分类 | 198 页 / 4148 部唯一番号 | 605 |
+| 当前项目链接表 | 3 个明确番号 | 0 |
+| Git 历史目录 | 20 个可解析快照 | 11 |
+| 旧目录与链接表 | 11 个文件 | 18 |
+| GIGA 当前官方目录 | 221 页 / 4386 影片 | 431 |
+
+官方目录逐卡核对结果为 cardsSeen=4386、cardsResolved=4386、errors=0、stopReason=empty。因此 431 条具备当前官方存在证据；二次 HEAD-only 核查另确认 288 条已从当前官网目录移除，剩余 124 条仍需核实。
+
+## 范围外与人工复核
+
+- 范围外系列前缀：`CGM`, `DBC`, `DFI`, `DIA`, `DIC`, `DMG`, `DMK`, `GAJ`, `GDGN`, `GDO`, `GDR`, `GES`, `GMH`, `GWS`, `NDH`, `NMH`, `NOH`, `PMSD`, `SBN`, `SDLN`, `SHK`, `SII`, `SNKJ`, `TAA`, `TAB`, `TAG`, `TAP`, `TBT`, `TCB`, `TCN`, `TDB`, `TDM`, `TDP`, `TGJ`, `TGL`, `TGM`, `THI`, `THM`, `THR`, `TJT`, `TKG`, `TKT`, `TKV`, `TLC`, `TLP`, `TLZ`, `TMV`, `TPH`, `TRY`, `TSDL`, `TSR`, `TSY`, `TVS`, `TWG`, `WH`, `YNO`, `ZMG`, `ZOR`
+- AsiaMonstr 摘要无法解析明确番号：0 条；见 `evidence/asiamonstr-ambiguous.json`。
+- 官方目录状态：stopReason=empty，pagesFetched=221，errors=0。

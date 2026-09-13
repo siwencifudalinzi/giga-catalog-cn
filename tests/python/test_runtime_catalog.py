@@ -193,6 +193,7 @@ class RuntimeCatalogTests(unittest.TestCase):
             "productId": 123,
             "previewBase": "https://example.test/spsf-1/sample/",
             "previewCount": 3,
+            "previewImages": ["https://i0.wp.com/www.asiamonstr.com/preview.jpg"],
         })
         bundle = build_runtime_v3(catalog)
         shard_video = next(
@@ -205,11 +206,15 @@ class RuntimeCatalogTests(unittest.TestCase):
         )
         for field in (
             "code", "number", "title", "actors", "releaseDate", "cover",
-            "productId", "previewBase", "previewCount", "links",
+            "productId", "previewBase", "previewCount", "previewImages", "links",
         ):
             self.assertIn(field, shard_video)
             self.assertEqual(shard_video[field], video[field])
             self.assertEqual(search_video[field], video[field])
+
+        archived = self._catalog()
+        archived["series"][0]["videos"][0]["releaseDate"] = None
+        build_runtime_v3(archived)
 
         drifted = self._catalog()
         drifted["series"][0]["videos"][0]["privateUrl"] = "https://private.example/secret"

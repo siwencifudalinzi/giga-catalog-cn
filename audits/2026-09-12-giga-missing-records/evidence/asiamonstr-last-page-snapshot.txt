@@ -1,0 +1,372 @@
+### Page
+- Page URL: https://www.asiamonstr.com/category/giga/page/198
+- Page Title: GIGA AsiaMonstrAsiaMonstr | Page 198
+### Snapshot
+```yaml
+- generic [active] [ref=f199e1]:
+  - banner [ref=f199e2]:
+    - generic [ref=f199e3]:
+      - link "AsiaMonstr.com" [ref=f199e4] [cursor=pointer]:
+        - /url: /
+      - search [ref=f199e6]:
+        - searchbox [ref=f199e8]
+        - button "Search" [ref=f199e9]
+  - generic [ref=f199e10]:
+    - complementary [ref=f199e11]:
+      - generic [ref=f199e13]:
+        - generic [ref=f199e14]: Categories
+        - list [ref=f199e15]:
+          - listitem [ref=f199e16]:
+            - link "Gallop" [ref=f199e17] [cursor=pointer]:
+              - /url: https://www.asiamonstr.com/category/gallop
+            - text: (58)
+          - listitem [ref=f199e18]:
+            - link "GIGA" [ref=f199e19] [cursor=pointer]:
+              - /url: https://www.asiamonstr.com/category/giga
+            - text: (4,148)
+          - listitem [ref=f199e20]:
+            - link "MEGA" [ref=f199e21] [cursor=pointer]:
+              - /url: https://www.asiamonstr.com/category/mega
+            - text: (35)
+          - listitem [ref=f199e22]:
+            - link "Monster" [ref=f199e23] [cursor=pointer]:
+              - /url: https://www.asiamonstr.com/category/monstr
+            - text: (126)
+          - listitem [ref=f199e24]:
+            - link "Other" [ref=f199e25] [cursor=pointer]:
+              - /url: https://www.asiamonstr.com/category/other
+            - text: (192)
+          - listitem [ref=f199e26]:
+            - link "TERA" [ref=f199e27] [cursor=pointer]:
+              - /url: https://www.asiamonstr.com/category/tera
+            - text: (64)
+          - listitem [ref=f199e28]:
+            - link "ZEN" [ref=f199e29] [cursor=pointer]:
+              - /url: https://www.asiamonstr.com/category/zen
+            - text: (806)
+          - listitem [ref=f199e30]:
+            - link "ZERO" [ref=f199e31] [cursor=pointer]:
+              - /url: https://www.asiamonstr.com/category/zero
+            - text: (104)
+          - listitem [ref=f199e32]:
+            - link "ZEUS" [ref=f199e33] [cursor=pointer]:
+              - /url: https://www.asiamonstr.com/category/zeus
+            - text: (145)
+    - generic [ref=f199e34]:
+      - heading "Download GIGA video clips" [level=1] [ref=f199e35]
+      - article [ref=f199e36]:
+        - heading "GPTM-14 Super Ultimate Tentacle Insult – Guardian Twinkle Grace" [level=2] [ref=f199e37]
+        - generic [ref=f199e38]:
+          - link "Hibiki Ootuki" [ref=f199e39] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/hibiki-ootuki
+          - text: ","
+          - link "Mio Kuraki" [ref=f199e40] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/mio-kuraki
+          - text: ","
+          - link "Rika Aiuchi" [ref=f199e41] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/rika-aiuchi
+        - 'link "GPTM-14 Super Ultimate Tentacle Insult – Guardian Twinkle Grace Views: 1603 January 25, 2013" [ref=f199e42] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gptm-14.html
+          - img "GPTM-14 Super Ultimate Tentacle Insult – Guardian Twinkle Grace" [ref=f199e44]
+          - generic [ref=f199e45]:
+            - generic [ref=f199e46]: "Views: 1603"
+            - generic [ref=f199e47]: January 25, 2013
+      - article [ref=f199e48]:
+        - heading "GPTM-17 New Beautiful Girl Fighter Sailor Prism Ⅴ" [level=2] [ref=f199e49]
+        - generic [ref=f199e50]:
+          - link "Airi Hayasaka" [ref=f199e51] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/airi-hayasaka
+          - text: ","
+          - link "Ayumu Sena" [ref=f199e52] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/ayumu-sena
+          - text: ","
+          - link "Miho Tachibana" [ref=f199e53] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/miho-tachibana
+          - text: ","
+          - link "Nozomi Haduki" [ref=f199e54] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/nozomi-haduki
+          - text: ","
+          - link "Uta Kohaku" [ref=f199e55] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/uta-kohaku
+        - 'link "GPTM-17 New Beautiful Girl Fighter Sailor Prism Ⅴ Views: 2157 January 25, 2013" [ref=f199e56] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gptm-17-new-beautiful-girl-fighter-sailor-prism.html
+          - img "GPTM-17 New Beautiful Girl Fighter Sailor Prism Ⅴ" [ref=f199e58]
+          - generic [ref=f199e59]:
+            - generic [ref=f199e60]: "Views: 2157"
+            - generic [ref=f199e61]: January 25, 2013
+      - article [ref=f199e62]:
+        - heading "GPTM-19 Wonder Lady VS. American Monsters" [level=2] [ref=f199e63]
+        - link "Yui Hatano" [ref=f199e65] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/tag/yui-hatano
+        - 'link "GPTM-19 Wonder Lady VS. American Monsters Views: 3184 January 25, 2013" [ref=f199e66] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gptm-19-lady-vs-american-monsters-yui-hatano.html
+          - img "GPTM-19 Wonder Lady VS. American Monsters" [ref=f199e68]
+          - generic [ref=f199e69]:
+            - generic [ref=f199e70]: "Views: 3184"
+            - generic [ref=f199e71]: January 25, 2013
+      - article [ref=f199e72]:
+        - heading "GXXD-15 Cyborg Heroine Machineger" [level=2] [ref=f199e73]
+        - link "Suzuki Anri" [ref=f199e75] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/tag/suzuki-anri
+        - 'link "GXXD-15 Cyborg Heroine Machineger Views: 1678 January 24, 2013" [ref=f199e76] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gxxd-15-cyborg-heroine-machineger-suzuki-anri.html
+          - img "GXXD-15 Cyborg Heroine Machineger" [ref=f199e78]
+          - generic [ref=f199e79]:
+            - generic [ref=f199e80]: "Views: 1678"
+            - generic [ref=f199e81]: January 24, 2013
+      - article [ref=f199e82]:
+        - heading "GXXD-17 Wing Force – Koharu" [level=2] [ref=f199e83]
+        - link "Natsukawa Miku" [ref=f199e85] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/tag/natsukawa-miku
+        - 'link "GXXD-17 Wing Force – Koharu Views: 1473 January 24, 2013" [ref=f199e86] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gxxd-17-wing-force-koharu.html
+          - img "GXXD-17 Wing Force – Koharu" [ref=f199e88]
+          - generic [ref=f199e89]:
+            - generic [ref=f199e90]: "Views: 1473"
+            - generic [ref=f199e91]: January 24, 2013
+      - article [ref=f199e92]:
+        - heading "GXXD-22 Space Agent Marian" [level=2] [ref=f199e93]
+        - link "Sawamura Reiko" [ref=f199e95] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/tag/sawamura-reiko
+        - 'link "GXXD-22 Space Agent Marian Views: 1594 January 24, 2013" [ref=f199e96] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gxxd-22-space-agent-marian.html
+          - img "GXXD-22 Space Agent Marian" [ref=f199e98]
+          - generic [ref=f199e99]:
+            - generic [ref=f199e100]: "Views: 1594"
+            - generic [ref=f199e101]: January 24, 2013
+      - article [ref=f199e102]:
+        - heading "GXXD-33 Future Generation Euzebion" [level=2] [ref=f199e103]
+        - link "Ai Hinata" [ref=f199e105] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/tag/ai-hinata
+        - 'link "GXXD-33 Future Generation Euzebion Views: 1581 January 24, 2013" [ref=f199e106] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gxxd-33-future-generation-euzebion-ai-hinata.html
+          - img "GXXD-33 Future Generation Euzebion" [ref=f199e108]
+          - generic [ref=f199e109]:
+            - generic [ref=f199e110]: "Views: 1581"
+            - generic [ref=f199e111]: January 24, 2013
+      - article [ref=f199e112]:
+        - heading "GXXD-40 Heroine Half Conscious Hell – Beautiful Mask Aurora" [level=2] [ref=f199e113]
+        - link "Suzuki Anri" [ref=f199e115] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/tag/suzuki-anri
+        - 'link "GXXD-40 Heroine Half Conscious Hell – Beautiful Mask Aurora Views: 2474 January 24, 2013" [ref=f199e116] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gxxd-40-heroine-half-conscious-hell-beautiful-mask-aurora.html
+          - img "GXXD-40 Heroine Half Conscious Hell – Beautiful Mask Aurora" [ref=f199e118]
+          - generic [ref=f199e119]:
+            - generic [ref=f199e120]: "Views: 2474"
+            - generic [ref=f199e121]: January 24, 2013
+      - article [ref=f199e122]:
+        - heading "GXXD-47 Great Hen girl heroine" [level=2] [ref=f199e123]
+        - link "Mai Kuroki" [ref=f199e125] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/tag/mai-kuroki
+        - 'link "GXXD-47 Great Hen girl heroine Views: 1618 January 24, 2013" [ref=f199e126] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gxxd-47-great-hen-girl-heroine-mai-kuroki.html
+          - img "GXXD-47 Great Hen girl heroine" [ref=f199e128]
+          - generic [ref=f199e129]:
+            - generic [ref=f199e130]: "Views: 1618"
+            - generic [ref=f199e131]: January 24, 2013
+      - article [ref=f199e132]:
+        - heading "GXXD-93 Sailor Prism 2" [level=2] [ref=f199e133]
+        - generic [ref=f199e134]:
+          - link "Azumi Mizushima" [ref=f199e135] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/azumi-mizushima
+          - text: ","
+          - link "Mahiro Aine" [ref=f199e136] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/mahiro-aine
+          - text: ","
+          - link "Minto Suzuki" [ref=f199e137] [cursor=pointer]:
+            - /url: https://www.asiamonstr.com/tag/minto-suzuki
+        - 'link "GXXD-93 Sailor Prism 2 Views: 2660 January 24, 2013" [ref=f199e138] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gxxd-93-sailor-prism-2.html
+          - img "GXXD-93 Sailor Prism 2" [ref=f199e140]
+          - generic [ref=f199e141]:
+            - generic [ref=f199e142]: "Views: 2660"
+            - generic [ref=f199e143]: January 24, 2013
+      - article [ref=f199e144]:
+        - heading "GXXD-98 Heroine Mimic Tentacle Insult – Superlady vs Glamour Mask" [level=2] [ref=f199e145]
+        - link "Ichika Aimi" [ref=f199e147] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/tag/ichika-aimi
+        - 'link "GXXD-98 Heroine Mimic Tentacle Insult – Superlady vs Glamour Mask Views: 2331 January 24, 2013" [ref=f199e148] [cursor=pointer]':
+          - /url: https://www.asiamonstr.com/giga/gxxd-98-heroine-mimic-tentacle-insult-superlady-vs-glamour-mask.html
+          - img "GXXD-98 Heroine Mimic Tentacle Insult – Superlady vs Glamour Mask" [ref=f199e150]
+          - generic [ref=f199e151]:
+            - generic [ref=f199e152]: "Views: 2331"
+            - generic [ref=f199e153]: January 24, 2013
+    - list [ref=f199e154]:
+      - listitem [ref=f199e155]:
+        - link "Prev" [ref=f199e156] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/197
+      - listitem [ref=f199e157]:
+        - link "1" [ref=f199e158] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/1
+      - listitem [ref=f199e159]:
+        - link "2" [ref=f199e160] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/2
+      - listitem [ref=f199e161]:
+        - link "3" [ref=f199e162] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/3
+      - listitem [ref=f199e163]:
+        - link "4" [ref=f199e164] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/4
+      - listitem [ref=f199e165]:
+        - link "5" [ref=f199e166] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/5
+      - listitem [ref=f199e167]:
+        - generic [ref=f199e168]: …
+      - listitem [ref=f199e169]:
+        - link "193" [ref=f199e170] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/193
+      - listitem [ref=f199e171]:
+        - link "194" [ref=f199e172] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/194
+      - listitem [ref=f199e173]:
+        - link "195" [ref=f199e174] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/195
+      - listitem [ref=f199e175]:
+        - link "196" [ref=f199e176] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/196
+      - listitem [ref=f199e177]:
+        - link "197" [ref=f199e178] [cursor=pointer]:
+          - /url: https://www.asiamonstr.com/category/giga/page/197
+      - listitem [ref=f199e179]:
+        - generic [ref=f199e180]: "198"
+    - generic [ref=f199e181]:
+      - link "Akari Minase (23 items)" [ref=f199e182] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/akari-minase
+        - text: Akari Minase
+      - link "Akari Niimura (48 items)" [ref=f199e183] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/akari-niimura
+        - text: Akari Niimura
+      - link "Aoi Mizutani (46 items)" [ref=f199e184] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/aoi-mizutani
+        - text: Aoi Mizutani
+      - link "Arisa Taki (20 items)" [ref=f199e185] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/arisa-taki
+        - text: Arisa Taki
+      - link "Ayaka Tomoda (26 items)" [ref=f199e186] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/ayaka-tomoda
+        - text: Ayaka Tomoda
+      - link "Ayaka Tsuji (57 items)" [ref=f199e187] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/ayaka-tsuji
+        - text: Ayaka Tsuji
+      - link "Ayumi Onodera (24 items)" [ref=f199e188] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/ayumi-onodera
+        - text: Ayumi Onodera
+      - link "Chika Arimura (20 items)" [ref=f199e189] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/chika-arimura
+        - text: Chika Arimura
+      - link "Hana Kano (27 items)" [ref=f199e190] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/hana-kano
+        - text: Hana Kano
+      - link "Haruna Ayane (28 items)" [ref=f199e191] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/haruna-ayane
+        - text: Haruna Ayane
+      - link "Hikaru Konno (23 items)" [ref=f199e192] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/hikaru-konno
+        - text: Hikaru Konno
+      - link "Hono Wakamiya (33 items)" [ref=f199e193] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/hono-wakamiya
+        - text: Hono Wakamiya
+      - link "Kanari Tsubaki (20 items)" [ref=f199e194] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/kanari-tsubaki
+        - text: Kanari Tsubaki
+      - link "Ko Asumi (20 items)" [ref=f199e195] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/ko-asumi
+        - text: Ko Asumi
+      - link "Kokomi Hoshinaka (31 items)" [ref=f199e196] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/kokomi-hoshinaka
+        - text: Kokomi Hoshinaka
+      - link "Kyouko Maki (24 items)" [ref=f199e197] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/kyouko-maki
+        - text: Kyouko Maki
+      - link "Maiko Sahara (20 items)" [ref=f199e198] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/maiko-sahara
+        - text: Maiko Sahara
+      - link "Mai Miori (37 items)" [ref=f199e199] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/mai-miori
+        - text: Mai Miori
+      - link "Mao Hamasaki (31 items)" [ref=f199e200] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/mao-hamasaki
+        - text: Mao Hamasaki
+      - link "Miho Tono (46 items)" [ref=f199e201] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/miho-tono
+        - text: Miho Tono
+      - link "Miki Sunohara (39 items)" [ref=f199e202] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/miki-sunohara
+        - text: Miki Sunohara
+      - link "Miku Abeno (20 items)" [ref=f199e203] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/miku-abeno
+        - text: Miku Abeno
+      - link "Miori Hara (30 items)" [ref=f199e204] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/miori-hara
+        - text: Miori Hara
+      - link "Mitsuki Nagisa (27 items)" [ref=f199e205] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/mitsuki-nagisa
+        - text: Mitsuki Nagisa
+      - link "Naoko Oosako (29 items)" [ref=f199e206] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/naoko-oosako
+        - text: Naoko Oosako
+      - link "Narumi Ookawa (44 items)" [ref=f199e207] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/narumi-ookawa
+        - text: Narumi Ookawa
+      - link "Nonoka Akari (22 items)" [ref=f199e208] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/nonoka-akari
+        - text: Nonoka Akari
+      - link "Noriko Fujioka (21 items)" [ref=f199e209] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/noriko-fujioka
+        - text: Noriko Fujioka
+      - link "Nozomi Arimura (22 items)" [ref=f199e210] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/nozomi-arimura
+        - text: Nozomi Arimura
+      - link "Nozomi Haduki (25 items)" [ref=f199e211] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/nozomi-haduki
+        - text: Nozomi Haduki
+      - link "Rei Misumi (23 items)" [ref=f199e212] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/rei-misumi
+        - text: Rei Misumi
+      - link "Rina Utimura (28 items)" [ref=f199e213] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/rina-utimura
+        - text: Rina Utimura
+      - link "Rion Izumi (23 items)" [ref=f199e214] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/rion-izumi
+        - text: Rion Izumi
+      - link "Rockass Mania (31 items)" [ref=f199e215] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/rockass-mania
+        - text: Rockass Mania
+      - link "Rui Negoto (31 items)" [ref=f199e216] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/rui-negoto
+        - text: Rui Negoto
+      - link "Sakura Tsuji (30 items)" [ref=f199e217] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/sakura-tsuji
+        - text: Sakura Tsuji
+      - link "Sarara Uruki (26 items)" [ref=f199e218] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/sarara-uruki
+        - text: Sarara Uruki
+      - link "Shijimi (21 items)" [ref=f199e219] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/shijimi
+        - text: Shijimi
+      - link "Umi Oikawa (32 items)" [ref=f199e220] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/umi-oikawa
+        - text: Umi Oikawa
+      - link "Yuha Kiriyama (33 items)" [ref=f199e221] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/yuha-kiriyama
+        - text: Yuha Kiriyama
+      - link "Yui Hatano (31 items)" [ref=f199e222] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/yui-hatano
+        - text: Yui Hatano
+      - link "Yui Misaki (25 items)" [ref=f199e223] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/yui-misaki
+        - text: Yui Misaki
+      - link "Yui Tenma (24 items)" [ref=f199e224] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/yui-tenma
+        - text: Yui Tenma
+      - link "Yuma Miyazaki (24 items)" [ref=f199e225] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/yuma-miyazaki
+        - text: Yuma Miyazaki
+      - link "Yurina Ayashiro (23 items)" [ref=f199e226] [cursor=pointer]:
+        - /url: https://www.asiamonstr.com/tag/yurina-ayashiro
+        - text: Yurina Ayashiro
+  - paragraph [ref=f199e227]:
+    - link "🠹" [ref=f199e228] [cursor=pointer]:
+      - /url: "#top"
+  - contentinfo
+```

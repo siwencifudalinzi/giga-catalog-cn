@@ -25,6 +25,31 @@ def product(code, date="2026-07-01", **overrides):
 
 
 class DeterministicMergeTests(unittest.TestCase):
+    def test_archived_preview_images_survive_merge_without_changing_known_series_dates(self) -> None:
+        catalog, _ = build_catalog(
+            [
+                product("GIRO-91", date="2015-05-01"),
+                product(
+                    "GIRO-92",
+                    date=None,
+                    previewImages=[
+                        "https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2015/05/GIRO92_01.jpg"
+                    ],
+                ),
+            ],
+            {},
+            generated_at=GENERATED_AT,
+        )
+
+        series = catalog["series"][0]
+        archived = next(video for video in series["videos"] if video["code"] == "GIRO-92")
+        self.assertEqual(
+            archived["previewImages"],
+            ["https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2015/05/GIRO92_01.jpg"],
+        )
+        self.assertEqual(series["firstReleaseDate"], "2015-05-01")
+        self.assertEqual(series["latestReleaseDate"], "2015-05-01")
+
     def test_preserves_vidara_links_from_the_live_sheet(self) -> None:
         catalog, _ = build_catalog(
             [product("SPSF-61")],

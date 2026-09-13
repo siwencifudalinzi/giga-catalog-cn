@@ -32,6 +32,7 @@ PUBLIC_VIDEO_FIELDS = frozenset(
         "productId",
         "previewBase",
         "previewCount",
+        "previewImages",
         "links",
     }
 )
@@ -190,7 +191,7 @@ def _build_v3_templates(
     assignments.sort(key=lambda item: item[0])
     recent_order = sorted(all_videos, key=lambda item: item[1].get("code"))
     recent_order.sort(
-        key=lambda item: item[1].get("releaseDate"), reverse=True
+        key=lambda item: item[1].get("releaseDate") or "", reverse=True
     )
     recent_videos = [
         item[2] | {"series": item[0]} for item in recent_order
@@ -428,7 +429,7 @@ def _validate_runtime_v3(
     expected_recent.sort(
         key=lambda item: expected_video_by_code[item["code"]][1].get(
             "releaseDate"
-        ),
+        ) or "",
         reverse=True,
     )
     if bootstrap.get("recentVideos") != expected_recent[: len(bootstrap.get("recentVideos", []))]:

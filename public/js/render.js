@@ -691,8 +691,11 @@ export function renderSearchResults(container, videos = [], options = {}) {
  * Derive a small preview batch from the compact descriptor after a dialog opens.
  */
 export function derivePreviewUrls(video = {}, options = {}) {
+  const explicitImages = Array.isArray(video.previewImages)
+    ? video.previewImages.map(safeHttpUrl).filter(Boolean)
+    : [];
   const base = safeHttpUrl(video.previewBase);
-  const count = normalizeNonnegativeInteger(video.previewCount);
+  const count = explicitImages.length || normalizeNonnegativeInteger(video.previewCount);
   const start = normalizeNonnegativeInteger(options.start);
   const requestedLimit =
     options.limit === undefined
@@ -700,7 +703,14 @@ export function derivePreviewUrls(video = {}, options = {}) {
       : normalizeNonnegativeInteger(options.limit);
   const limit = Math.min(requestedLimit, MAX_PREVIEW_BATCH);
   if (!base || count === 0 || start >= count || limit === 0) {
-    return Object.freeze([]);
+    if (!explicitImages.length || start >= count || limit === 0) {
+      return Object.freeze([]);
+    }
+    return Object.freeze(explicitImages.slice(start, start + limit));
+  }
+
+  if (explicitImages.length) {
+    return Object.freeze(explicitImages.slice(start, start + limit));
   }
 
   const parsedBase = new URL(base);

@@ -169,6 +169,21 @@ test("runtime store installs generation-bound shards and search records", () => 
   assert.equal(store.getVideo("spsf_2").code, "SPSF-2");
 });
 
+test("archive videos retain null dates and validated AsiaMonstr previews", () => {
+  const bootstrapValue = validBootstrap();
+  const archive = bootstrapValue.recentVideos[0];
+  archive.releaseDate = null;
+  delete archive.previewBase;
+  delete archive.previewCount;
+  archive.previewImages = [
+    "https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2013/02/avgp009_s.jpg",
+  ];
+  assert.equal(parseBootstrap(bootstrapValue).recentVideos[0].previewImages.length, 1);
+
+  archive.previewImages = ["https://images.example/untrusted.jpg"];
+  assertInvalid(() => parseBootstrap(bootstrapValue));
+});
+
 test("every generated V3 series artifact parses against its bootstrap summary", () => {
   const dataRoot = new URL("../../public/data/", import.meta.url);
   const bootstrap = parseBootstrap(JSON.parse(

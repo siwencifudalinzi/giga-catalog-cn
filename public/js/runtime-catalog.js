@@ -223,10 +223,28 @@ function hasLinkLeaf(value) {
   return typeof value === "string" && Boolean(value);
 }
 
+function previewImages(value, kind) {
+  if (!Array.isArray(value) || !value.length || value.length > 99 || new Set(value).size !== value.length) fail(kind);
+  for (const image of value) {
+    safeHttpUrl(image, kind);
+    let parsed;
+    try {
+      parsed = new URL(image);
+    } catch {
+      fail(kind);
+    }
+    if (parsed.protocol !== "https:" || parsed.hostname !== "i0.wp.com"
+      || !parsed.pathname.startsWith("/www.asiamonstr.com/wp-content/uploads/")
+      || !/\.(?:avif|gif|jpe?g|png|webp)$/iu.test(parsed.pathname)
+      || parsed.search || parsed.hash) fail(kind);
+  }
+  return value;
+}
+
 function video(value, kind, { includeSeries } = {}) {
   const required = ["code", "number", "title", "actors", "releaseDate", "cover"];
   if (includeSeries) required.push("series");
-  const allowed = [...required, "productId", "previewBase", "previewCount", "links"];
+  const allowed = [...required, "productId", "previewBase", "previewCount", "previewImages", "links"];
   object(value, kind, { required, allowed });
   const code = canonicalVideoCode(value.code, kind);
   const number = integer(value.number, kind);
@@ -234,7 +252,7 @@ function video(value, kind, { includeSeries } = {}) {
   if (`${code.slice(0, split)}-${number}` !== code) fail(kind);
   text(value.title, kind);
   if (!Array.isArray(value.actors) || value.actors.some((actor) => typeof actor !== "string" || !actor.trim())) fail(kind);
-  date(value.releaseDate, kind);
+  if (value.releaseDate !== null) date(value.releaseDate, kind);
   if (value.cover !== null) safeHttpUrl(value.cover, kind);
   if (Object.hasOwn(value, "series")) canonicalSeriesCode(value.series, kind);
   if (Object.hasOwn(value, "productId")) integer(value.productId, kind, { minimum: 1 });
@@ -245,6 +263,7 @@ function video(value, kind, { includeSeries } = {}) {
     safeHttpUrl(value.previewBase, kind);
     integer(value.previewCount, kind, { minimum: 1, maximum: 99 });
   }
+  if (Object.hasOwn(value, "previewImages")) previewImages(value.previewImages, kind);
   if (Object.hasOwn(value, "links")) links(value.links, kind);
   return value;
 }

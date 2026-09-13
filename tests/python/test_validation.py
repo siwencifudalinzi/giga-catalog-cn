@@ -40,6 +40,29 @@ def video_map(catalog):
 
 
 class CatalogSchemaValidationTests(unittest.TestCase):
+    def test_archived_video_accepts_unknown_release_date_and_explicit_asiamonstr_previews(self) -> None:
+        catalog = catalog_for(
+            [
+                product(
+                    "GIRO-92",
+                    date=None,
+                    cover="https://www.giga-web.jp/db_titles/giro/giro92/pac_s.jpg",
+                    previewImages=[
+                        "https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2015/05/GIRO92_01.jpg",
+                        "https://i0.wp.com/www.asiamonstr.com/wp-content/uploads/2015/05/GIRO92_02.jpg",
+                    ],
+                )
+            ]
+        )
+
+        self.assertEqual(validate_catalog(catalog), [])
+
+        invalid = copy.deepcopy(catalog)
+        video_map(invalid)["GIRO-92"]["previewImages"].append(
+            "https://example.test/not-asiamonstr.jpg"
+        )
+        self.assertTrue(any("previewImages" in issue for issue in validate_catalog(invalid)))
+
     def test_validates_complete_tag_references_and_counts(self) -> None:
         catalog = build_catalog(
             [

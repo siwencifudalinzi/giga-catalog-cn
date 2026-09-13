@@ -1,0 +1,1123 @@
+{
+  "mode": "audit",
+  "pagesFetched": 221,
+  "parsedProducts": 4386,
+  "newProducts": 4386,
+  "knownProducts": 0,
+  "cursor": 221,
+  "retries": 0,
+  "errors": 0,
+  "stopReason": "empty",
+  "cardsSeen": 4386,
+  "cardsResolved": 4386,
+  "detailFallbacks": 0,
+  "cardIntegrityComplete": true,
+  "pageReconciliation": [
+    {
+      "page": 1,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 2,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 3,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 4,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 5,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 6,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 7,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 8,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 9,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 10,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 11,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 12,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 13,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 14,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 15,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 16,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 17,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 18,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 19,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 20,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 21,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 22,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 23,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 24,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 25,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 26,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 27,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 28,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 29,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 30,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 31,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 32,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 33,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 34,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 35,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 36,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 37,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 38,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 39,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 40,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 41,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 42,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 43,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 44,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 45,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 46,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 47,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 48,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 49,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 50,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 51,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 52,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 53,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 54,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 55,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 56,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 57,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 58,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 59,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 60,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 61,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 62,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 63,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 64,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 65,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 66,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 67,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 68,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 69,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 70,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 71,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 72,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 73,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 74,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 75,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 76,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 77,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 78,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 79,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 80,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 81,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 82,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 83,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 84,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 85,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 86,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 87,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 88,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 89,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 90,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 91,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 92,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 93,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 94,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 95,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 96,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 97,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 98,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 99,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 100,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 101,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 102,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 103,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 104,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 105,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 106,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 107,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 108,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 109,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 110,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 111,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 112,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 113,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 114,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 115,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 116,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 117,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 118,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 119,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 120,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 121,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 122,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 123,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 124,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 125,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 126,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 127,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 128,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 129,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 130,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 131,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 132,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 133,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 134,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 135,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 136,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 137,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 138,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 139,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 140,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 141,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 142,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 143,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 144,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 145,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 146,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 147,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 148,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 149,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 150,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 151,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 152,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 153,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 154,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 155,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 156,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 157,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 158,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 159,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 160,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 161,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 162,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 163,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 164,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 165,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 166,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 167,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 168,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 169,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 170,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 171,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 172,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 173,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 174,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 175,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 176,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 177,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 178,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 179,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 180,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 181,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 182,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 183,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 184,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 185,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 186,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 187,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 188,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 189,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 190,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 191,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 192,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 193,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 194,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 195,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 196,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 197,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 198,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 199,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 200,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 201,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 202,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 203,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 204,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 205,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 206,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 207,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 208,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 209,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 210,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 211,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 212,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 213,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 214,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 215,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 216,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 217,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 218,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 219,
+      "cards": 20,
+      "resolved": 20
+    },
+    {
+      "page": 220,
+      "cards": 6,
+      "resolved": 6
+    },
+    {
+      "page": 221,
+      "cards": 0,
+      "resolved": 0
+    }
+  ],
+  "diagnostics": []
+}
