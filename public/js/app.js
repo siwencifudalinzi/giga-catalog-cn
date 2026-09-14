@@ -21,6 +21,18 @@ import {
   createResolvedLinkLoader,
   resolveLinkTarget,
 } from "./resolved-links.js";
+import {
+  bindVideoDetailCloseRequests,
+  createVideoDetailNavigation,
+  createVideoDialogCloseLifecycle,
+  restoreVideoDetailFocus,
+} from "./video-detail-navigation.js";
+export {
+  bindVideoDetailCloseRequests,
+  createVideoDetailNavigation,
+  createVideoDialogCloseLifecycle,
+  restoreVideoDetailFocus,
+};
 
 export const UI_STORAGE_KEY = "giga_catalog_ui_v1";
 
@@ -992,7 +1004,6 @@ function startApplication() {
     tagLoad: null,
     tagRetry: null,
     detailHydration: null,
-    detailOpenPromises: new Map(),
     activeDialogCode: null,
     linkUpdatesTrigger: null,
     linkUpdates: null,
@@ -1904,7 +1915,10 @@ function startApplication() {
         state.tagError = null;
         removeResourceError("tags");
         if (ui.videoDialog.open && state.activeDialogCode) {
-          void openVideoDialog(state.activeDialogCode, state.dialogTrigger).catch(() => {});
+          void openVideoDialog(state.activeDialogCode, state.dialogTrigger, {
+            force: true,
+            historyMode: "none",
+          }).catch(() => {});
         }
         return true;
       } catch (error) {
@@ -1995,7 +2009,6 @@ function startApplication() {
         if (state.view === "tags" && !state.query) renderTagView();
       },
     });
-    state.detailOpenPromises.clear();
     persistPreferences();
     updateSummary();
     renderSeriesNavigation();
@@ -2353,23 +2366,20 @@ function startApplication() {
     return actions;
   }
 
-  async function openVideoDialog(code, trigger, { controls = [] } = {}) {
-    const key = detailRetryAction(code)?.code || code;
-    const existing = state.detailOpenPromises.get(key);
-    if (existing) return existing;
-    const task = openVideoDialogOnce(code, trigger, controls);
-    state.detailOpenPromises.set(key, task);
-    try {
-      return await task;
-    } finally {
-      if (state.detailOpenPromises.get(key) === task) {
-        state.detailOpenPromises.delete(key);
-      }
-    }
+  function openVideoDialog(
+    code,
+    trigger,
+    { controls = [], force = false, historyMode = "push", source = null } = {},
+  ) {
+    return videoNavigation.open(
+      code,
+      { controls, source, trigger },
+      { force, historyMode },
+    );
   }
 
-  async function openVideoDialogOnce(code, trigger, controls = []) {
-    const video = await (state.detailHydration?.open(code, trigger, {
+  async function prepareVideoDialog(code, { trigger, controls = [] } = {}) {
+    return state.detailHydration?.open(code, trigger, {
       signal: state.fetchController?.signal,
       controls,
     }) ??
@@ -2389,13 +2399,13 @@ function startApplication() {
       }).open(code, trigger, {
         signal: state.fetchController?.signal,
         controls,
-      }));
-    if (!video) {
-      return;
-    }
+      });
+  }
+
+  function showVideoDialog(video, { trigger } = {}) {
+    videoDialogLifecycle.beginOpen();
     removeResourceError("detail");
     disconnectPreviewObserver();
-    state.activeDialogCode = video.code;
     state.dialogTrigger = trigger ?? document.activeElement;
     const layout = createElement("div", "detail-layout");
     const coverFrame = createElement("figure", "detail-cover-frame");
@@ -2462,11 +2472,33 @@ function startApplication() {
     ui.videoDialog.querySelector("[data-action='close-dialog']").focus();
   }
 
-  function closeVideoDialog() {
-    if (ui.videoDialog.open) {
-      ui.videoDialog.close();
+  function hideVideoDialog({ context } = {}) {
+    if (!state.dialogTrigger && context?.trigger) {
+      state.dialogTrigger = context.trigger;
     }
+    if (ui.videoDialog.open) {
+      pendingVideoDialogCloses.push(videoDialogLifecycle.beginClose());
+      ui.videoDialog.close();
+    } else {
+      videoDialogLifecycle.cleanupNow();
+    }
+  }
+
+  function findVideoDialogTrigger(code) {
+    return [...document.querySelectorAll('[data-action="open-video"]')]
+      .find((control) => control.dataset.code === code) ?? null;
+  }
+
+  function cleanupVideoDialog() {
+    disconnectPreviewObserver();
+    ui.videoDialogContent.replaceChildren();
     state.activeDialogCode = null;
+    const origin = state.dialogTrigger;
+    const fallback = origin?.dataset?.code
+      ? findVideoDialogTrigger(origin.dataset.code) ?? ui.search
+      : ui.search;
+    restoreVideoDetailFocus(origin, fallback);
+    state.dialogTrigger = null;
   }
 
   function trapDialogFocus(event) {
@@ -2590,6 +2622,31 @@ function startApplication() {
     }
   }
 
+  const pendingVideoDialogCloses = [];
+  const videoDialogLifecycle = createVideoDialogCloseLifecycle(
+    cleanupVideoDialog,
+  );
+
+  const detailSessionId = globalThis.crypto?.randomUUID?.()
+    ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const videoNavigation = createVideoDetailNavigation({
+    history: window.history,
+    eventTarget: window,
+    sessionId: detailSessionId,
+    prepareDetail: prepareVideoDialog,
+    showDetail: showVideoDialog,
+    hideDetail: hideVideoDialog,
+    isDetailOpen: () => ui.videoDialog.open,
+    onActiveChange: (code) => {
+      state.activeDialogCode = code;
+    },
+    resolveOrigin: findVideoDialogTrigger,
+  });
+  videoNavigation.start();
+  bindVideoDetailCloseRequests(ui.videoDialog, (reason) => {
+    videoNavigation.requestClose(reason);
+  });
+
   document.addEventListener("click", (event) => {
     const control = event.target.closest("[data-action]");
     if (!control) {
@@ -2669,10 +2726,10 @@ function startApplication() {
       resetProgressiveCounter(state.visible, { series: code });
       mountSeriesWindow(code);
     } else if (action === "open-video") {
-      void openVideoDialog(control.dataset.code, control).catch(() => {});
+      void openVideoDialog(control.dataset.code, control, {
+        source: control.closest("[data-context]")?.dataset.context ?? document.body.dataset.view,
+      }).catch(() => {});
       if (!state.tagsReady) void ensureTagCatalog(findTagTabControl());
-    } else if (action === "close-dialog") {
-      closeVideoDialog();
     } else if (action === "copy-code") {
       void copyCode(control.dataset.code);
     } else if (action === "cycle-favorite") {
@@ -2694,7 +2751,7 @@ function startApplication() {
       }
     } else if (action === "actor-search") {
       const actor = control.dataset.actor ?? "";
-      closeVideoDialog();
+      videoNavigation.leaveForListAction("actor");
       ui.search.value = actor;
       ui.searchClear.hidden = !actor;
       state.query = actor.trim();
@@ -2735,7 +2792,7 @@ function startApplication() {
           input: ui.search,
           clearButton: ui.searchClear,
         });
-        closeVideoDialog();
+        videoNavigation.leaveForListAction("tag");
         renderCurrentView({ focusMain: true });
       }
     } else if (action === "load-more") {
@@ -2773,8 +2830,7 @@ function startApplication() {
     } else if (action === "retry-detail") {
       const code = detailRetryAction(control.dataset.code)?.code;
       if (!code) return;
-      const card = [...document.querySelectorAll('[data-action="open-video"]')]
-        .find((candidate) => candidate.dataset.code === code);
+      const card = findVideoDialogTrigger(code);
       const trigger = resolveDetailDialogTrigger(card, control);
       const controls = card ? [control] : [];
       void openVideoDialog(code, trigger, { controls }).catch(() => {});
@@ -2891,7 +2947,9 @@ function startApplication() {
     }
   });
 
-  for (const dialog of [ui.videoDialog, ui.seriesDrawer, ui.linkUpdatesDialog]) {
+  ui.videoDialog.addEventListener("keydown", trapDialogFocus);
+
+  for (const dialog of [ui.seriesDrawer, ui.linkUpdatesDialog]) {
     dialog.addEventListener("keydown", trapDialogFocus);
     dialog.addEventListener("click", (event) => {
       if (event.target === dialog) {
@@ -2905,12 +2963,7 @@ function startApplication() {
   }
 
   ui.videoDialog.addEventListener("close", () => {
-    disconnectPreviewObserver();
-    ui.videoDialogContent.replaceChildren();
-    if (state.dialogTrigger?.isConnected) {
-      state.dialogTrigger.focus();
-    }
-    state.dialogTrigger = null;
+    pendingVideoDialogCloses.shift()?.();
   });
 
   ui.seriesDrawer.addEventListener("close", () => {
