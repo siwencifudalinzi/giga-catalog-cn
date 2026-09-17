@@ -65,6 +65,16 @@ _XLSX_HYPERLINK_REL_TYPE = (
 _MAX_XLSX_BYTES = 8 * 1024 * 1024
 _MAX_XLSX_UNCOMPRESSED_BYTES = 16 * 1024 * 1024
 _MAX_XLSX_ENTRIES = 100
+_KNOWN_PMID_NON_CATALOG_CODES = frozenset({
+    "PIMD-105",
+    "PMIF-109",
+    "PIMD-113",
+    "PIMD-114",
+    "PIMD-121",
+    "PIMD-122",
+    "PIMD-123",
+    "PIMD-124",
+})
 
 
 class SubtitleFormatError(ValueError):
@@ -709,6 +719,8 @@ def parse_collection_child_csv(
     series: str,
     catalog_codes: Iterable[str],
     pending_codes: Optional[set[str]] = None,
+    allow_known_pmid_typo: bool = False,
+    diagnostics: Optional[List[dict]] = None,
 ) -> Dict[str, str]:
     """Parse CODE,URL with optional HARDSUB note and empty export padding.
 
@@ -734,6 +746,7 @@ def parse_collection_child_csv(
     links: Dict[str, str] = {}
     seen_codes = set()
     pending_catalog_codes = set()
+    ignored_rows = []
     try:
         rows = csv.reader(StringIO(text))
         for row_number, row in enumerate(rows, 1):
@@ -759,6 +772,23 @@ def parse_collection_child_csv(
                 raise SubtitleFormatError(
                     f"collection child row {row_number} has an invalid code"
                 )
+            if (
+                allow_known_pmid_typo
+                and normalized_series == "PMID"
+                and code in _KNOWN_PMID_NON_CATALOG_CODES
+                and code not in normalized_catalog_codes
+            ):
+                if code in seen_codes:
+                    raise SubtitleFormatError(
+                        f"duplicate normalized collection child code {code}"
+                    )
+                seen_codes.add(code)
+                _collection_source_url(row[1].strip())
+                ignored_rows.append({
+                    "series": "PMID", "row": row_number,
+                    "reason": "known_non_catalog_code_typo",
+                })
+                continue
             if code.rsplit("-", 1)[0] != normalized_series:
                 raise SubtitleFormatError(
                     f"collection child code {code} has the wrong series prefix"
@@ -781,6 +811,8 @@ def parse_collection_child_csv(
         raise SubtitleFormatError("collection child CSV contains no catalog links")
     if pending_codes is not None:
         pending_codes.update(pending_catalog_codes)
+    if diagnostics is not None:
+        diagnostics.extend(ignored_rows)
     return dict(sorted(links.items()))
 
 

@@ -51,6 +51,16 @@ DEFAULT_SUBTITLE_URL = (
     "1wyNMnWXLRoHySoErtj3A-XeuBrenem7NCRb_Qvm5Zag/"
     "htmlview/sheet?pli=1&headers=true&gid=0"
 )
+KNOWN_UNAVAILABLE_GHVR_CSV_URL = (
+    "https://docs.google.com/spreadsheets/d/"
+    "12s9KVRyrtTD9OCRfP8lnLcBmgnYNZcwtx6oShEYTwFQ/"
+    "export?format=csv&gid=0"
+)
+KNOWN_PMID_CSV_URL = (
+    "https://docs.google.com/spreadsheets/d/"
+    "1At1H45bj0W-G9B4g6V06IHOnxKzzjUst5DInw29IOEc/"
+    "export?format=csv&gid=0"
+)
 DEFAULT_BASE_URL = BASE_URL
 DEFAULT_LEGACY_DIR = Path(r"D:\giga-catalog")
 DEFAULT_OUTPUT_ROOT = REPOSITORY_ROOT / "public"
@@ -227,12 +237,29 @@ def run_refresh(
             except (requests.RequestException, SubtitleFormatError) as error:
                 collection_diagnostics.append({"series": child.series, "reason": str(error)})
             continue
-        child_text = collection_downloader(
-            child.csv_url,
-            timeout=options.timeout,
-            retries=options.retries,
-            delay_seconds=options.delay,
-        )
+        try:
+            child_text = collection_downloader(
+                child.csv_url,
+                timeout=options.timeout,
+                retries=options.retries,
+                delay_seconds=options.delay,
+            )
+        except requests.HTTPError as error:
+            if (
+                child.series == "GHVR"
+                and child.csv_url == KNOWN_UNAVAILABLE_GHVR_CSV_URL
+                and error.response is not None
+                and error.response.status_code == 404
+                and not any(
+                    code.startswith("GHVR-") and "reupload" in links
+                    for code, links in selected_links.items()
+                )
+            ):
+                collection_diagnostics.append({
+                    "series": "GHVR", "reason": "known_unavailable_source_404",
+                })
+                continue
+            raise
         if not isinstance(child_text, str):
             raise RefreshError("collection child downloader did not return CSV text")
         try:
@@ -241,6 +268,10 @@ def run_refresh(
                 series=child.series,
                 catalog_codes=catalog_codes,
                 pending_codes=collection_pending_codes,
+                allow_known_pmid_typo=(
+                    child.series == "PMID" and child.csv_url == KNOWN_PMID_CSV_URL
+                ),
+                diagnostics=collection_diagnostics,
             )
         except SubtitleFormatError as error:
             raise RefreshError(f"collection series {child.series}: {error}") from error

@@ -472,6 +472,31 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
                 with self.assertRaisesRegex(SubtitleFormatError, message):
                     parser(payload, series="AKBD", catalog_codes={"AKBD-1"})
 
+    def test_known_pmid_typo_does_not_relax_other_child_validation(self) -> None:
+        parser = subtitle_module.parse_collection_child_csv
+        for row, catalog_codes in (
+            ("PIMD-106,https://ouo.io/other", {"PMID-104"}),
+            ("PIMD-105,https://evil.example/link", {"PMID-104"}),
+            ("PIMD-105,https://ouo.io/typo", {"PMID-104", "PIMD-105"}),
+        ):
+            with self.subTest(row=row, catalog_codes=catalog_codes):
+                diagnostics = []
+                with self.assertRaises(SubtitleFormatError):
+                    parser(
+                        "PMID-104,https://ouo.io/ready\n" + row + "\n",
+                        series="PMID", catalog_codes=catalog_codes,
+                        allow_known_pmid_typo=True, diagnostics=diagnostics,
+                    )
+                self.assertEqual(diagnostics, [])
+        with self.assertRaisesRegex(SubtitleFormatError, "duplicate"):
+            parser(
+                "PMID-104,https://ouo.io/ready\n"
+                "PIMD-105,https://ouo.io/typo\n"
+                "PIMD-105,https://ouo.io/typo\n",
+                series="PMID", catalog_codes={"PMID-104"},
+                allow_known_pmid_typo=True,
+            )
+
     def test_collection_child_hardsub_note_does_not_change_link_classification(self) -> None:
         for note in ("hardsub", " HARDSUB "):
             self.assertEqual(

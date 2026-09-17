@@ -396,6 +396,141 @@ class RefreshPipelineTests(unittest.TestCase):
             self.assertEqual(videos["AVGP-1"]["links"]["gofile"], "https://example.test/keep")
             self.assertEqual(len(result["internal"]["sources"]["collection"]["diagnostics"]), 1)
 
+    def test_known_unlinked_ghvr_404_does_not_block_other_collection_links(self) -> None:
+        import requests
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            output = root / "public"
+            write_previous(
+                output,
+                products=[product("GHVR-1"), product("AHEF-1", productId=2)],
+            )
+            directory = EMPTY_COLLECTION_DIRECTORY_HTML.replace(
+                "</tbody>",
+                '<tr><td class="blue"><a href="https://drive.google.com/open?'
+                'id=12s9KVRyrtTD9OCRfP8lnLcBmgnYNZcwtx6oShEYTwFQ&usp=drive_copy">GHVR</a></td>'
+                '<td class="blue"><a href="https://docs.google.com/spreadsheets/d/'
+                'ahef-child/edit?gid=0#gid=0">AHEF</a></td></tr></tbody>',
+            ).replace("</style>", ".waffle .blue { color: #1155cc; }</style>")
+
+            def download(url, **kwargs):
+                if url == SUBTITLE_DIRECTORY_URL:
+                    return directory
+                if "12s9KVRyrtTD9OCRfP8lnLcBmgnYNZcwtx6oShEYTwFQ" in url:
+                    response = requests.Response()
+                    response.status_code = 404
+                    raise requests.HTTPError("missing GHVR sheet", response=response)
+                return "AHEF-01,https://ouo.io/ready\n"
+
+            result = run_refresh(
+                ["--mode", "links-only", "--output-root", str(output),
+                 "--data-root", str(root / "private")],
+                sheet_downloader=lambda *args, **kwargs: SHEET_HEADER,
+                collection_downloader=download,
+                featured_cover_refresher=lambda *args, **kwargs: {"published": False},
+                clock=lambda: GENERATED_AT,
+            )
+            catalog = json.loads((output / "data" / "catalog.json").read_text(encoding="utf-8"))
+            videos = {v["code"]: v for s in catalog["series"] for v in s["videos"]}
+            self.assertFalse(videos["GHVR-1"].get("links"))
+            self.assertEqual(videos["AHEF-1"]["links"]["reupload"], "https://ouo.io/ready")
+            self.assertEqual(
+                result["internal"]["sources"]["collection"]["diagnostics"],
+                [{"series": "GHVR", "reason": "known_unavailable_source_404"}],
+            )
+
+    def test_collection_404_outside_the_ghvr_exception_still_fails_closed(self) -> None:
+        import requests
+        ghvr_id = "12s9KVRyrtTD9OCRfP8lnLcBmgnYNZcwtx6oShEYTwFQ"
+        cases = (
+            ("AHEF", ghvr_id, None, 404),
+            ("GHVR", "other-child", None, 404),
+            ("GHVR", ghvr_id, {"reupload": "https://ouo.io/old"}, 404),
+            ("GHVR", ghvr_id, None, 503),
+        )
+        for series, child_id, previous_links, status in cases:
+            with self.subTest(series=series, child_id=child_id, status=status,
+                              previous_links=previous_links), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                output = root / "public"
+                write_previous(output, products=[product(f"{series}-1")],
+                               links={f"{series}-1": previous_links} if previous_links else None)
+                catalog_path = output / "data" / "catalog.json"
+                before = catalog_path.read_bytes()
+                directory = EMPTY_COLLECTION_DIRECTORY_HTML.replace(
+                    "</tbody>",
+                    '<tr><td class="blue"><a href="https://drive.google.com/open?'
+                    f'id={child_id}&usp=drive_copy">{series}</a></td></tr></tbody>',
+                ).replace("</style>", ".waffle .blue { color: #1155cc; }</style>")
+
+                def download(url, **kwargs):
+                    if url == SUBTITLE_DIRECTORY_URL:
+                        return directory
+                    response = requests.Response()
+                    response.status_code = status
+                    raise requests.HTTPError("unavailable child", response=response)
+
+                with self.assertRaises(requests.HTTPError):
+                    run_refresh(
+                        ["--mode", "links-only", "--output-root", str(output),
+                         "--data-root", str(root / "private")],
+                        sheet_downloader=lambda *args, **kwargs: SHEET_HEADER,
+                        collection_downloader=download,
+                        clock=lambda: GENERATED_AT,
+                    )
+                self.assertEqual(catalog_path.read_bytes(), before)
+
+    def test_eight_known_pmid_typos_do_not_block_valid_rows_in_that_sheet(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            output = root / "public"
+            write_previous(
+                output,
+                products=[product("PMID-104"), product("PMID-106", productId=2)],
+            )
+            directory = EMPTY_COLLECTION_DIRECTORY_HTML.replace(
+                "</tbody>",
+                '<tr><td class="blue"><a href="https://docs.google.com/spreadsheets/d/'
+                '1At1H45bj0W-G9B4g6V06IHOnxKzzjUst5DInw29IOEc/edit?gid=0#gid=0">'
+                'PMID</a></td></tr></tbody>',
+            ).replace("</style>", ".waffle .blue { color: #1155cc; }</style>")
+
+            def download(url, **kwargs):
+                if url == SUBTITLE_DIRECTORY_URL:
+                    return directory
+                return (
+                    "PMID-104,https://ouo.io/first\n"
+                    "PIMD-105,https://ouo.io/typo105\n"
+                    "PMIF-109,https://ouo.io/typo109\n"
+                    "PIMD-113,https://ouo.io/typo113\n"
+                    "PIMD-114,https://ouo.io/typo114\n"
+                    "PIMD-121,https://ouo.io/typo121\n"
+                    "PIMD-122,https://ouo.io/typo122\n"
+                    "PIMD-123,https://ouo.io/typo123\n"
+                    "PIMD-124,https://ouo.io/typo124\n"
+                    "PMID-106,https://ouo.io/second\n"
+                )
+
+            result = run_refresh(
+                ["--mode", "links-only", "--output-root", str(output),
+                 "--data-root", str(root / "private")],
+                sheet_downloader=lambda *args, **kwargs: SHEET_HEADER,
+                collection_downloader=download,
+                featured_cover_refresher=lambda *args, **kwargs: {"published": False},
+                clock=lambda: GENERATED_AT,
+            )
+            catalog = json.loads((output / "data" / "catalog.json").read_text(encoding="utf-8"))
+            videos = {v["code"]: v for s in catalog["series"] for v in s["videos"]}
+            self.assertEqual(videos["PMID-104"]["links"]["reupload"], "https://ouo.io/first")
+            self.assertEqual(videos["PMID-106"]["links"]["reupload"], "https://ouo.io/second")
+            self.assertEqual(
+                result["internal"]["sources"]["collection"]["diagnostics"],
+                [
+                    {"series": "PMID", "row": row, "reason": "known_non_catalog_code_typo"}
+                    for row in range(2, 10)
+                ],
+            )
+
     def test_pending_collection_removes_only_reupload_and_accepts_all_pending(self) -> None:
         for active_row in ("", "AHEF-02,https://ouo.io/ready\n"):
             with self.subTest(all_pending=not active_row), tempfile.TemporaryDirectory() as temporary:
