@@ -1680,6 +1680,70 @@ class RefreshPipelineTests(unittest.TestCase):
                 ["SPSF-1", "SPSF-2"],
             )
 
+    def test_sheet_overlay_moves_uncensored_urls_to_their_declared_code(self) -> None:
+        """A corrected owner must remove the same sheet URLs from a neighboring code."""
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            output = root / "public"
+            data = root / "private"
+            write_previous(
+                output,
+                [product("SPSF-67", productId=67), product("GIRO-92", productId=92)],
+                {
+                    "SPSF-67": {
+                        "streamtape": "https://ouo.io/normal",
+                        "uncensored": {
+                            "streamtape": "https://ouo.io/unc-st",
+                            "gofile": "https://ouo.io/unc-go",
+                        },
+                    },
+                    "GIRO-92": {"reupload": "https://ouo.io/archive"},
+                },
+            )
+
+            run_refresh(
+                [
+                    "--mode",
+                    "links-only",
+                    "--legacy-dir",
+                    str(root / "unused"),
+                    "--output-root",
+                    str(output),
+                    "--data-root",
+                    str(data),
+                ],
+                sheet_downloader=lambda *args, **kwargs: (
+                    SHEET_HEADER
+                    + "SPSF-67,https://ouo.io/normal,,,GIRO-92 UMR.mp4,"
+                    "https://ouo.io/unc-st,,https://ouo.io/unc-go\n"
+                ),
+                discoverer=lambda *args, **kwargs: self.fail(
+                    "links-only contacted GIGA"
+                ),
+                clock=lambda: GENERATED_AT,
+            )
+
+            current = json.loads((output / "data" / "catalog.json").read_text("utf-8"))
+            links = {
+                video["code"]: video.get("links")
+                for series in current["series"]
+                for video in series["videos"]
+            }
+            self.assertEqual(
+                links["SPSF-67"],
+                {"streamtape": "https://ouo.io/normal"},
+            )
+            self.assertEqual(
+                links["GIRO-92"],
+                {
+                    "reupload": "https://ouo.io/archive",
+                    "uncensored": {
+                        "streamtape": "https://ouo.io/unc-st",
+                        "gofile": "https://ouo.io/unc-go",
+                    },
+                },
+            )
+
     def test_audit_directory_error_uses_bounded_tail_fallback_without_deletion(self) -> None:
         """Recovered tail records may update an audit, but cannot authorize removals."""
         with tempfile.TemporaryDirectory() as temporary_directory:

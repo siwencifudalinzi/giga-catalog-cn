@@ -19,6 +19,41 @@ FIXTURE_PATH = Path(__file__).parents[1] / "fixtures" / "sheet.csv"
 
 
 class SheetParserTests(unittest.TestCase):
+    def test_keys_uncensored_links_by_the_code_in_the_uncensored_column(self) -> None:
+        """A neighboring NEW CODE must not receive another title's uncensored links."""
+        text = (
+            "NEW CODE,STREAMTAPE LINK,GOFILE LINK,,UNCENSORED,"
+            "STREAMTAPE LINK,GOFILE LINK,\n"
+            "SPSF-67,https://ouo.io/normal-st,https://ouo.io/normal-go,,"
+            "GIRO-92 UMR.mp4,https://ouo.io/unc-st,https://ouo.io/unc-go,\n"
+            ",,,,TRE-41 UMR.mp4,https://ouo.io/tre-st,https://ouo.io/tre-go,\n"
+        )
+
+        links, conflicts = parse_sheet_csv(text)
+
+        self.assertEqual(
+            links,
+            {
+                "GIRO-92": {
+                    "uncensored": {
+                        "gofile": "https://ouo.io/unc-go",
+                        "streamtape": "https://ouo.io/unc-st",
+                    },
+                },
+                "SPSF-67": {
+                    "gofile": "https://ouo.io/normal-go",
+                    "streamtape": "https://ouo.io/normal-st",
+                },
+                "TRE-41": {
+                    "uncensored": {
+                        "gofile": "https://ouo.io/tre-go",
+                        "streamtape": "https://ouo.io/tre-st",
+                    },
+                },
+            },
+        )
+        self.assertEqual(conflicts, [])
+
     def test_maps_live_schema_after_optional_middle_provider_columns_are_removed(self) -> None:
         """The sheet may retire Player4me/Vidara without hiding required providers."""
         text = (

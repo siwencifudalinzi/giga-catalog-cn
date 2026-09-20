@@ -2,7 +2,9 @@
 
 import csv
 from io import StringIO
+import re
 import time
+from typing import Optional
 from urllib.parse import urlparse
 
 import requests
@@ -22,6 +24,7 @@ _PROVIDER_HEADER_SLOTS = (
     (("GOFILE LINK",), True),
 )
 _TRANSIENT_STATUS_CODES = {408, 425, 429}
+_CODE_AT_START = re.compile(r"^\s*([A-Za-z][A-Za-z0-9]*[\s_-]\d+)\b")
 
 
 class SheetFormatError(ValueError):
@@ -156,15 +159,38 @@ def parse_sheet_csv(text: str) -> tuple[dict[str, dict], list[dict]]:
     conflicts: list[dict] = []
 
     for row in rows:
-        code = normalize_code(_cell(row, code_index))
-        if code is None:
+        normal_code = normalize_code(_cell(row, code_index))
+        uncensored_value = _cell(row, uncensored_index)
+        uncensored_code = (
+            _code_at_start(uncensored_value)
+            if uncensored_value
+            else normal_code
+        )
+        row_codes = tuple(
+            dict.fromkeys(
+                code for code in (normal_code, uncensored_code) if code is not None
+            )
+        )
+        if not row_codes:
             continue
 
-        if code in links:
-            conflicts.append({"type": "duplicate_code", "code": code})
-        record = links.setdefault(code, {})
-        _import_group(row, record, normal_columns, code, conflicts)
+        for code in row_codes:
+            if code in links:
+                conflicts.append({"type": "duplicate_code", "code": code})
+            links.setdefault(code, {})
 
+        if normal_code is not None:
+            _import_group(
+                row,
+                links[normal_code],
+                normal_columns,
+                normal_code,
+                conflicts,
+            )
+
+        if uncensored_code is None:
+            continue
+        record = links[uncensored_code]
         uncensored = record.get("uncensored")
         if uncensored is None:
             uncensored = {}
@@ -180,6 +206,11 @@ def parse_sheet_csv(text: str) -> tuple[dict[str, dict], list[dict]]:
             record["uncensored"] = uncensored
 
     return links, conflicts
+
+
+def _code_at_start(value: str) -> Optional[str]:
+    match = _CODE_AT_START.match(value)
+    return normalize_code(match.group(1)) if match is not None else None
 
 
 def _header_name(value: str) -> str:

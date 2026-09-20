@@ -172,6 +172,7 @@ def run_refresh(
         if previous_catalog is None
         else _extract_catalog_links(previous_catalog)
     )
+    prior_links = _remove_reassigned_sheet_urls(prior_links, sheet_links)
     selected_links = _overlay_links(prior_links, sheet_links)
 
     existing_products = (
@@ -1129,6 +1130,51 @@ def _overlay_links(base: Mapping[str, dict], overlay: Mapping[str, dict]) -> Dic
     result = copy.deepcopy(dict(base))
     for code in sorted(overlay):
         result[code] = _overlay_link_record(result.get(code, {}), overlay[code])
+    return result
+
+
+def _remove_reassigned_sheet_urls(
+    base: Mapping[str, dict], overlay: Mapping[str, dict]
+) -> Dict[str, dict]:
+    owners: Dict[str, set[str]] = {}
+    for code, record in overlay.items():
+        for url in _link_urls(record):
+            owners.setdefault(url, set()).add(code)
+    authoritative_owners = {
+        url: next(iter(codes))
+        for url, codes in owners.items()
+        if len(codes) == 1
+    }
+
+    result = {}
+    for code, record in base.items():
+        cleaned = _remove_links_owned_by_other_codes(
+            record, code, authoritative_owners
+        )
+        if cleaned:
+            result[code] = cleaned
+    return result
+
+
+def _link_urls(record: Mapping[str, object]):
+    for value in record.values():
+        if isinstance(value, Mapping):
+            yield from _link_urls(value)
+        elif isinstance(value, str):
+            yield value
+
+
+def _remove_links_owned_by_other_codes(
+    record: Mapping[str, object], code: str, owners: Mapping[str, str]
+) -> dict:
+    result = {}
+    for key, value in record.items():
+        if isinstance(value, Mapping):
+            nested = _remove_links_owned_by_other_codes(value, code, owners)
+            if nested:
+                result[key] = nested
+        elif not (isinstance(value, str) and owners.get(value) not in {None, code}):
+            result[key] = copy.deepcopy(value)
     return result
 
 
