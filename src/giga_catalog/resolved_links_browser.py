@@ -36,6 +36,14 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+async def click_flow_button(button) -> bool:
+    try:
+        await button.first.click(timeout=5_000, no_wait_after=True, force=True)
+        return True
+    except Exception:
+        return False
+
+
 async def collect_candidates(
     candidates: Iterable[LinkCandidate],
     state: MutableMapping[str, object],
@@ -72,7 +80,7 @@ def _should_skip(candidate, previous):
     return (
         isinstance(previous, Mapping)
         and previous.get("sourceUrlHash") == candidate.source_url_hash
-        and previous.get("status") != "retryable"
+        and previous.get("status") not in {"retryable", "blocked-human"}
     )
 
 
@@ -252,20 +260,14 @@ class PlaywrightOuoResolver:
                 continue
             human = page.get_by_role("button", name="I'm a human")
             if await human.count() and await human.first.is_visible():
-                try:
-                    await human.first.click(timeout=5_000, no_wait_after=True)
-                except Exception:
-                    pass
+                await click_flow_button(human)
                 await page.wait_for_timeout(1_500)
                 await self._adopt_flow_page()
                 continue
             get_link = page.get_by_role("button", name="Get Link")
             if await get_link.count() and await get_link.first.is_visible():
                 await page.wait_for_timeout(4_000)
-                try:
-                    await get_link.first.click(timeout=5_000, no_wait_after=True)
-                except Exception:
-                    pass
+                await click_flow_button(get_link)
                 await page.wait_for_timeout(3_000)
                 await self._adopt_flow_page()
                 continue

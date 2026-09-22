@@ -8,12 +8,14 @@ from src.giga_catalog import resolved_links_browser
 from src.giga_catalog.resolved_links import (
     atomic_write_json,
     build_manifest,
+    filter_candidates_by_codes,
     iter_catalog_candidates,
     seed_state_from_manifest,
     validate_final_url,
 )
 from src.giga_catalog.resolved_links_browser import (
     choose_flow_url,
+    click_flow_button,
     collect_candidates,
     collect_candidates_parallel,
     is_human_verification_title,
@@ -22,6 +24,24 @@ from src.giga_catalog.resolved_links_browser import (
 
 
 class ResolvedLinkCandidateTests(unittest.TestCase):
+    def test_code_filter_limits_browser_work_without_dropping_manifest_candidates(self):
+        catalog = {
+            "series": [{"videos": [
+                {"code": "SPSF-64", "links": {"gofile": "https://ouo.io/spsf64"}},
+                {"code": "TBB-77", "links": {"gofile": "https://ouo.io/tbb77"}},
+                {"code": "TRE-41", "links": {"gofile": "https://ouo.io/tre41"}},
+            ]}],
+        }
+        candidates = list(iter_catalog_candidates(catalog))
+
+        filtered = filter_candidates_by_codes(
+            candidates,
+            [" spsf-64 ", "TBB-77", "spsf-64"],
+        )
+
+        self.assertEqual([item.code for item in filtered], ["SPSF-64", "TBB-77"])
+        self.assertEqual([item.code for item in candidates], ["SPSF-64", "TBB-77", "TRE-41"])
+
     def test_catalog_candidates_use_stable_standard_and_uncensored_slots(self):
         catalog = {
             "series": [{
@@ -143,6 +163,60 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
         self.assertEqual(entry["provider"], "player4me")
         self.assertEqual(entry["finalUrl"], "https://gigaandzen.embed4me.com/#nrf8u")
 
+    def test_manifest_reuses_a_verified_destination_for_identical_source_urls(self):
+        catalog = {
+            "series": [{"videos": [{
+                "code": "THZA-10",
+                "links": {
+                    "reupload": "https://ouo.io/sameSource",
+                    "streamtape": "https://ouo.io/sameSource",
+                },
+            }]}],
+        }
+        candidates = list(iter_catalog_candidates(catalog))
+        verified = candidates[0]
+        state = {"schemaVersion": 1, "results": {verified.key: {
+            "sourceUrlHash": verified.source_url_hash,
+            "status": "verified",
+            "provider": "streamtape",
+            "finalUrl": "https://streamtape.com/v/id/THZA-10.mp4",
+            "checkedAt": "2026-09-20T00:00:00Z",
+        }}}
+
+        manifest = build_manifest(candidates, state, generated_at="2026-09-20T01:00:00Z")
+
+        entries = manifest["entries"]["THZA-10"]
+        self.assertEqual(
+            entries["standard.reupload"]["finalUrl"],
+            "https://streamtape.com/v/id/THZA-10.mp4",
+        )
+        self.assertEqual(
+            entries["standard.streamtape"]["finalUrl"],
+            "https://streamtape.com/v/id/THZA-10.mp4",
+        )
+
+    def test_manifest_does_not_reuse_a_destination_across_different_codes(self):
+        catalog = {
+            "series": [{"videos": [
+                {"code": "SPSF-64", "links": {"gofile": "https://ouo.io/shared"}},
+                {"code": "SPSF-65", "links": {"gofile": "https://ouo.io/shared"}},
+            ]}],
+        }
+        candidates = list(iter_catalog_candidates(catalog))
+        verified = candidates[0]
+        state = {"schemaVersion": 1, "results": {verified.key: {
+            "sourceUrlHash": verified.source_url_hash,
+            "status": "verified",
+            "provider": "gofile",
+            "finalUrl": "https://gofile.io/d/onlySPSF64",
+            "checkedAt": "2026-09-20T00:00:00Z",
+        }}}
+
+        manifest = build_manifest(candidates, state, generated_at="2026-09-20T01:00:00Z")
+
+        self.assertIn("SPSF-64", manifest["entries"])
+        self.assertNotIn("SPSF-65", manifest["entries"])
+
     def test_manifest_preserves_timestamp_when_public_entries_are_unchanged(self):
         catalog = {"series": [{"videos": [{
             "code": "SPSF-58",
@@ -199,6 +273,22 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
 
 
 class ResolvedLinkCollectorTests(unittest.IsolatedAsyncioTestCase):
+    async def test_flow_button_click_bypasses_an_ad_overlay(self):
+        class OverlayProtectedButton:
+            def __init__(self):
+                self.first = self
+                self.clicked = False
+
+            async def click(self, *, force=False, **_kwargs):
+                if not force:
+                    raise RuntimeError("ad overlay intercepted pointer events")
+                self.clicked = True
+
+        button = OverlayProtectedButton()
+
+        self.assertTrue(await click_flow_button(button))
+        self.assertTrue(button.clicked)
+
     def test_background_browser_uses_headed_chrome_offscreen_without_focus(self):
         build_options = getattr(resolved_links_browser, "build_browser_launch_options", None)
         self.assertIsNotNone(build_options)
@@ -228,7 +318,7 @@ class ResolvedLinkCollectorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(choose_flow_url(urls), urls[2])
         self.assertEqual(choose_flow_url(urls[:2]), urls[1])
 
-    async def test_collector_checkpoints_verified_and_failed_results_and_resumes(self):
+    async def test_collector_checkpoints_verified_and_retries_human_verification_on_resume(self):
         catalog = {
             "series": [{"code": "SPSF", "videos": [{
                 "code": "SPSF-58",
@@ -261,15 +351,20 @@ class ResolvedLinkCollectorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(second["status"], "blocked-human")
         self.assertNotIn("finalUrl", second)
 
-        resolver.reset_mock()
+        resolver.reset_mock(return_value=True, side_effect=True)
+        resolver.return_value = {
+            "status": "verified",
+            "finalUrl": "https://gofile.io/d/recoveredAfterCaptcha",
+        }
         resumed = await collect_candidates(
             candidates,
             state,
             resolver,
             checkpoint=lambda value: None,
         )
-        self.assertEqual(resumed, 0)
-        resolver.assert_not_awaited()
+        self.assertEqual(resumed, 1)
+        resolver.assert_awaited_once_with(candidates[1])
+        self.assertEqual(state["results"][candidates[1].key]["status"], "verified")
 
     async def test_collector_never_marks_unknown_destination_verified(self):
         candidate = next(iter(iter_catalog_candidates({

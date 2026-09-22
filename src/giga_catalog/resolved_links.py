@@ -99,6 +99,16 @@ def iter_catalog_candidates(catalog: Mapping[str, object]) -> Iterator[LinkCandi
     return iter(candidates)
 
 
+def filter_candidates_by_codes(
+    candidates: Iterable[LinkCandidate],
+    codes: Iterable[str],
+) -> list[LinkCandidate]:
+    selected = {str(code).strip().upper() for code in codes if str(code).strip()}
+    if not selected:
+        return list(candidates)
+    return [candidate for candidate in candidates if candidate.code in selected]
+
+
 def validate_final_url(value: object, *, expected_provider: Optional[str] = None) -> Optional[str]:
     if not isinstance(value, str) or value != value.strip() or len(value) > 2048:
         return None
@@ -161,9 +171,23 @@ def build_manifest(
     results = state.get("results", {}) if isinstance(state, Mapping) else {}
     if not isinstance(results, Mapping):
         results = {}
+    verified_by_source = {}
+    for result_key, result in results.items():
+        if not isinstance(result, Mapping) or result.get("status") != "verified":
+            continue
+        if not isinstance(result_key, str) or "\0" not in result_key:
+            continue
+        code = result_key.split("\0", 1)[0]
+        source_hash = result.get("sourceUrlHash")
+        provider = result.get("provider") or provider_for_final_url(result.get("finalUrl"))
+        final_url = validate_final_url(result.get("finalUrl"), expected_provider=provider)
+        if source_hash and provider in PROVIDER_ORDER and final_url:
+            verified_by_source.setdefault((code, source_hash), result)
     entries = {}
     for candidate in sorted(candidates, key=lambda item: (item.code, item.slot)):
         result = results.get(candidate.key)
+        if not isinstance(result, Mapping) or result.get("status") != "verified":
+            result = verified_by_source.get((candidate.code, candidate.source_url_hash))
         if not isinstance(result, Mapping):
             continue
         provider = result.get("provider") or provider_for_final_url(result.get("finalUrl"))

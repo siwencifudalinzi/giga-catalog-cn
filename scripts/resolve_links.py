@@ -16,6 +16,7 @@ if str(ROOT) not in sys.path:
 from src.giga_catalog.resolved_links import (  # noqa: E402
     atomic_write_json,
     build_manifest,
+    filter_candidates_by_codes,
     iter_catalog_candidates,
     load_json,
     seed_state_from_manifest,
@@ -42,13 +43,19 @@ def parse_args(argv=None):
         help="Run headed Chrome minimized and offscreen without taking focus",
     )
     parser.add_argument("--max-links", type=int, default=0, help="0 processes every pending candidate")
+    parser.add_argument(
+        "--code",
+        action="append",
+        default=[],
+        help="Process only this catalog code in browser mode; repeat for multiple codes",
+    )
     parser.add_argument("--delay", type=float, default=1.0)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--profile-dir", type=Path, default=ROOT / "data/browser/resolved-links-profile")
     return parser.parse_args(argv)
 
 
-async def run_browser(args, candidates, state, previous_manifest):
+async def run_browser(args, candidates, state, previous_manifest, *, manifest_candidates=None):
     if not 1 <= args.workers <= 8:
         raise SystemExit("--workers must be between 1 and 8")
     resolvers = []
@@ -65,7 +72,7 @@ async def run_browser(args, candidates, state, previous_manifest):
             atomic_write_json(args.state, current_state)
             generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
             atomic_write_json(args.output, build_manifest(
-                candidates,
+                manifest_candidates if manifest_candidates is not None else candidates,
                 current_state,
                 generated_at=generated_at,
                 previous_manifest=previous_manifest,
@@ -86,7 +93,14 @@ def main(argv=None):
     previous_manifest = load_json(args.output, {})
     state = seed_state_from_manifest(candidates, previous_manifest, state)
     if args.browser:
-        processed = asyncio.run(run_browser(args, candidates, state, previous_manifest))
+        browser_candidates = filter_candidates_by_codes(candidates, args.code)
+        processed = asyncio.run(run_browser(
+            args,
+            browser_candidates,
+            state,
+            previous_manifest,
+            manifest_candidates=candidates,
+        ))
         print(f"processed={processed}")
         state = load_json(args.state, state)
     generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
