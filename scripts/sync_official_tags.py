@@ -401,6 +401,10 @@ def run_sync(argv: Optional[Sequence[str]] = None) -> dict:
     )
     if errors:
         raise RuntimeError("tagged catalog validation failed:\n" + "\n".join(errors))
+    if isinstance(previous_refresh, Mapping):
+        # Tag enrichment is part of the same refresh; its rebuild must not
+        # replace the source refresh's added/updated counts with tag-only diffs.
+        rebuilt["refresh"] = copy.deepcopy(previous_refresh)
     result = {
         "targets": len(targets),
         "videos": len(enriched),

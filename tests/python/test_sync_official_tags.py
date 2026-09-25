@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from scripts.sync_official_tags import (
     apply_product_detail,
@@ -12,14 +13,62 @@ from scripts.sync_official_tags import (
     mark_unavailable_product_tags,
     merge_tag_definitions,
     prune_runtime_generations,
+    run_sync,
     select_tag_sync_targets,
 )
+from src.giga_catalog.merge import build_catalog, serialize_catalog
 
 
 STAMP = "2026-08-20T00:00:00Z"
 
 
 class OfficialTagSyncTests(unittest.TestCase):
+    def test_tag_sync_keeps_the_last_refresh_added_count_visible(self):
+        catalog, _ = build_catalog(
+            [{
+                "code": "SPSF-69",
+                "productId": 69,
+                "title": "New release",
+                "actors": ["Actor"],
+                "releaseDate": "2026-10-09",
+                "cover": "https://example.test/cover.jpg",
+                "tagIds": [],
+                "tagsStatus": "complete",
+                "tagsUpdatedAt": "2026-09-25T00:00:00Z",
+                "tagsSource": "official",
+            }],
+            {},
+            generated_at="2026-09-25T00:00:00Z",
+            tags=[],
+        )
+        self.assertEqual(catalog["refresh"]["counts"]["added"], 1)
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            catalog_path = root / "public" / "data" / "catalog.json"
+            catalog_path.parent.mkdir(parents=True)
+            catalog_path.write_bytes(serialize_catalog(catalog))
+            args = [
+                "--catalog", str(catalog_path),
+                "--runtime-core", str(root / "public" / "data" / "catalog-core.json"),
+                "--runtime-tags", str(root / "public" / "data" / "catalog-tags.json"),
+                "--runtime-bootstrap", str(root / "public" / "data" / "catalog-bootstrap.json"),
+                "--runtime-root", str(root / "public" / "data" / "runtime"),
+                "--products", str(root / "data" / "raw" / "products.json"),
+                "--tags", str(root / "data" / "raw" / "tags.json"),
+                "--product-id-overrides", str(root / "data" / "product-id-overrides.json"),
+                "--checkpoint", str(root / "data" / "state" / "tag-sync-checkpoint.json"),
+            ]
+            with patch("scripts.sync_official_tags._fetch_tag_directories", return_value=[]):
+                run_sync(args)
+
+            published = json.loads(catalog_path.read_text(encoding="utf-8"))
+            bootstrap = json.loads(
+                (root / "public" / "data" / "catalog-bootstrap.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(published["refresh"]["counts"]["added"], 1)
+            self.assertEqual(bootstrap["refresh"]["counts"]["added"], 1)
+
     def test_runtime_artifact_defaults_are_public_and_published_atomically(self):
         options = create_parser().parse_args([])
         self.assertEqual(options.runtime_core.name, "catalog-core.json")
