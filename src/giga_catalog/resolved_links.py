@@ -13,17 +13,22 @@ from urllib.parse import urlsplit, urlunsplit
 
 
 PROVIDER_ORDER = ("reupload", "streamtape", "player4me", "gofile")
+FINAL_PROVIDERS = PROVIDER_ORDER + ("vidara",)
 SOURCE_HOST = "ouo.io"
 GOFILE_HOSTS = {"gofile.io", "www.gofile.io"}
 STREAMTAPE_HOSTS = {"streamtape.com"}
 PLAYER4ME_HOSTS = {"gigaandzen.embed4me.com"}
-ALLOWED_FINAL_HOSTS = GOFILE_HOSTS | STREAMTAPE_HOSTS | PLAYER4ME_HOSTS
+VIDARA_HOSTS = {"vidara.to", "vidara.so"}
+ALLOWED_FINAL_HOSTS = (
+    GOFILE_HOSTS | STREAMTAPE_HOSTS | PLAYER4ME_HOSTS | VIDARA_HOSTS
+)
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 SLOT_RE = re.compile(
     r"^(standard|uncensored)\.(reupload|streamtape|player4me|gofile)$"
 )
 GOFILE_PATH_RE = re.compile(r"^/d/[A-Za-z0-9]+/?$")
 STREAMTAPE_PATH_RE = re.compile(r"^/(?:v|e)/[A-Za-z0-9_-]+(?:/[^/?#]*)?/?$")
+VIDARA_PATH_RE = re.compile(r"^/(?:e|v)/[A-Za-z0-9]{8,32}/?$")
 
 
 @dataclass(frozen=True)
@@ -135,12 +140,15 @@ def validate_final_url(value: object, *, expected_provider: Optional[str] = None
         parsed.path not in ("", "/") or not re.fullmatch(r"[A-Za-z0-9]+", parsed.fragment)
     ):
         return None
+    if host in VIDARA_HOSTS and not VIDARA_PATH_RE.fullmatch(parsed.path):
+        return None
     if host not in PLAYER4ME_HOSTS and parsed.fragment:
         return None
     actual_provider = (
         "gofile" if host in GOFILE_HOSTS
         else "streamtape" if host in STREAMTAPE_HOSTS
-        else "player4me"
+        else "player4me" if host in PLAYER4ME_HOSTS
+        else "vidara"
     )
     if expected_provider is not None and actual_provider != expected_provider:
         return None
@@ -158,6 +166,8 @@ def provider_for_final_url(value: object) -> Optional[str]:
         return "streamtape"
     if host in PLAYER4ME_HOSTS:
         return "player4me"
+    if host in VIDARA_HOSTS:
+        return "vidara"
     return None
 
 
@@ -181,7 +191,7 @@ def build_manifest(
         source_hash = result.get("sourceUrlHash")
         provider = result.get("provider") or provider_for_final_url(result.get("finalUrl"))
         final_url = validate_final_url(result.get("finalUrl"), expected_provider=provider)
-        if source_hash and provider in PROVIDER_ORDER and final_url:
+        if source_hash and provider in FINAL_PROVIDERS and final_url:
             verified_by_source.setdefault((code, source_hash), result)
     entries = {}
     for candidate in sorted(candidates, key=lambda item: (item.code, item.slot)):
@@ -196,7 +206,7 @@ def build_manifest(
         if (
             result.get("status") != "verified"
             or result.get("sourceUrlHash") != candidate.source_url_hash
-            or provider not in PROVIDER_ORDER
+            or provider not in FINAL_PROVIDERS
             or not final_url
             or not isinstance(checked_at, str)
             or not checked_at
@@ -245,7 +255,7 @@ def seed_state_from_manifest(
         final_url = validate_final_url(entry.get("finalUrl"), expected_provider=provider) if isinstance(entry, Mapping) else None
         if (
             isinstance(entry, Mapping)
-            and provider in PROVIDER_ORDER
+            and provider in FINAL_PROVIDERS
             and entry.get("sourceUrlHash") == candidate.source_url_hash
             and entry.get("status") == "verified"
             and entry.get("kind") == "external"

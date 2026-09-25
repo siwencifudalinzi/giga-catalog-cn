@@ -102,6 +102,30 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
         ):
             self.assertIsNone(validate_final_url(value), value)
 
+    def test_final_url_validation_accepts_vidara_watch_pages(self):
+        self.assertEqual(
+            validate_final_url("https://vidara.to/e/GSHPFUIm9UPKy"),
+            "https://vidara.to/e/GSHPFUIm9UPKy",
+        )
+        self.assertEqual(
+            validate_final_url("https://vidara.so/v/6uTHDGn6r8BA4"),
+            "https://vidara.so/v/6uTHDGn6r8BA4",
+        )
+
+    def test_final_url_validation_rejects_parked_or_malformed_new_hosts(self):
+        for value in (
+            "https://strmup.cc/",
+            "https://ww19.strmup.to/",
+            "https://strmup.to/",
+            "https://strmup.to/get/t/file-id",
+            "https://strmup.to/edm0O2yFbplzH?ch=1&js=temporary&sid=session",
+            "https://vidara.to/",
+            "https://vidara.to/download/GSHPFUIm9UPKy",
+            "https://vidara.to:444/e/GSHPFUIm9UPKy",
+            "https://evil.vidara.to/e/GSHPFUIm9UPKy",
+        ):
+            self.assertIsNone(validate_final_url(value), value)
+
     def test_manifest_preserves_matching_verified_entries_and_drops_stale_sources(self):
         catalog = {
             "series": [{"code": "SPSF", "videos": [{

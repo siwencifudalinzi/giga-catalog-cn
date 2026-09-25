@@ -94,6 +94,45 @@ test("Streamtape mp4-looking watch pages remain external landing pages", () => {
   assert.equal(manifest.size, 1);
 });
 
+test("Vidara watch pages become direct external landings", async () => {
+  for (const [finalUrl, provider, expectedUrl, expectedLabel] of [
+    [
+      "https://vidara.to/e/GSHPFUIm9UPKy",
+      "vidara",
+      "https://vidara.to/e/GSHPFUIm9UPKy",
+      "直达 Vidara",
+    ],
+    [
+      "https://vidara.so/v/6uTHDGn6r8BA4",
+      "vidara",
+      "https://vidara.so/v/6uTHDGn6r8BA4",
+      "直达 Vidara",
+    ],
+  ]) {
+    const raw = manifestWith(finalUrl);
+    raw.entries["SPSF-58"]["standard.gofile"].provider = provider;
+    const manifest = normalizeResolvedLinkManifest(raw);
+    assert.equal(manifest.size, 1);
+    assert.deepEqual(
+      await resolveLinkTarget(
+        {
+          code: "SPSF-58",
+          provider: "gofile",
+          slot: "standard.gofile",
+          label: "Gofile",
+          sourceUrl: SOURCE,
+        },
+        manifest,
+      ),
+      {
+        url: expectedUrl,
+        label: expectedLabel,
+        resolved: true,
+      },
+    );
+  }
+});
+
 test("the exact Player4me landing host accepts its required content fragment", () => {
   const manifest = normalizeResolvedLinkManifest({
     schemaVersion: 2,
@@ -114,15 +153,26 @@ test("the exact Player4me landing host accepts its required content fragment", (
 });
 
 test("unsafe or non-watch destinations are dropped", () => {
-  for (const finalUrl of [
-    "http://gofile.io/d/N87ugOtd",
-    "https://user:pass@gofile.io/d/N87ugOtd",
-    "https://evil.example/d/N87ugOtd",
-    "https://streamtape.com/get_video?id=file",
-    "https://evil.embed4me.com/#a3nxx",
-    "https://gigaandzen.embed4me.com/#bad-value",
+  for (const [finalUrl, provider = "gofile"] of [
+    ["http://gofile.io/d/N87ugOtd"],
+    ["https://user:pass@gofile.io/d/N87ugOtd"],
+    ["https://evil.example/d/N87ugOtd"],
+    ["https://streamtape.com/get_video?id=file", "streamtape"],
+    ["https://evil.embed4me.com/#a3nxx", "player4me"],
+    ["https://gigaandzen.embed4me.com/#bad-value", "player4me"],
+    ["https://strmup.cc/", "strmup"],
+    ["https://ww19.strmup.to/", "strmup"],
+    ["https://strmup.to/", "strmup"],
+    ["https://strmup.to/get/t/file-id", "strmup"],
+    ["https://strmup.to/edm0O2yFbplzH?ch=1&js=temporary&sid=session", "strmup"],
+    ["https://vidara.to/", "vidara"],
+    ["https://vidara.to/download/GSHPFUIm9UPKy", "vidara"],
+    ["https://vidara.to:444/e/GSHPFUIm9UPKy", "vidara"],
+    ["https://evil.vidara.to/e/GSHPFUIm9UPKy", "vidara"],
   ]) {
-    assert.equal(normalizeResolvedLinkManifest(manifestWith(finalUrl)).size, 0);
+    const raw = manifestWith(finalUrl);
+    raw.entries["SPSF-58"]["standard.gofile"].provider = provider;
+    assert.equal(normalizeResolvedLinkManifest(raw).size, 0);
   }
 });
 

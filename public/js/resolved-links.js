@@ -3,11 +3,14 @@ const ALLOWED_HOSTS = new Set([
   "www.gofile.io",
   "streamtape.com",
   "gigaandzen.embed4me.com",
+  "vidara.to",
+  "vidara.so",
 ]);
 const PROVIDER_LABELS = Object.freeze({
   gofile: "Gofile",
   streamtape: "Streamtape",
   player4me: "Player4me",
+  vidara: "Vidara",
 });
 
 function keyFor(code, slot) {
@@ -24,7 +27,9 @@ function normalizeFinalUrl(value) {
       url.protocol !== "https:" ||
       url.username ||
       url.password ||
-      !ALLOWED_HOSTS.has(url.hostname)
+      url.port ||
+      !ALLOWED_HOSTS.has(url.hostname) ||
+      url.search
     ) {
       return null;
     }
@@ -46,6 +51,12 @@ function normalizeFinalUrl(value) {
     ) {
       return null;
     }
+    if (
+      ["vidara.to", "vidara.so"].includes(url.hostname) &&
+      !/^\/(?:e|v)\/[A-Za-z0-9]{8,32}\/?$/u.test(url.pathname)
+    ) {
+      return null;
+    }
     if (url.hostname !== "gigaandzen.embed4me.com" && url.hash) {
       return null;
     }
@@ -60,6 +71,7 @@ function providerForFinalUrl(value) {
   if (["gofile.io", "www.gofile.io"].includes(host)) return "gofile";
   if (host === "streamtape.com") return "streamtape";
   if (host === "gigaandzen.embed4me.com") return "player4me";
+  if (["vidara.to", "vidara.so"].includes(host)) return "vidara";
   return null;
 }
 
