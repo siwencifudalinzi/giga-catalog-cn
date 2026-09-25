@@ -239,7 +239,8 @@ def _provider_columns(
             for index in range(start, end)
             if header[index] in aliases
         ]
-        if not indexes and not required:
+        normal_gofile_retired = group == "normal" and aliases == ("GOFILE LINK",)
+        if not indexes and (not required or normal_gofile_retired):
             continue
         if len(indexes) != 1:
             expected = " or ".join(repr(name) for name in aliases)

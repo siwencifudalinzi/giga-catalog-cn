@@ -78,6 +78,28 @@ class SheetParserTests(unittest.TestCase):
         )
         self.assertEqual(conflicts, [])
 
+    def test_imports_live_sheet_after_normal_gofile_column_is_removed(self) -> None:
+        """A retired normal provider must not stop other links from refreshing."""
+        text = (
+            "NEW CODE,STREAMTAPE LINK,,,UNCENSORED,STREAMTAPE LINK,GOFILE LINK,\n"
+            "SPSF-69,https://ouo.io/normal,,,SPSF-69 UMR.mp4,"
+            "https://ouo.io/unc-st,https://ouo.io/unc-go,\n"
+        )
+
+        links, conflicts = parse_sheet_csv(text)
+
+        self.assertEqual(
+            links["SPSF-69"],
+            {
+                "streamtape": "https://ouo.io/normal",
+                "uncensored": {
+                    "streamtape": "https://ouo.io/unc-st",
+                    "gofile": "https://ouo.io/unc-go",
+                },
+            },
+        )
+        self.assertEqual(conflicts, [])
+
     def test_maps_vidara_replacement_header_without_losing_uncensored_player4me(self) -> None:
         """The live sheet may replace only the normal Player4me column with Vidara."""
         text = (
@@ -191,7 +213,7 @@ class SheetParserTests(unittest.TestCase):
                 "NEW CODE,STREAMTAPE LINK,PLAYER4ME LINK,GOFILE LINK\n"
             ),
             (
-                "NEW CODE,STREAMTAPE LINK,PLAYER4ME LINK,UNCENSORED,"
+                "NEW CODE,PLAYER4ME LINK,GOFILE LINK,UNCENSORED,"
                 "STREAMTAPE LINK,PLAYER4ME LINK,GOFILE LINK\n"
             ),
             (
