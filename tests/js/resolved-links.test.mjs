@@ -133,7 +133,7 @@ test("Vidara watch pages become direct external landings", async () => {
   }
 });
 
-test("the exact Player4me landing host accepts its required content fragment", () => {
+test("an unverified Player4me landing is rejected so the sheet link remains the fallback", () => {
   const manifest = normalizeResolvedLinkManifest({
     schemaVersion: 2,
     entries: {
@@ -149,7 +149,27 @@ test("the exact Player4me landing host accepts its required content fragment", (
       },
     },
   });
-  assert.equal(manifest.size, 1);
+  assert.equal(manifest.size, 0);
+});
+
+test("a playback-verified Player4me landing remains eligible for direct use", () => {
+  const raw = {
+    schemaVersion: 2,
+    entries: {
+      "SPSF-52": {
+        "standard.player4me": {
+          provider: "player4me",
+          sourceUrlHash: HASH,
+          finalUrl: "https://gigaandzen.embed4me.com/#a3nxx",
+          kind: "external",
+          status: "verified",
+          playbackStatus: "verified",
+          checkedAt: "2026-08-23T00:00:00Z",
+        },
+      },
+    },
+  };
+  assert.equal(normalizeResolvedLinkManifest(raw).size, 1);
 });
 
 test("unsafe or non-watch destinations are dropped", () => {
@@ -184,6 +204,7 @@ test("a final landing domain must match the declared provider", () => {
 test("a stale source slot label may resolve to a different allowlisted provider", async () => {
   const raw = manifestWith("https://gigaandzen.embed4me.com/#nrf8u");
   raw.entries["SPSF-58"]["standard.gofile"].provider = "player4me";
+  raw.entries["SPSF-58"]["standard.gofile"].playbackStatus = "verified";
   const manifest = normalizeResolvedLinkManifest(raw);
   assert.equal(manifest.size, 1);
   assert.deepEqual(

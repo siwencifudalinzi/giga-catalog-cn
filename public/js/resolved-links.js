@@ -96,6 +96,7 @@ export function normalizeResolvedLinkManifest(raw) {
       if (
         !/^(?:standard|uncensored)\.(?:reupload|gofile|streamtape|player4me)$/u.test(slot) ||
         providerForFinalUrl(finalUrl || "https://invalid.invalid/") !== entry?.provider ||
+        (entry?.provider === "player4me" && entry?.playbackStatus !== "verified") ||
         entry?.kind !== "external" ||
         entry?.status !== "verified" ||
         !/^sha256:[0-9a-f]{64}$/u.test(entry?.sourceUrlHash || "") ||
