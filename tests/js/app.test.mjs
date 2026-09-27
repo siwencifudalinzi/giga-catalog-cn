@@ -1062,6 +1062,27 @@ test("reuploaded collection links appear first with a clear Chinese label", () =
   ]);
 });
 
+test("JAVRyo metadata pages appear as an additive standard source", () => {
+  const groups = collectLinkGroups({
+    streamtape: "https://ouo.io/original",
+    javryo: "https://javryo.com/movies/spsf-72-sample/",
+  });
+  assert.deepEqual(groups[0].links, [
+    {
+      provider: "streamtape",
+      slot: "standard.streamtape",
+      label: "Streamtape",
+      url: "https://ouo.io/original",
+    },
+    {
+      provider: "javryo",
+      slot: "standard.javryo",
+      label: "JAVRyo",
+      url: "https://javryo.com/movies/spsf-72-sample/",
+    },
+  ]);
+});
+
 test("resolved cache upgrades matching slots without colliding with uncensored links", async () => {
   const groups = collectLinkGroups({
     gofile: "https://ouo.io/mT78vqU",

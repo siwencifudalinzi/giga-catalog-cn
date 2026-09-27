@@ -94,7 +94,7 @@ export function normalizeResolvedLinkManifest(raw) {
     for (const [slot, entry] of Object.entries(slots)) {
       const finalUrl = normalizeFinalUrl(entry?.finalUrl);
       if (
-        !/^(?:standard|uncensored)\.(?:reupload|gofile|streamtape|player4me)$/u.test(slot) ||
+        !/^(?:standard|uncensored)\.(?:reupload|gofile|streamtape|player4me|javryo)$/u.test(slot) ||
         providerForFinalUrl(finalUrl || "https://invalid.invalid/") !== entry?.provider ||
         (entry?.provider === "player4me" && entry?.playbackStatus !== "verified") ||
         entry?.kind !== "external" ||

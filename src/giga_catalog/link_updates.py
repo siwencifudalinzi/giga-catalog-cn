@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Iterable, Mapping
 
 
-PROVIDERS = ("reupload", "streamtape", "player4me", "vidara", "gofile")
+PROVIDERS = ("reupload", "streamtape", "player4me", "vidara", "gofile", "javryo")
 SOURCES = {"catalog", "resolved"}
 ACTIONS = {"added", "updated", "removed", "resolved"}
 
@@ -136,7 +136,7 @@ def _safe_entry(value: object) -> bool:
         and re.fullmatch(r"[A-Z0-9]+-[0-9]+", value["code"]) is not None
         and isinstance(value.get("slot"), str)
         and re.fullmatch(
-            r"(?:standard|uncensored)\.(?:reupload|streamtape|player4me|vidara|gofile)",
+            r"(?:standard|uncensored)\.(?:reupload|streamtape|player4me|vidara|gofile|javryo)",
             value["slot"],
         ) is not None
         and value.get("action") in ACTIONS

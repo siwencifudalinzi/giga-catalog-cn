@@ -46,6 +46,7 @@ const PROVIDERS = Object.freeze([
   ["player4me", "Player4me"],
   ["vidara", "Vidara"],
   ["gofile", "Gofile"],
+  ["javryo", "JAVRyo"],
 ]);
 const FAVORITE_PRESENTATION = Object.freeze({
   0: { label: "加入想看", shortLabel: "未收藏" },

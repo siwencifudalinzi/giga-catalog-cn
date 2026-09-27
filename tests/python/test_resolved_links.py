@@ -74,6 +74,18 @@ class ResolvedLinkCandidateTests(unittest.TestCase):
         )
         self.assertTrue(all(item.source_url_hash.startswith("sha256:") for item in candidates))
 
+    def test_javryo_movie_page_is_a_supported_standard_source(self):
+        catalog = {
+            "series": [{"videos": [{
+                "code": "SPSF-72",
+                "links": {"javryo": "https://javryo.com/movies/spsf-72-sample/"},
+            }]}],
+        }
+        candidates = list(iter_catalog_candidates(catalog))
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0].slot, "standard.javryo")
+        self.assertEqual(candidates[0].provider, "javryo")
+
     def test_final_url_validation_accepts_only_public_landing_pages(self):
         self.assertEqual(
             validate_final_url("https://gofile.io/d/N87ugOtd"),

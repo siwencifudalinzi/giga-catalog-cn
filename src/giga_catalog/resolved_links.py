@@ -12,8 +12,8 @@ from typing import Iterable, Iterator, Mapping, Optional
 from urllib.parse import urlsplit, urlunsplit
 
 
-PROVIDER_ORDER = ("reupload", "streamtape", "player4me", "gofile")
-FINAL_PROVIDERS = PROVIDER_ORDER + ("vidara",)
+PROVIDER_ORDER = ("reupload", "streamtape", "player4me", "gofile", "javryo")
+FINAL_PROVIDERS = ("reupload", "streamtape", "player4me", "gofile", "vidara")
 SOURCE_HOST = "ouo.io"
 GOFILE_HOSTS = {"gofile.io", "www.gofile.io"}
 STREAMTAPE_HOSTS = {"streamtape.com"}
@@ -24,7 +24,7 @@ ALLOWED_FINAL_HOSTS = (
 )
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 SLOT_RE = re.compile(
-    r"^(standard|uncensored)\.(reupload|streamtape|player4me|gofile)$"
+    r"^(standard|uncensored)\.(reupload|streamtape|player4me|gofile|javryo)$"
 )
 GOFILE_PATH_RE = re.compile(r"^/d/[A-Za-z0-9]+/?$")
 STREAMTAPE_PATH_RE = re.compile(r"^/(?:v|e)/[A-Za-z0-9_-]+(?:/[^/?#]*)?/?$")
@@ -49,12 +49,25 @@ def source_url_hash(source_url: str) -> str:
     return "sha256:" + hashlib.sha256(source_url.encode("utf-8")).hexdigest()
 
 
-def _valid_source_url(value: object) -> Optional[str]:
+def _valid_source_url(value: object, provider: str) -> Optional[str]:
     if not isinstance(value, str) or value != value.strip() or len(value) > 2048:
         return None
     try:
         parsed = urlsplit(value)
     except ValueError:
+        return None
+    if provider == "javryo":
+        if (
+            parsed.scheme == "https"
+            and (parsed.hostname or "").lower() == "javryo.com"
+            and not parsed.username
+            and not parsed.password
+            and parsed.port in (None, 443)
+            and not parsed.query
+            and not parsed.fragment
+            and re.fullmatch(r"/movies/[a-z0-9][a-z0-9-]*/", parsed.path)
+        ):
+            return value
         return None
     if (
         parsed.scheme != "https"
@@ -90,7 +103,7 @@ def iter_catalog_candidates(catalog: Mapping[str, object]) -> Iterator[LinkCandi
                 if not isinstance(source, Mapping):
                     continue
                 for provider in PROVIDER_ORDER:
-                    source_url = _valid_source_url(source.get(provider))
+                    source_url = _valid_source_url(source.get(provider), provider)
                     if source_url:
                         candidates.append(LinkCandidate(
                             code=code,

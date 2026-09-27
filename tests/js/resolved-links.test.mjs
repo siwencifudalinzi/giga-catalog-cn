@@ -94,6 +94,42 @@ test("Streamtape mp4-looking watch pages remain external landing pages", () => {
   assert.equal(manifest.size, 1);
 });
 
+test("a JAVRyo source slot may upgrade to its verified Streamtape watch page", async () => {
+  const sourceUrl = "https://javryo.com/movies/spsf-72-sample/";
+  const sourceHash = await sha256SourceUrl(sourceUrl);
+  const manifest = normalizeResolvedLinkManifest({
+    schemaVersion: 2,
+    entries: {
+      "SPSF-72": {
+        "standard.javryo": {
+          provider: "streamtape",
+          sourceUrlHash: sourceHash,
+          finalUrl: "https://streamtape.com/v/abc_1/SPSF-72.mp4",
+          kind: "external",
+          status: "verified",
+          checkedAt: "2026-09-27T00:00:00Z",
+        },
+      },
+    },
+  });
+  assert.deepEqual(
+    await resolveLinkTarget(
+      {
+        code: "SPSF-72",
+        slot: "standard.javryo",
+        label: "JAVRyo",
+        sourceUrl,
+      },
+      manifest,
+    ),
+    {
+      url: "https://streamtape.com/v/abc_1/SPSF-72.mp4",
+      label: "直达 Streamtape",
+      resolved: true,
+    },
+  );
+});
+
 test("Vidara watch pages become direct external landings", async () => {
   for (const [finalUrl, provider, expectedUrl, expectedLabel] of [
     [

@@ -13,6 +13,7 @@ from src.giga_catalog.tags import build_public_tag_index
 
 _PROVIDERS = (
     "gofile",
+    "javryo",
     "player4me",
     "reupload",
     "streamtape",
