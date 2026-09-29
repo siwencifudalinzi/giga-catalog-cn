@@ -1,9 +1,26 @@
 import unittest
 
 from src.giga_catalog.javryo_embeds_browser import aggregate_path_status, classify_observation, safe_evidence, source_request_allowed
+from scripts.verify_javryo_embeds import should_queue_candidate
 
 
 class PlaybackClassificationTests(unittest.TestCase):
+    def test_promising_retry_only_rechecks_direct_playback_evidence(self):
+        previous = {"sourceUrlHash": "source", "embedUrlHash": "embed",
+                    "playbackStatus": "retryable", "attempts": 1,
+                    "paths": {"direct": {"status": "verified"}}}
+        self.assertTrue(should_queue_candidate(previous, "source", "embed", retry=True,
+                                               retry_promising=True))
+        previous["paths"]["direct"]["status"] = "retryable"
+        self.assertFalse(should_queue_candidate(previous, "source", "embed", retry=True,
+                                                retry_promising=True))
+        previous["paths"]["direct"]["status"] = "media_reachable"
+        self.assertTrue(should_queue_candidate(previous, "source", "embed", retry=True,
+                                               retry_promising=True))
+        previous["attempts"] = 3
+        self.assertFalse(should_queue_candidate(previous, "source", "embed", retry=True,
+                                                retry_promising=True))
+
     def test_source_page_uses_only_javryo_and_the_selected_embed_host(self):
         self.assertTrue(source_request_allowed("https://javryo.com/wp-json/dooplayer/v1/post/12", "bysejikuar.com"))
         self.assertTrue(source_request_allowed("https://bysejikuar.com/e/id", "bysejikuar.com"))
@@ -27,6 +44,9 @@ class PlaybackClassificationTests(unittest.TestCase):
         self.assertEqual(classify_observation(observation), "media_reachable")
         self.assertEqual(classify_observation({"httpStatus": 200, "videoCount": 1,
                           "duration": 0, "events": ["playing"]}), "retryable")
+        self.assertEqual(classify_observation({"httpStatus": 200, "videoCount": 1,
+                          "duration": 0, "mediaStatus": 206,
+                          "events": ["timeupdate"]}), "verified")
 
     def test_empty_deleted_challenged_and_failed_media(self):
         self.assertEqual(classify_observation({"httpStatus": 200}), "retryable")

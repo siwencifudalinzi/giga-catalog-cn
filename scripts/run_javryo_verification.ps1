@@ -1,7 +1,8 @@
 param(
     [int]$BatchSize = 16,
     [int]$TimeoutMs = 30000,
-    [switch]$Retry
+    [switch]$Retry,
+    [switch]$RetryPromising
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,6 +16,7 @@ while ($true) {
     $verifierArgs = @('-X', 'utf8', 'scripts/verify_javryo_embeds.py', '--max-links', $BatchSize,
               '--timeout-ms', $TimeoutMs)
     if ($Retry) { $verifierArgs += '--retry' }
+    if ($RetryPromising) { $verifierArgs += '--retry-promising' }
     $output = & 'C:\Windows\py.exe' @verifierArgs 2>&1
     $exit = $LASTEXITCODE
     $output | Add-Content -LiteralPath $log -Encoding UTF8

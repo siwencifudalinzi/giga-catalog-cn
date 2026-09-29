@@ -39,6 +39,10 @@ async def run(args):
             break
         queue.put_nowait((code, page_url, final_url, matching_wrapper(crawl.get(code), final_url)))
 
+    print(f"queued={queue.qsize()}", flush=True)
+    if queue.empty():
+        return
+
     lock = asyncio.Lock()
     async with async_playwright() as manager:
         async def worker():
@@ -73,7 +77,7 @@ async def run(args):
             finally:
                 await browser.close()
 
-        await asyncio.gather(*(worker() for _ in range(4)))
+        await asyncio.gather(*(worker() for _ in range(args.workers)))
     print(len(results), Counter(v["playbackStatus"] for v in results.values()), flush=True)
 
 
@@ -83,6 +87,7 @@ def main():
     parser.add_argument("--max-links", type=int, default=0)
     parser.add_argument("--timeout-ms", type=int, default=20000)
     parser.add_argument("--retry", action="store_true")
+    parser.add_argument("--workers", type=int, choices=(1, 2, 3, 4), default=4)
     asyncio.run(run(parser.parse_args()))
 
 

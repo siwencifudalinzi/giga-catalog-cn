@@ -56,7 +56,7 @@ def classify_observation(value: Mapping) -> str:
         return "blocked"
     if status != 200:
         return "retryable"
-    if (value.get("videoCount", 0) > 0 and value.get("duration", 0) > 0
+    if (value.get("videoCount", 0) > 0
             and (value.get("manifestStatus") == 200 or value.get("mediaStatus") in (200, 206))
             and any(event in ("playing", "timeupdate") for event in value.get("events", []))):
         return "verified"
@@ -134,7 +134,8 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
                 await page.wait_for_timeout(1500)
             except Exception:
                 observation["errorCode"] = "source-player-click"
-                return observation
+                # Playwright can report a click timeout after the page has already
+                # issued the player API request. Keep watching for the exact iframe.
         deadline = asyncio.get_running_loop().time() + timeout_ms / 1000
         source_retry_at = asyncio.get_running_loop().time() + 5
         source_retried = False
@@ -246,7 +247,7 @@ async def verify_embed_candidate(candidate: JavryoEmbedCandidate, browser, *, ti
         context.on("page", close_popup)
         try:
             evidence = await _observe(page, url, source_page=path_name == "source",
-                                      timeout_ms=timeout_ms,
+                                      timeout_ms=min(timeout_ms, 12000) if path_name == "source" else timeout_ms,
                                       expected_embed=candidate.embed_url if path_name == "source" else "")
             if (path_name == "source" and evidence.get("embedFrameSeen")
                     and (evidence.get("embedStatus") == 200 or evidence.get("apiStatus") == 200)):

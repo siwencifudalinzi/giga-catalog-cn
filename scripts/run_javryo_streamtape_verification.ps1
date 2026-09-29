@@ -1,0 +1,23 @@
+param([int]$BatchSize = 16, [int]$TimeoutMs = 20000, [int]$Workers = 1)
+
+$ErrorActionPreference = 'Stop'
+$repo = Split-Path -Parent $PSScriptRoot
+$log = Join-Path $repo 'data/state/javryo-streamtape-run.log'
+Set-Location -LiteralPath $repo
+$env:PYTHONIOENCODING = 'utf-8'
+$failures = 0
+
+while ($true) {
+    $verifierArgs = @('-X', 'utf8', 'scripts/verify_javryo_streamtape.py',
+        '--max-links', $BatchSize, '--timeout-ms', $TimeoutMs, '--workers', $Workers)
+    $output = & 'C:\Windows\py.exe' @verifierArgs 2>&1
+    $exit = $LASTEXITCODE
+    $output | Add-Content -LiteralPath $log -Encoding UTF8
+    if ($output -match '^queued=0$') { break }
+    if ($exit -eq 0) {
+        $failures = 0
+    } else {
+        $failures += 1
+        if ($failures -ge 3) { throw "Streamtape verifier failed three consecutive batches; inspect $log" }
+    }
+}

@@ -36,6 +36,23 @@ def progress(results: dict, total: int, added: int) -> str:
             f"本批新增直达：{added}\n当前阶段：后台验证")
 
 
+def should_queue_candidate(previous: object, source_hash: str, embed_hash: str,
+                           *, retry: bool, retry_promising: bool) -> bool:
+    if not isinstance(previous, dict):
+        return not retry_promising
+    if previous.get("sourceUrlHash") != source_hash or previous.get("embedUrlHash") != embed_hash:
+        return not retry_promising
+    if previous.get("playbackStatus") not in {"retryable", "blocked"}:
+        return False
+    if not retry or previous.get("attempts", 0) >= 3:
+        return False
+    if retry_promising:
+        paths = previous.get("paths", {})
+        direct = paths.get("direct", {}) if isinstance(paths, dict) else {}
+        return isinstance(direct, dict) and direct.get("status") in {"verified", "media_reachable"}
+    return True
+
+
 async def run(args) -> None:
     from playwright.async_api import async_playwright
 
@@ -50,11 +67,9 @@ async def run(args) -> None:
     queue = asyncio.Queue()
     for candidate in candidates:
         previous = results.get(candidate.code)
-        same = isinstance(previous, dict) and previous.get("sourceUrlHash") == candidate.source_url_hash
-        if same and candidate.embed_url:
-            same = previous.get("embedUrlHash") == source_url_hash(candidate.embed_url)
-        if same and (previous.get("playbackStatus") not in {"retryable", "blocked"}
-                     or not args.retry or previous.get("attempts", 0) >= 3):
+        embed_hash = source_url_hash(candidate.embed_url) if candidate.embed_url else ""
+        if not should_queue_candidate(previous, candidate.source_url_hash, embed_hash,
+                                      retry=args.retry, retry_promising=args.retry_promising):
             continue
         if args.max_links and queue.qsize() >= args.max_links:
             break
@@ -109,8 +124,11 @@ def main():
     parser.add_argument("--max-links", type=int, default=0)
     parser.add_argument("--timeout-ms", type=int, default=12000)
     parser.add_argument("--retry", action="store_true")
+    parser.add_argument("--retry-promising", action="store_true")
     parser.add_argument("--code", action="append", default=[])
     args = parser.parse_args()
+    if args.retry_promising and not args.retry:
+        parser.error("--retry-promising requires --retry")
     asyncio.run(run(args))
 
 
