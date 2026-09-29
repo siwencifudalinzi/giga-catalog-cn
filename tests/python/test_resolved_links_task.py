@@ -16,8 +16,8 @@ class ResolvedLinksTaskTests(unittest.TestCase):
 
     def test_runner_updates_generated_manifest_and_sanitized_changelog(self):
         text = (ROOT / "scripts/run_resolved_links_sync.ps1").read_text(encoding="utf-8")
-        self.assertIn("resolve_links.py --browser --background-window", text)
-        self.assertNotIn("resolve_links.py --browser --headless", text)
+        self.assertIn("resolve_links.py --browser --headless", text)
+        self.assertNotIn("resolve_links.py --browser --background-window", text)
         self.assertIn("public/data/resolved-links.json", text)
         self.assertIn("public/data/link-updates.json", text)
         self.assertIn("update_link_changelog.py --source resolved", text)

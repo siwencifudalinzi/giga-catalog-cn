@@ -137,7 +137,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -- data/raw data/state data/update-summary.json public/data/catalog.json public/data/catalog-core.json public/data/catalog-tags.json public/data/catalog-bootstrap.json public/data/link-updates.json public/data/featured-covers.json public/data/runtime public/media/featured-covers
+          git add -u -- data/state
+          git add -- data/raw data/update-summary.json public/data/catalog.json public/data/catalog-core.json public/data/catalog-tags.json public/data/catalog-bootstrap.json public/data/link-updates.json public/data/featured-covers.json public/data/runtime public/media/featured-covers
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Catalog data is unchanged."

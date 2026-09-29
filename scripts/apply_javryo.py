@@ -65,7 +65,12 @@ def apply_files(root: Path = ROOT) -> dict:
             kept = {slot: value for slot, value in slots.items() if slot != "standard.javryo"}
             if kept:
                 entries[code] = kept
-    javryo_entries = build_manifest_entries(overlay)
+    javryo_entries = build_manifest_entries(
+        overlay,
+        _load(root / "data/state/javryo-embed-verification.json", {}),
+        _load(root / "data/state/javryo-streamtape-verification.json", {}),
+        _load(root / "data/javryo-embeds.json", {}),
+    )
     for code, slots in javryo_entries.items():
         entries.setdefault(code, {}).update(slots)
     atomic_write_json(manifest_path, {
@@ -83,7 +88,10 @@ def apply_files(root: Path = ROOT) -> dict:
     return {
         "catalogLinksAdded": changed,
         "javryoPages": len(overlay.get("entries", {})) if isinstance(overlay, dict) else 0,
-        "verifiedStreamtape": len(javryo_entries),
+        "verifiedStreamtape": sum(slots["standard.javryo"]["provider"] == "streamtape"
+                                   for slots in javryo_entries.values()),
+        "verifiedJavryoStreams": sum(slots["standard.javryo"]["provider"] == "javryo_stream"
+                                       for slots in javryo_entries.values()),
         "runtime": runtime,
     }
 

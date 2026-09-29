@@ -24,6 +24,34 @@ from src.giga_catalog.resolved_links_browser import (
 
 
 class ResolvedLinkCandidateTests(unittest.TestCase):
+    def test_javryo_stream_requires_playback_status_and_round_trips(self):
+        catalog = {"series": [{"videos": [{"code": "ATHB-16", "links": {
+            "javryo": "https://javryo.com/movies/athb-16-sample/"}}]}]}
+        candidate = next(iter(iter_catalog_candidates(catalog)))
+        state = {"results": {candidate.key: {
+            "sourceUrlHash": candidate.source_url_hash, "status": "verified",
+            "provider": "javryo_stream", "finalUrl": "https://bysejikuar.com/e/7p4h1pwsjiaw",
+            "checkedAt": "2026-09-29T00:00:00Z", "playbackStatus": "media_reachable",
+        }}}
+        inventory = {"entries": {"ATHB-16": {"sourceUrlHash": candidate.source_url_hash,
+            "embedUrl": "https://bysejikuar.com/e/7p4h1pwsjiaw"}}}
+        self.assertEqual(build_manifest([candidate], state, generated_at="now")["entries"], {})
+        state["results"][candidate.key]["playbackStatus"] = "verified"
+        manifest = build_manifest([candidate], state, generated_at="now", embed_candidates=inventory)
+        entry = manifest["entries"]["ATHB-16"]["standard.javryo"]
+        self.assertEqual(entry["playbackStatus"], "verified")
+        seeded = seed_state_from_manifest([candidate], manifest, {"results": {}}, embed_candidates=inventory)
+        self.assertEqual(seeded["results"][candidate.key]["playbackStatus"], "verified")
+        inventory["entries"]["ATHB-16"]["embedUrl"] = "https://bysejikuar.com/e/changed"
+        self.assertEqual(build_manifest([candidate], state, generated_at="now", embed_candidates=inventory)["entries"], {})
+        self.assertEqual(seed_state_from_manifest([candidate], manifest, {"results": {}},
+                         embed_candidates=inventory)["results"], {})
+
+    def test_javryo_stream_rejects_media_urls_and_changed_source(self):
+        for url in ("https://bysejikuar.com/e/id.m3u8", "https://bysejikuar.come/e/id",
+                    "https://bysejikuar.com/e/id?token=x", "https://bysejikuar.com:444/e/id"):
+            self.assertIsNone(validate_final_url(url, expected_provider="javryo_stream"))
+
     def test_code_filter_limits_browser_work_without_dropping_manifest_candidates(self):
         catalog = {
             "series": [{"videos": [

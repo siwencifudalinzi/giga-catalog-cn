@@ -55,7 +55,8 @@ def parse_args(argv=None):
     return parser.parse_args(argv)
 
 
-async def run_browser(args, candidates, state, previous_manifest, *, manifest_candidates=None):
+async def run_browser(args, candidates, state, previous_manifest, *, manifest_candidates=None,
+                      embed_candidates=None):
     if not 1 <= args.workers <= 8:
         raise SystemExit("--workers must be between 1 and 8")
     resolvers = []
@@ -76,6 +77,7 @@ async def run_browser(args, candidates, state, previous_manifest, *, manifest_ca
                 current_state,
                 generated_at=generated_at,
                 previous_manifest=previous_manifest,
+                embed_candidates=embed_candidates,
             ))
 
         collector = collect_candidates if len(resolvers) == 1 else collect_candidates_parallel
@@ -91,15 +93,19 @@ def main(argv=None):
     candidates = list(iter_catalog_candidates(catalog))
     state = load_json(args.state, {"schemaVersion": 1, "results": {}})
     previous_manifest = load_json(args.output, {})
-    state = seed_state_from_manifest(candidates, previous_manifest, state)
+    embed_candidates = load_json(ROOT / "data/javryo-embeds.json", {})
+    state = seed_state_from_manifest(candidates, previous_manifest, state,
+                                     embed_candidates=embed_candidates)
     if args.browser:
-        browser_candidates = filter_candidates_by_codes(candidates, args.code)
+        browser_candidates = [item for item in filter_candidates_by_codes(candidates, args.code)
+                              if item.provider != "javryo"]
         processed = asyncio.run(run_browser(
             args,
             browser_candidates,
             state,
             previous_manifest,
             manifest_candidates=candidates,
+            embed_candidates=embed_candidates,
         ))
         print(f"processed={processed}")
         state = load_json(args.state, state)
@@ -109,6 +115,7 @@ def main(argv=None):
         state,
         generated_at=generated_at,
         previous_manifest=previous_manifest,
+        embed_candidates=embed_candidates,
     )
     resolved = sum(len(slots) for slots in manifest["entries"].values())
     print(f"candidates={len(candidates)} resolved={resolved} pending={len(candidates) - resolved}")

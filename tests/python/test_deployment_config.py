@@ -33,6 +33,10 @@ def evaluate_default_branch_guard(workflow, ref, default_branch):
 
 
 class RefreshWorkflowConfigTests(unittest.TestCase):
+    def test_refresh_never_stages_untracked_private_verification_state(self):
+        self.assertIn("git add -u -- data/state", self.workflow)
+        self.assertNotIn("git add -- data/raw data/state", self.workflow)
+
     def setUp(self):
         self.assertTrue(
             WORKFLOW_PATH.is_file(),
@@ -176,7 +180,7 @@ class RefreshWorkflowConfigTests(unittest.TestCase):
         self.assertIn(test_command, self.workflow)
         self.assertNotIn("npm test", self.workflow)
         stage_command = (
-            "git add -- data/raw data/state data/update-summary.json "
+            "git add -- data/raw data/update-summary.json "
             "public/data/catalog.json public/data/catalog-core.json "
             "public/data/catalog-tags.json public/data/catalog-bootstrap.json "
             "public/data/link-updates.json "

@@ -12,4 +12,6 @@ test-results/
 *.tmp
 data/state/tag-sync-checkpoint.json
 data/state/resolved-links-state.json
+data/state/javryo-*.json
+data/state/*.ps1
 data/browser/

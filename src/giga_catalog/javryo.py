@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import html as html_module
-import hashlib
 import re
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
@@ -191,34 +190,61 @@ def apply_overlay_to_catalog(catalog: dict, overlay: object) -> int:
     return changed
 
 
-def build_manifest_entries(overlay: object) -> dict:
-    """Build resolved-link entries only for crawler-verified Streamtape pages."""
+def build_manifest_entries(overlay: object, embed_verification: object = None,
+                           streamtape_verification: object = None,
+                           embed_candidates: object = None) -> dict:
+    """Publish only two-path playback-verified stable player landings."""
+    from .javryo_streams import normalize_embed_url
+    from .resolved_links import validate_final_url, source_url_hash
+
+    embed_rows = embed_verification.get("results", {}) if isinstance(embed_verification, dict) else {}
+    tape_rows = streamtape_verification.get("results", {}) if isinstance(streamtape_verification, dict) else {}
+    candidate_rows = embed_candidates.get("entries", {}) if isinstance(embed_candidates, dict) else {}
     entries = {}
     for code, item in sorted(_overlay_entries(overlay).items()):
-        if not isinstance(item, dict) or item.get("status") != "streamtape_verified":
+        if not isinstance(item, dict):
             continue
         canonical = normalize_code(code)
         source_url = item.get("pageUrl")
-        final_url = item.get("streamtapeUrl")
-        checked_at = item.get("checkedAt")
-        if (
-            canonical != code
-            or not isinstance(source_url, str)
-            or extract_movie_code(source_url) != code
-            or not isinstance(final_url, str)
-            or not streamtape_page_is_live(final_url, 200, "streamtape <video></video>")
-            or not isinstance(checked_at, str)
-            or not checked_at
-        ):
+        if canonical != code or not isinstance(source_url, str) or extract_movie_code(source_url) != code:
             continue
-        digest = hashlib.sha256(source_url.encode("utf-8")).hexdigest()
+        digest = source_url_hash(source_url)
+        selected = None
+        for provider, row in (("streamtape", tape_rows.get(code)), ("javryo_stream", embed_rows.get(code))):
+            if not isinstance(row, dict) or row.get("sourceUrlHash") != digest:
+                continue
+            final_url = validate_final_url(row.get("finalUrl"), expected_provider=provider)
+            paths = row.get("paths", {})
+            if (row.get("playbackStatus") != "verified" or not final_url
+                    or not isinstance(paths, dict)
+                    or not isinstance(paths.get("source"), dict)
+                    or not isinstance(paths.get("direct"), dict)
+                    or paths.get("source", {}).get("status") not in {"reached", "verified"}
+                    or paths.get("direct", {}).get("status") != "verified"
+                    or not isinstance(row.get("checkedAt"), str) or not row["checkedAt"]):
+                continue
+            if provider == "streamtape" and final_url != item.get("streamtapeUrl"):
+                continue
+            if provider == "javryo_stream":
+                inventory = candidate_rows.get(code)
+                if (row.get("embedUrlHash") != source_url_hash(final_url)
+                        or not isinstance(inventory, dict)
+                        or inventory.get("sourceUrlHash") != digest
+                        or normalize_embed_url(inventory.get("embedUrl")) != final_url):
+                    continue
+            selected = (provider, final_url, row["checkedAt"])
+            break
+        if not selected:
+            continue
+        provider, final_url, checked_at = selected
         entries[code] = {
             "standard.javryo": {
-                "provider": "streamtape",
-                "sourceUrlHash": f"sha256:{digest}",
+                "provider": provider,
+                "sourceUrlHash": digest,
                 "finalUrl": final_url,
                 "kind": "external",
                 "status": "verified",
+                "playbackStatus": "verified",
                 "checkedAt": checked_at,
             }
         }

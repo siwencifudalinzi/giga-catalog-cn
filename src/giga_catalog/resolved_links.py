@@ -13,7 +13,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 
 PROVIDER_ORDER = ("reupload", "streamtape", "player4me", "gofile", "javryo")
-FINAL_PROVIDERS = ("reupload", "streamtape", "player4me", "gofile", "vidara")
+FINAL_PROVIDERS = ("reupload", "streamtape", "player4me", "gofile", "vidara", "javryo_stream")
 SOURCE_HOST = "ouo.io"
 GOFILE_HOSTS = {"gofile.io", "www.gofile.io"}
 STREAMTAPE_HOSTS = {"streamtape.com"}
@@ -128,8 +128,12 @@ def filter_candidates_by_codes(
 
 
 def validate_final_url(value: object, *, expected_provider: Optional[str] = None) -> Optional[str]:
-    if not isinstance(value, str) or value != value.strip() or len(value) > 2048:
+    if (not isinstance(value, str) or value != value.strip() or len(value) > 2048
+            or any(char in value for char in "\r\n\t")):
         return None
+    if expected_provider == "javryo_stream":
+        from .javryo_streams import normalize_embed_url
+        return normalize_embed_url(value)
     try:
         parsed = urlsplit(value)
         host = (parsed.hostname or "").lower()
@@ -169,6 +173,9 @@ def validate_final_url(value: object, *, expected_provider: Optional[str] = None
 
 
 def provider_for_final_url(value: object) -> Optional[str]:
+    from .javryo_streams import normalize_embed_url
+    if normalize_embed_url(value):
+        return "javryo_stream"
     normalized = validate_final_url(value)
     if not normalized:
         return None
@@ -184,12 +191,23 @@ def provider_for_final_url(value: object) -> Optional[str]:
     return None
 
 
+def _current_javryo_embed(candidate: LinkCandidate, final_url: str,
+                          inventory: Optional[Mapping[str, object]]) -> bool:
+    from .javryo_streams import normalize_embed_url
+    rows = inventory.get("entries", {}) if isinstance(inventory, Mapping) else {}
+    row = rows.get(candidate.code) if isinstance(rows, Mapping) else None
+    return (isinstance(row, Mapping)
+            and row.get("sourceUrlHash") == candidate.source_url_hash
+            and normalize_embed_url(row.get("embedUrl")) == final_url)
+
+
 def build_manifest(
     candidates: Iterable[LinkCandidate],
     state: Mapping[str, object],
     *,
     generated_at: str,
     previous_manifest: Optional[Mapping[str, object]] = None,
+    embed_candidates: Optional[Mapping[str, object]] = None,
 ) -> dict:
     results = state.get("results", {}) if isinstance(state, Mapping) else {}
     if not isinstance(results, Mapping):
@@ -223,9 +241,12 @@ def build_manifest(
             or not final_url
             or not isinstance(checked_at, str)
             or not checked_at
+            or (candidate.slot == "standard.javryo" and result.get("playbackStatus") != "verified")
+            or (provider == "javryo_stream" and result.get("playbackStatus") != "verified")
+            or (provider == "javryo_stream" and not _current_javryo_embed(candidate, final_url, embed_candidates))
         ):
             continue
-        entries.setdefault(candidate.code, {})[candidate.slot] = {
+        entry = {
             "provider": provider,
             "sourceUrlHash": candidate.source_url_hash,
             "finalUrl": final_url,
@@ -233,6 +254,9 @@ def build_manifest(
             "status": "verified",
             "checkedAt": checked_at,
         }
+        if result.get("playbackStatus") == "verified":
+            entry["playbackStatus"] = "verified"
+        entries.setdefault(candidate.code, {})[candidate.slot] = entry
     if (
         isinstance(previous_manifest, Mapping)
         and previous_manifest.get("schemaVersion") == 2
@@ -252,6 +276,8 @@ def seed_state_from_manifest(
     candidates: Iterable[LinkCandidate],
     manifest: Mapping[str, object],
     state: Mapping[str, object],
+    *,
+    embed_candidates: Optional[Mapping[str, object]] = None,
 ) -> dict:
     seeded = dict(state) if isinstance(state, Mapping) else {}
     existing_results = seeded.get("results")
@@ -274,6 +300,8 @@ def seed_state_from_manifest(
             and entry.get("kind") == "external"
             and final_url
             and isinstance(entry.get("checkedAt"), str)
+            and (candidate.slot != "standard.javryo" or entry.get("playbackStatus") == "verified")
+            and (provider != "javryo_stream" or _current_javryo_embed(candidate, final_url, embed_candidates))
         ):
             results[candidate.key] = {
                 "sourceUrlHash": candidate.source_url_hash,
@@ -283,6 +311,8 @@ def seed_state_from_manifest(
                 "checkedAt": entry["checkedAt"],
                 "attempts": 0,
             }
+            if entry.get("playbackStatus") == "verified":
+                results[candidate.key]["playbackStatus"] = "verified"
     seeded["schemaVersion"] = 1
     seeded["results"] = results
     return seeded

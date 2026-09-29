@@ -1,0 +1,118 @@
+"""Run four resumable headless workers; store only bounded playback evidence."""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import json
+import sys
+from collections import Counter
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.giga_catalog.javryo_streams import JavryoEmbedCandidate  # noqa: E402
+from src.giga_catalog.javryo_embeds_browser import utc_now, verify_embed_candidate  # noqa: E402
+from src.giga_catalog.resolved_links import atomic_write_json, load_json, source_url_hash  # noqa: E402
+
+
+def candidates_from_file(path: Path) -> list[JavryoEmbedCandidate]:
+    rows = load_json(path, {}).get("entries", {})
+    return [JavryoEmbedCandidate(
+        code=row["code"], page_url=row["pageUrl"], post_id=row["postId"],
+        source_url_hash=row["sourceUrlHash"], embed_url=row.get("embedUrl"),
+        host=row.get("host", ""), status=row["status"], fetched_at=row["fetchedAt"],
+    ) for row in rows.values()]
+
+
+def progress(results: dict, total: int, added: int) -> str:
+    counts = Counter(row.get("playbackStatus") for row in results.values())
+    return (f"已处理：{len(results)} / {total}\n确认可播放：{counts['verified']}\n"
+            f"播放器与媒体清单可达：{counts['media_reachable']}\n"
+            f"验证受阻：{counts['blocked'] + counts['retryable']}\n"
+            f"已失效：{counts['dead']}\n不支持：{counts['unsupported']}\n"
+            f"本批新增直达：{added}\n当前阶段：后台验证")
+
+
+async def run(args) -> None:
+    from playwright.async_api import async_playwright
+
+    candidates = candidates_from_file(args.candidates)
+    if args.code:
+        selected = {code.strip().upper() for code in args.code}
+        candidates = [candidate for candidate in candidates if candidate.code in selected]
+    state = load_json(args.state, {"schemaVersion": 1, "results": {}})
+    if not isinstance(state, dict) or not isinstance(state.get("results"), dict):
+        state = {"schemaVersion": 1, "results": {}}
+    results = state["results"]
+    queue = asyncio.Queue()
+    for candidate in candidates:
+        previous = results.get(candidate.code)
+        same = isinstance(previous, dict) and previous.get("sourceUrlHash") == candidate.source_url_hash
+        if same and candidate.embed_url:
+            same = previous.get("embedUrlHash") == source_url_hash(candidate.embed_url)
+        if same and (previous.get("playbackStatus") not in {"retryable", "blocked"}
+                     or not args.retry or previous.get("attempts", 0) >= 3):
+            continue
+        if args.max_links and queue.qsize() >= args.max_links:
+            break
+        queue.put_nowait(candidate)
+
+    print(f"queued={queue.qsize()}", flush=True)
+    if queue.empty():
+        return
+
+    lock = asyncio.Lock()
+    added = 0
+    async with async_playwright() as manager:
+        async def worker():
+            nonlocal added
+            browser = await manager.chromium.launch(headless=True, args=["--autoplay-policy=no-user-gesture-required"])
+            try:
+                while True:
+                    try:
+                        candidate = queue.get_nowait()
+                    except asyncio.QueueEmpty:
+                        return
+                    previous = results.get(candidate.code, {})
+                    try:
+                        result = await verify_embed_candidate(candidate, browser, timeout_ms=args.timeout_ms)
+                    except Exception as error:
+                        result = {"playbackStatus": "retryable", "errorCode": type(error).__name__}
+                    result.setdefault("checkedAt", utc_now())
+                    result.setdefault("sourceUrlHash", candidate.source_url_hash)
+                    result.setdefault("embedUrlHash", source_url_hash(candidate.embed_url) if candidate.embed_url else "")
+                    result["attempts"] = int(previous.get("attempts", 0)) + 1 if isinstance(previous, dict) else 1
+                    async with lock:
+                        results[candidate.code] = result
+                        state["updatedAt"] = utc_now()
+                        atomic_write_json(args.state, state)
+                        if result["playbackStatus"] == "verified" and previous.get("playbackStatus") != "verified":
+                            added += 1
+                        if len(results) % 300 == 0 or len(results) == len(candidates):
+                            print(progress(results, len(candidates), added), flush=True)
+                            added = 0
+                    queue.task_done()
+            finally:
+                await browser.close()
+
+        await asyncio.gather(*(worker() for _ in range(4)))
+    print(progress(results, len(candidates), added), flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--candidates", type=Path, default=ROOT / "data/javryo-embeds.json")
+    parser.add_argument("--state", type=Path, default=ROOT / "data/state/javryo-embed-verification.json")
+    parser.add_argument("--max-links", type=int, default=0)
+    parser.add_argument("--timeout-ms", type=int, default=12000)
+    parser.add_argument("--retry", action="store_true")
+    parser.add_argument("--code", action="append", default=[])
+    args = parser.parse_args()
+    asyncio.run(run(args))
+
+
+if __name__ == "__main__":
+    main()

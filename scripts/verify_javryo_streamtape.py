@@ -1,0 +1,90 @@
+"""Recheck every legacy JAVRyo Streamtape watch with four headless workers."""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import sys
+from collections import Counter
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.giga_catalog.javryo_embeds_browser import utc_now  # noqa: E402
+from src.giga_catalog.javryo_streamtape_browser import matching_wrapper, verify_streamtape_candidate  # noqa: E402
+from src.giga_catalog.resolved_links import atomic_write_json, load_json, source_url_hash  # noqa: E402
+
+
+async def run(args):
+    from playwright.async_api import async_playwright
+
+    overlay = load_json(ROOT / "data/javryo-links.json", {}).get("entries", {})
+    crawl = load_json(ROOT / "data/state/javryo-crawl.json", {}).get("results", {})
+    state = load_json(args.state, {"schemaVersion": 1, "results": {}})
+    results = state["results"]
+    queue = asyncio.Queue()
+    for code, item in sorted(overlay.items()):
+        if item.get("status") != "streamtape_verified":
+            continue
+        page_url, final_url = item["pageUrl"], item["streamtapeUrl"]
+        prior = results.get(code, {})
+        if (prior.get("sourceUrlHash") == source_url_hash(page_url)
+                and prior.get("targetUrlHash") == source_url_hash(final_url)
+                and (prior.get("playbackStatus") not in {"retryable", "blocked"}
+                     or not args.retry or prior.get("attempts", 0) >= 2)):
+            continue
+        if args.max_links and queue.qsize() >= args.max_links:
+            break
+        queue.put_nowait((code, page_url, final_url, matching_wrapper(crawl.get(code), final_url)))
+
+    lock = asyncio.Lock()
+    async with async_playwright() as manager:
+        async def worker():
+            browser = await manager.chromium.launch(headless=True,
+                args=["--autoplay-policy=no-user-gesture-required"])
+            try:
+                while True:
+                    try:
+                        code, page_url, final_url, wrapper = queue.get_nowait()
+                    except asyncio.QueueEmpty:
+                        return
+                    previous = results.get(code, {})
+                    if wrapper:
+                        try:
+                            row = await verify_streamtape_candidate(browser, page_url=page_url,
+                                final_url=final_url, wrapper_url=wrapper, timeout_ms=args.timeout_ms)
+                        except Exception as error:
+                            row = {"playbackStatus": "retryable", "errorCode": type(error).__name__}
+                    else:
+                        row = {"playbackStatus": "unsupported", "errorCode": "missing-wrapper"}
+                    row.setdefault("checkedAt", utc_now())
+                    row.setdefault("sourceUrlHash", source_url_hash(page_url))
+                    row["targetUrlHash"] = source_url_hash(final_url)
+                    row["attempts"] = int(previous.get("attempts", 0)) + 1
+                    async with lock:
+                        results[code] = row
+                        state["updatedAt"] = utc_now()
+                        atomic_write_json(args.state, state)
+                        if len(results) % 300 == 0:
+                            print(len(results), Counter(v["playbackStatus"] for v in results.values()), flush=True)
+                    queue.task_done()
+            finally:
+                await browser.close()
+
+        await asyncio.gather(*(worker() for _ in range(4)))
+    print(len(results), Counter(v["playbackStatus"] for v in results.values()), flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--state", type=Path, default=ROOT / "data/state/javryo-streamtape-verification.json")
+    parser.add_argument("--max-links", type=int, default=0)
+    parser.add_argument("--timeout-ms", type=int, default=20000)
+    parser.add_argument("--retry", action="store_true")
+    asyncio.run(run(parser.parse_args()))
+
+
+if __name__ == "__main__":
+    main()

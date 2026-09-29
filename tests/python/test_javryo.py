@@ -1,4 +1,5 @@
 import unittest
+from src.giga_catalog.resolved_links import source_url_hash
 
 from src.giga_catalog.javryo import (
     apply_overlay_to_catalog,
@@ -12,6 +13,30 @@ from src.giga_catalog.javryo import (
 
 
 class JavryoParsingTests(unittest.TestCase):
+    def test_verified_embed_is_published_and_verified_streamtape_wins(self):
+        page = "https://javryo.com/movies/athb-16-sample/"
+        embed = "https://bysejikuar.com/e/7p4h1pwsjiaw"
+        tape = "https://streamtape.com/v/abc/ATHB-16.mp4"
+        overlay = {"entries": {"ATHB-16": {"pageUrl": page, "status": "streamtape_verified",
+                                             "streamtapeUrl": tape, "checkedAt": "2026-09-29T00:00:00Z"}}}
+        embeds = {"results": {"ATHB-16": {"playbackStatus": "verified",
+            "sourceUrlHash": source_url_hash(page), "embedUrlHash": source_url_hash(embed),
+            "finalUrl": embed, "checkedAt": "2026-09-29T00:00:00Z",
+            "paths": {"source": {"status": "reached"}, "direct": {"status": "verified"}}}}}
+        inventory = {"entries": {"ATHB-16": {"pageUrl": page,
+            "sourceUrlHash": source_url_hash(page), "embedUrl": embed}}}
+        entry = build_manifest_entries(overlay, embeds, None, inventory)["ATHB-16"]["standard.javryo"]
+        self.assertEqual((entry["provider"], entry["finalUrl"], entry["playbackStatus"]),
+                         ("javryo_stream", embed, "verified"))
+        tapes = {"results": {"ATHB-16": {"playbackStatus": "verified",
+            "sourceUrlHash": source_url_hash(page), "finalUrl": tape,
+            "checkedAt": "2026-09-29T00:00:00Z",
+            "paths": {"source": {"status": "verified"}, "direct": {"status": "verified"}}}}}
+        entry = build_manifest_entries(overlay, embeds, tapes, inventory)["ATHB-16"]["standard.javryo"]
+        self.assertEqual(entry["provider"], "streamtape")
+        inventory["entries"]["ATHB-16"]["embedUrl"] = "https://bysejikuar.com/e/newplayer"
+        self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
+
     def test_overlay_adds_page_without_overwriting_existing_links(self) -> None:
         catalog = {
             "series": [{"videos": [{
@@ -72,8 +97,7 @@ class JavryoParsingTests(unittest.TestCase):
                 },
             }
         })
-        self.assertEqual(list(entries), ["SPSF-72"])
-        self.assertEqual(entries["SPSF-72"]["standard.javryo"]["provider"], "streamtape")
+        self.assertEqual(entries, {})
 
     def test_extracts_only_movie_urls_from_sitemap(self) -> None:
         xml = """<?xml version="1.0"?>

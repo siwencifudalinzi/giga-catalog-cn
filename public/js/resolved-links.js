@@ -5,12 +5,26 @@ const ALLOWED_HOSTS = new Set([
   "gigaandzen.embed4me.com",
   "vidara.to",
   "vidara.so",
+  "bysejikuar.com", "ryonanation.icu", "ryonads.icu", "short.icu",
+  "dood.la", "player.mogulstream.icu", "movearnpre.com",
+  "javryo.embed4me.com",
 ]);
+const JAVRYO_PATHS = Object.freeze({
+  "bysejikuar.com": /^\/e\/[A-Za-z0-9_-]+$/u,
+  "ryonanation.icu": /^\/(?:v|p)\/[A-Za-z0-9_-]+$/u,
+  "ryonads.icu": /^\/e\/[A-Za-z0-9_-]+(?:\.html)?$/u,
+  "short.icu": /^\/[A-Za-z0-9_-]+$/u,
+  "dood.la": /^\/e\/[A-Za-z0-9_-]+$/u,
+  "player.mogulstream.icu": /^\/v\/[A-Za-z0-9_-]+$/u,
+  "movearnpre.com": /^\/embed\/[A-Za-z0-9_-]+$/u,
+  "javryo.embed4me.com": /^\/$/u,
+});
 const PROVIDER_LABELS = Object.freeze({
   gofile: "Gofile",
   streamtape: "Streamtape",
   player4me: "Player4me",
   vidara: "Vidara",
+  javryo_stream: "JAVRyo Stream",
 });
 
 function keyFor(code, slot) {
@@ -18,7 +32,8 @@ function keyFor(code, slot) {
 }
 
 function normalizeFinalUrl(value) {
-  if (typeof value !== "string" || value.length > 2048) {
+  if (typeof value !== "string" || value.length > 2048 ||
+      value !== value.trim() || /[\r\n\t]/u.test(value)) {
     return null;
   }
   try {
@@ -57,7 +72,13 @@ function normalizeFinalUrl(value) {
     ) {
       return null;
     }
-    if (url.hostname !== "gigaandzen.embed4me.com" && url.hash) {
+    if (JAVRYO_PATHS[url.hostname] &&
+      (!JAVRYO_PATHS[url.hostname].test(url.pathname) ||
+        (url.hostname === "javryo.embed4me.com"
+          ? !/^#[A-Za-z0-9]+$/u.test(url.hash) : Boolean(url.hash)))) {
+      return null;
+    }
+    if (!["gigaandzen.embed4me.com", "javryo.embed4me.com"].includes(url.hostname) && url.hash) {
       return null;
     }
     return url.href;
@@ -68,6 +89,7 @@ function normalizeFinalUrl(value) {
 
 function providerForFinalUrl(value) {
   const host = new URL(value).hostname;
+  if (JAVRYO_PATHS[host]) return "javryo_stream";
   if (["gofile.io", "www.gofile.io"].includes(host)) return "gofile";
   if (host === "streamtape.com") return "streamtape";
   if (host === "gigaandzen.embed4me.com") return "player4me";
@@ -96,7 +118,7 @@ export function normalizeResolvedLinkManifest(raw) {
       if (
         !/^(?:standard|uncensored)\.(?:reupload|gofile|streamtape|player4me|javryo)$/u.test(slot) ||
         providerForFinalUrl(finalUrl || "https://invalid.invalid/") !== entry?.provider ||
-        (entry?.provider === "player4me" && entry?.playbackStatus !== "verified") ||
+        ((entry?.provider === "player4me" || entry?.provider === "javryo_stream" || slot === "standard.javryo") && entry?.playbackStatus !== "verified") ||
         entry?.kind !== "external" ||
         entry?.status !== "verified" ||
         !/^sha256:[0-9a-f]{64}$/u.test(entry?.sourceUrlHash || "") ||

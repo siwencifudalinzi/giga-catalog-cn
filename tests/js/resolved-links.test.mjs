@@ -12,6 +12,33 @@ const SOURCE = "https://ouo.io/mT78vqU";
 const HASH =
   "sha256:8e4a74b155b39a37bc851982ed6c75f3b6ee95f0b42528b11cc6cc62afe198fc";
 
+test("JAVRyo embed appears only with verified playback and matching source", async () => {
+  const sourceUrl = "https://javryo.com/movies/athb-16-sample/";
+  const sourceUrlHash = await sha256SourceUrl(sourceUrl);
+  const entry = {
+    provider: "javryo_stream", sourceUrlHash,
+    finalUrl: "https://bysejikuar.com/e/7p4h1pwsjiaw",
+    kind: "external", status: "verified", checkedAt: "2026-09-29T00:00:00Z",
+    playbackStatus: "media_reachable",
+  };
+  const raw = { schemaVersion: 2, entries: { "ATHB-16": { "standard.javryo": entry } } };
+  assert.equal(normalizeResolvedLinkManifest(raw).size, 0);
+  entry.playbackStatus = "verified";
+  const manifest = normalizeResolvedLinkManifest(raw);
+  assert.deepEqual(await resolveLinkTarget({code: "ATHB-16", slot: "standard.javryo",
+    label: "JAVRyo", sourceUrl}, manifest), {
+      url: entry.finalUrl, label: "直达 JAVRyo Stream", resolved: true,
+    });
+  assert.equal((await resolveLinkTarget({code: "ATHB-16", slot: "standard.javryo",
+    label: "JAVRyo", sourceUrl: sourceUrl + "changed"}, manifest)).resolved, false);
+  for (const bad of ["https://bysejikuar.come/e/id", "https://bysejikuar.com/e/id?token=x",
+    "https://bysejikuar.com/e/id.m3u8", "https://myvidplay.com/e/15m18xirm8ld",
+    "https://bysejikuar.com/e/id\n"]) {
+    entry.finalUrl = bad;
+    assert.equal(normalizeResolvedLinkManifest(raw).size, 0);
+  }
+});
+
 function manifestWith(finalUrl) {
   return {
     schemaVersion: 2,
@@ -105,6 +132,7 @@ test("a JAVRyo source slot may upgrade to its verified Streamtape watch page", a
           provider: "streamtape",
           sourceUrlHash: sourceHash,
           finalUrl: "https://streamtape.com/v/abc_1/SPSF-72.mp4",
+          playbackStatus: "verified",
           kind: "external",
           status: "verified",
           checkedAt: "2026-09-27T00:00:00Z",

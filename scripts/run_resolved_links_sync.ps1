@@ -29,7 +29,7 @@ try {
     $beforePath = [System.IO.Path]::GetTempFileName()
     Copy-Item -LiteralPath 'public/data/resolved-links.json' -Destination $beforePath -Force
 
-    & 'C:\Windows\py.exe' scripts/resolve_links.py --browser --background-window --workers $Workers --max-links $MaxLinks --delay 0.5 --write
+    & 'C:\Windows\py.exe' scripts/resolve_links.py --browser --headless --workers $Workers --max-links $MaxLinks --delay 0.5 --write
     if ($LASTEXITCODE -ne 0) { throw "resolver exited $LASTEXITCODE" }
     & 'C:\Windows\py.exe' scripts/update_link_changelog.py --source resolved --before $beforePath --after public/data/resolved-links.json --history public/data/link-updates.json
     if ($LASTEXITCODE -ne 0) { throw "changelog exited $LASTEXITCODE" }

@@ -2531,6 +2531,7 @@ function startApplication() {
     reupload: "重传链接",
     streamtape: "Streamtape",
     player4me: "Player4me",
+    javryo_stream: "JAVRyo Stream",
     vidara: "Vidara",
     gofile: "Gofile",
   });
