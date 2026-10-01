@@ -15,7 +15,8 @@ if str(ROOT) not in sys.path:
 
 from src.giga_catalog.javryo_streams import JavryoEmbedCandidate  # noqa: E402
 from src.giga_catalog.javryo_embeds_browser import utc_now, verify_embed_candidate  # noqa: E402
-from src.giga_catalog.resolved_links import atomic_write_json, load_json, source_url_hash  # noqa: E402
+from src.giga_catalog.javryo_checkpoints import durable_path, load_checkpoint, save_checkpoint  # noqa: E402
+from src.giga_catalog.resolved_links import load_json, source_url_hash  # noqa: E402
 
 
 def candidates_from_file(path: Path) -> list[JavryoEmbedCandidate]:
@@ -60,7 +61,7 @@ async def run(args) -> None:
     if args.code:
         selected = {code.strip().upper() for code in args.code}
         candidates = [candidate for candidate in candidates if candidate.code in selected]
-    state = load_json(args.state, {"schemaVersion": 1, "results": {}})
+    state = load_checkpoint(args.state, args.backup_state)
     if not isinstance(state, dict) or not isinstance(state.get("results"), dict):
         state = {"schemaVersion": 1, "results": {}}
     results = state["results"]
@@ -103,7 +104,7 @@ async def run(args) -> None:
                     async with lock:
                         results[candidate.code] = result
                         state["updatedAt"] = utc_now()
-                        atomic_write_json(args.state, state)
+                        save_checkpoint(args.state, args.backup_state, state)
                         if result["playbackStatus"] == "verified" and previous.get("playbackStatus") != "verified":
                             added += 1
                         if len(results) % 300 == 0 or len(results) == len(candidates):
@@ -121,12 +122,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidates", type=Path, default=ROOT / "data/javryo-embeds.json")
     parser.add_argument("--state", type=Path, default=ROOT / "data/state/javryo-embed-verification.json")
+    parser.add_argument("--backup-state", type=Path)
     parser.add_argument("--max-links", type=int, default=0)
     parser.add_argument("--timeout-ms", type=int, default=12000)
     parser.add_argument("--retry", action="store_true")
     parser.add_argument("--retry-promising", action="store_true")
     parser.add_argument("--code", action="append", default=[])
     args = parser.parse_args()
+    args.backup_state = args.backup_state or durable_path(args.state.name)
     if args.retry_promising and not args.retry:
         parser.error("--retry-promising requires --retry")
     asyncio.run(run(args))

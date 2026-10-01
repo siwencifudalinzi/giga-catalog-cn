@@ -13,8 +13,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.giga_catalog.javryo_embeds_browser import utc_now  # noqa: E402
+from src.giga_catalog.javryo_checkpoints import durable_path, load_checkpoint, save_checkpoint  # noqa: E402
 from src.giga_catalog.javryo_streamtape_browser import matching_wrapper, verify_streamtape_candidate  # noqa: E402
-from src.giga_catalog.resolved_links import atomic_write_json, load_json, source_url_hash  # noqa: E402
+from src.giga_catalog.resolved_links import load_json, source_url_hash  # noqa: E402
 
 
 async def run(args):
@@ -22,7 +23,7 @@ async def run(args):
 
     overlay = load_json(ROOT / "data/javryo-links.json", {}).get("entries", {})
     crawl = load_json(ROOT / "data/state/javryo-crawl.json", {}).get("results", {})
-    state = load_json(args.state, {"schemaVersion": 1, "results": {}})
+    state = load_checkpoint(args.state, args.backup_state)
     results = state["results"]
     queue = asyncio.Queue()
     for code, item in sorted(overlay.items()):
@@ -55,14 +56,11 @@ async def run(args):
                     except asyncio.QueueEmpty:
                         return
                     previous = results.get(code, {})
-                    if wrapper:
-                        try:
-                            row = await verify_streamtape_candidate(browser, page_url=page_url,
-                                final_url=final_url, wrapper_url=wrapper, timeout_ms=args.timeout_ms)
-                        except Exception as error:
-                            row = {"playbackStatus": "retryable", "errorCode": type(error).__name__}
-                    else:
-                        row = {"playbackStatus": "unsupported", "errorCode": "missing-wrapper"}
+                    try:
+                        row = await verify_streamtape_candidate(browser, page_url=page_url,
+                            final_url=final_url, wrapper_url=wrapper, timeout_ms=args.timeout_ms)
+                    except Exception as error:
+                        row = {"playbackStatus": "retryable", "errorCode": type(error).__name__}
                     row.setdefault("checkedAt", utc_now())
                     row.setdefault("sourceUrlHash", source_url_hash(page_url))
                     row["targetUrlHash"] = source_url_hash(final_url)
@@ -70,7 +68,7 @@ async def run(args):
                     async with lock:
                         results[code] = row
                         state["updatedAt"] = utc_now()
-                        atomic_write_json(args.state, state)
+                        save_checkpoint(args.state, args.backup_state, state)
                         if len(results) % 300 == 0:
                             print(len(results), Counter(v["playbackStatus"] for v in results.values()), flush=True)
                     queue.task_done()
@@ -84,11 +82,14 @@ async def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--state", type=Path, default=ROOT / "data/state/javryo-streamtape-verification.json")
+    parser.add_argument("--backup-state", type=Path)
     parser.add_argument("--max-links", type=int, default=0)
     parser.add_argument("--timeout-ms", type=int, default=20000)
     parser.add_argument("--retry", action="store_true")
     parser.add_argument("--workers", type=int, choices=(1, 2, 3, 4), default=4)
-    asyncio.run(run(parser.parse_args()))
+    args = parser.parse_args()
+    args.backup_state = args.backup_state or durable_path(args.state.name)
+    asyncio.run(run(args))
 
 
 if __name__ == "__main__":

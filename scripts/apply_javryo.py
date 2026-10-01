@@ -38,6 +38,13 @@ def _write_bytes(path: Path, payload: bytes) -> None:
     temporary.replace(path)
 
 
+def javryo_manifest_changed(before: dict, after: dict) -> bool:
+    def selected(entries):
+        return {code: slots["standard.javryo"] for code, slots in entries.items()
+                if isinstance(slots, dict) and "standard.javryo" in slots}
+    return selected(before) != selected(after)
+
+
 def apply_files(root: Path = ROOT) -> dict:
     overlay_path = root / "data/javryo-links.json"
     catalog_path = root / "public/data/catalog.json"
@@ -50,11 +57,6 @@ def apply_files(root: Path = ROOT) -> dict:
     if changed:
         generated_at = overlay.get("generatedAt") if isinstance(overlay, dict) else None
         catalog["generatedAt"] = generated_at if isinstance(generated_at, str) else _now()
-    errors = validate_stored_catalog(catalog)
-    if errors:
-        raise RuntimeError("catalog validation failed:\n" + "\n".join(sorted(errors)))
-    _write_bytes(catalog_path, serialize_catalog(catalog))
-
     manifest = _load(manifest_path, {})
     old_entries = manifest.get("entries", {}) if isinstance(manifest, dict) else {}
     entries = {}
@@ -73,6 +75,12 @@ def apply_files(root: Path = ROOT) -> dict:
     )
     for code, slots in javryo_entries.items():
         entries.setdefault(code, {}).update(slots)
+    if not changed and javryo_manifest_changed(old_entries, entries):
+        catalog["generatedAt"] = _now()
+    errors = validate_stored_catalog(catalog)
+    if errors:
+        raise RuntimeError("catalog validation failed:\n" + "\n".join(sorted(errors)))
+    _write_bytes(catalog_path, serialize_catalog(catalog))
     atomic_write_json(manifest_path, {
         "schemaVersion": 2,
         "generatedAt": _now(),

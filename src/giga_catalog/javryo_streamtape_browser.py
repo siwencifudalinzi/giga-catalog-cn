@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import re
 from urllib.parse import urlsplit
+from typing import Optional
 
 from .javryo_embeds_browser import (
     EVENT_SCRIPT, MEDIA_EXT_RE, _observe, _route_media, aggregate_path_status,
@@ -93,10 +94,23 @@ async def _clicked_path(browser, page_url: str, wrapper: str, final_url: str,
 
 
 async def verify_streamtape_candidate(browser, *, page_url: str, final_url: str,
-                                      wrapper_url: str, timeout_ms: int = 20000) -> dict:
+                                      wrapper_url: Optional[str], timeout_ms: int = 20000) -> dict:
     if validate_final_url(final_url, expected_provider="streamtape") != final_url:
         return {"playbackStatus": "unsupported"}
-    source = await _clicked_path(browser, page_url, wrapper_url, final_url, timeout_ms)
+    if wrapper_url:
+        source = await _clicked_path(browser, page_url, wrapper_url, final_url, timeout_ms)
+    else:
+        context = await _context(browser)
+        try:
+            page = await context.new_page()
+            response = await page.goto(page_url, wait_until="commit", timeout=timeout_ms)
+            status = response.status if response else None
+            source = {"status": "blocked" if status in (401, 403, 429) else "retryable",
+                      "evidence": {"httpStatus": status, "errorCode": "missing-wrapper"}}
+        except Exception as error:
+            source = {"status": "retryable", "evidence": {"errorCode": type(error).__name__}}
+        finally:
+            await context.close()
     context = await _context(browser)
     try:
         direct_page = await context.new_page()

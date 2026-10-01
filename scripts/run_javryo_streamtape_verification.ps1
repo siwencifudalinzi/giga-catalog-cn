@@ -7,6 +7,9 @@ Set-Location -LiteralPath $repo
 $env:PYTHONIOENCODING = 'utf-8'
 $failures = 0
 
+& 'C:\Windows\py.exe' -X utf8 scripts/recover_javryo_wrappers.py
+if ($LASTEXITCODE -ne 0) { throw 'Streamtape source metadata recovery failed' }
+
 while ($true) {
     $verifierArgs = @('-X', 'utf8', 'scripts/verify_javryo_streamtape.py',
         '--max-links', $BatchSize, '--timeout-ms', $TimeoutMs, '--workers', $Workers)
