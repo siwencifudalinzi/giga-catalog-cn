@@ -40,7 +40,7 @@ EVENT_SCRIPT = """(() => {
       video.pause();
     }, true);
 })()"""
-DELETED_RE = re.compile(r"no such file|file (?:was )?deleted|video not found|file not found", re.I)
+DELETED_RE = re.compile(r"no such file|(?:file|video) (?:was )?deleted|video not found|file not found|\b404\s+not\s+found\b", re.I)
 CHALLENGE_RE = re.compile(r"captcha|cloudflare|just a moment|verify you are human|人机验证", re.I)
 MEDIA_EXT_RE = re.compile(r"\.(?:mp4|m4v|ts|m4s)(?:$|[?])", re.I)
 AD_HOST_RE = re.compile(r"^https?://(?:creative\.rmhfrtnd\.com|dcbbwymp1bhlf\.cloudfront\.net)/", re.I)

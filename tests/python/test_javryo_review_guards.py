@@ -7,6 +7,11 @@ from src.giga_catalog import javryo_embeds_browser as browser
 
 
 class SourceAndEventGuardTests(unittest.TestCase):
+    def test_spa_not_found_page_is_deleted_even_when_root_http_is_200(self):
+        observation = {"httpStatus": 200, "videoCount": 0, "events": [],
+                       "deleted": bool(browser.DELETED_RE.search("404 Not Found"))}
+        self.assertEqual(browser.classify_observation(observation), "dead")
+
     def test_page_console_flood_is_suppressed_without_removing_event_listeners(self):
         program = """
 let messages = 0;
