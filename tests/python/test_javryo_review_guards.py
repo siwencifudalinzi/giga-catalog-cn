@@ -7,6 +7,21 @@ from src.giga_catalog import javryo_embeds_browser as browser
 
 
 class SourceAndEventGuardTests(unittest.TestCase):
+    def test_page_console_flood_is_suppressed_without_removing_event_listeners(self):
+        program = """
+let messages = 0;
+const listeners = {};
+global.window = {console:{log:()=>messages++,debug:()=>messages++,warn:()=>messages++}};
+global.document = {addEventListener:(name,callback)=>listeners[name]=callback};
+""" + browser.EVENT_SCRIPT + """
+for (let i=0; i<100000; i++) {window.console.log({i});window.console.debug(i);}
+window.console.warn('diagnostic');
+process.stdout.write(JSON.stringify({messages,listeners:Object.keys(listeners).sort()}));
+"""
+        result = subprocess.run(["node"], input=program, text=True, capture_output=True, check=True)
+        self.assertEqual(json.loads(result.stdout),
+                         {"messages": 0, "listeners": ["click", "playing", "timeupdate"]})
+
     def test_catalog_link_proof_requires_a_trusted_anchor_click(self):
         program = """
 global.window = {};

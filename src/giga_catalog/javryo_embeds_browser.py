@@ -15,6 +15,13 @@ from .javryo_media_probe import MediaProbeBudget, fetch_probe
 
 VERIFICATION_VERSION = 4
 EVENT_SCRIPT = """(() => {
+  // Some source pages continuously log objects (140,000 messages in 23s).
+  // The driver retains console handles and can exhaust its heap. Console output
+  // is not playback evidence; suppress it before page scripts start executing.
+  if (window.console) for (const name of ['log','debug','info','warn','error','trace',
+      'dir','dirxml','table','assert','group','groupCollapsed','groupEnd','time',
+      'timeEnd','timeLog','count','countReset','clear','profile','profileEnd','timeStamp'])
+    try { window.console[name] = () => {}; } catch (_) {}
   window.__gigaSourceClickObserved = false;
   window.__gigaLastClickedHref = null;
   document.addEventListener('click', event => {
