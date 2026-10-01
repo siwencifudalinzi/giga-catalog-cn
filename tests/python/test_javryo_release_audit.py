@@ -11,7 +11,7 @@ class CatalogPreviewReleaseGateTests(unittest.TestCase):
         entry = {"finalUrl": "https://bysejikuar.com/e/example"}
         evidence = {"httpStatus": 200, "videoCount": 1, "manifestStatus": 200,
                     "trustedVideoEvents": True, "playerDocumentValidated": True,
-                    "events": ["playing"]}
+                    "events": ["playing"], "catalogClickObserved": True, "catalogDocumentValidated": True}
         row = {"generation": "generation", "targetUrlHash": source_url_hash(entry["finalUrl"]),
                "verificationVersion": VERIFICATION_VERSION, "playbackStatus": "verified",
                "paths": {name: {"status": "verified", "evidence": copy.deepcopy(evidence)}
@@ -23,6 +23,10 @@ class CatalogPreviewReleaseGateTests(unittest.TestCase):
             bad[key] = value
             with self.assertRaises(AssertionError):
                 audit.assert_preview_entry("EX-1", entry, bad, "generation")
+        bad = copy.deepcopy(row)
+        bad["paths"]["catalog"]["evidence"]["catalogClickObserved"] = False
+        with self.assertRaises(AssertionError):
+            audit.assert_preview_entry("EX-1", entry, bad, "generation")
         bad = copy.deepcopy(row)
         bad["paths"]["direct"]["evidence"]["events"] = []
         with self.assertRaises(AssertionError):

@@ -16,7 +16,10 @@ from .javryo_media_probe import MediaProbeBudget, fetch_probe
 VERIFICATION_VERSION = 4
 EVENT_SCRIPT = """(() => {
   window.__gigaSourceClickObserved = false;
+  window.__gigaLastClickedHref = null;
   document.addEventListener('click', event => {
+    const anchor = event.target?.closest?.('a[href]');
+    if (event.isTrusted && anchor) window.__gigaLastClickedHref = anchor.href;
     if (event.isTrusted && event.target?.closest?.('#player-option-1'))
       window.__gigaSourceClickObserved = true;
   }, true);
@@ -45,7 +48,8 @@ def safe_evidence(observation: Mapping) -> dict:
     keys = ("httpStatus", "videoCount", "duration", "manifestStatus", "manifestHost",
             "mediaStatus", "events", "challenge", "deleted", "errorCode",
             "embedStatus", "embedFrameSeen", "apiStatus", "clicks", "clickErrors",
-            "sourceClickObserved", "trustedVideoEvents", "playerDocumentValidated", "playerFrameStatus")
+            "sourceClickObserved", "trustedVideoEvents", "playerDocumentValidated", "playerFrameStatus",
+            "catalogClickObserved", "catalogDocumentValidated")
     result = {key: observation[key] for key in keys if key in observation}
     if "events" in result:
         result["events"] = [event for event in result["events"] if event in ("playing", "timeupdate")]
@@ -66,6 +70,7 @@ def classify_observation(value: Mapping) -> str:
         return "dead"
     if (status in (401, 403, 429) or value.get("embedStatus") in (401, 403, 429)
             or value.get("playerFrameStatus") in (401, 403, 429) or value.get("challenge")
+            or value.get("mediaStatus") in (401, 403, 429)
             or value.get("manifestStatus") in (401, 403, 429)):
         return "blocked"
     if status != 200:

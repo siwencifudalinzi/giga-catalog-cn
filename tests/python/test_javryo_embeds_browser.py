@@ -7,6 +7,11 @@ from src.giga_catalog.javryo_embeds_browser import bounded_route_handler
 
 
 class PlaybackClassificationTests(unittest.TestCase):
+    def test_media_403_remains_blocked_even_when_manifest_and_duration_exist(self):
+        self.assertEqual(classify_observation({"httpStatus": 200, "videoCount": 1,
+            "duration": 100, "manifestStatus": 200, "mediaStatus": 403,
+            "playerDocumentValidated": True, "events": []}), "blocked")
+
     def test_older_verification_is_requeued_even_when_previously_verified(self):
         previous = {"sourceUrlHash": "source", "embedUrlHash": "embed",
                     "playbackStatus": "verified", "verificationVersion": 1, "attempts": 3}

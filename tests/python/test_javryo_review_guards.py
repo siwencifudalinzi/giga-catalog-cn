@@ -7,6 +7,23 @@ from src.giga_catalog import javryo_embeds_browser as browser
 
 
 class SourceAndEventGuardTests(unittest.TestCase):
+    def test_catalog_link_proof_requires_a_trusted_anchor_click(self):
+        program = """
+global.window = {};
+global.HTMLVideoElement = class {};
+const listeners = {};
+global.document = {addEventListener:(name,callback)=>listeners[name]=callback};
+""" + browser.EVENT_SCRIPT + """
+const anchor = {href:'https://bysejikuar.com/e/example'};
+const target = {closest:selector=>selector==='a[href]'?anchor:null};
+listeners.click({isTrusted:false,target});
+const before = window.__gigaLastClickedHref || null;
+listeners.click({isTrusted:true,target});
+console.log(JSON.stringify([before,window.__gigaLastClickedHref || null]));
+"""
+        result = subprocess.run(["node"], input=program, text=True, capture_output=True, check=True)
+        self.assertEqual(json.loads(result.stdout), [None, "https://bysejikuar.com/e/example"])
+
     def test_internal_byse_frame_requires_exact_host_path_and_same_file_id(self):
         target = "https://bysejikuar.com/e/7p4h1pwsjiaw"
         valid = "https://n1mwq.org/dw3/7p4h1pwsjiaw"

@@ -229,9 +229,7 @@ def build_manifest_entries(overlay: object, embed_verification: object = None,
             source_evidence = paths["source"].get("evidence", {})
             if (not isinstance(direct_evidence, dict) or not isinstance(source_evidence, dict)
                     or classify_observation(direct_evidence) != "verified"
-                    or (classify_source_observation(source_evidence) if provider == "javryo_stream"
-                        else classify_observation(source_evidence))
-                       != ("reached" if provider == "javryo_stream" else "verified")):
+                    or not verified_source_path(row, provider)):
                 continue
             if provider == "streamtape" and final_url != item.get("streamtapeUrl"):
                 continue
@@ -259,3 +257,16 @@ def build_manifest_entries(overlay: object, embed_verification: object = None,
             }
         }
     return entries
+
+
+def verified_source_path(row: dict, provider: str) -> bool:
+    from .javryo_embeds_browser import classify_observation, classify_source_observation
+    source = row.get("paths", {}).get("source", {})
+    evidence = source.get("evidence", {})
+    if row.get("sourceKind") == "catalog":
+        return (source.get("status") == "verified" and evidence.get("catalogClickObserved") is True
+                and evidence.get("catalogDocumentValidated") is True
+                and classify_observation(evidence) == "verified")
+    if provider == "javryo_stream":
+        return source.get("status") == "reached" and classify_source_observation(evidence) == "reached"
+    return source.get("status") == "verified" and classify_observation(evidence) == "verified"

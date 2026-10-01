@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.giga_catalog.javryo import build_manifest_entries  # noqa: E402
+from src.giga_catalog.javryo import build_manifest_entries, verified_source_path  # noqa: E402
 from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION, classify_observation, classify_source_observation  # noqa: E402
 from src.giga_catalog.resolved_links import load_json, source_url_hash  # noqa: E402
 
@@ -34,6 +34,8 @@ def assert_preview_entry(code: str, entry: dict, preview: dict, generation: str)
         proof = preview.get("paths", {}).get(path_name, {})
         assert (proof.get("status") == "verified"
                 and classify_observation(proof.get("evidence", {})) == "verified"), code
+    catalog = preview["paths"]["catalog"]["evidence"]
+    assert catalog.get("catalogClickObserved") is True and catalog.get("catalogDocumentValidated") is True, code
 
 
 def audit(root: Path, baseline_path: Path) -> dict:
@@ -82,20 +84,23 @@ def audit(root: Path, baseline_path: Path) -> dict:
         paths = row["paths"]
         direct = paths["direct"]["evidence"]
         assert paths["direct"]["status"] == "verified"
+        assert verified_source_path(row, provider), code
         assert classify_observation(direct) == "verified", code
         assert any(event in ("playing", "timeupdate") for event in direct.get("events", [])), code
         assert direct.get("manifestStatus") == 200 or direct.get("mediaStatus") in (200, 206), code
-        if provider == "javryo_stream":
+        if provider == "javryo_stream" and row.get("sourceKind") != "catalog":
             source = paths["source"]["evidence"]
             assert paths["source"]["status"] == "reached"
             assert source.get("embedFrameSeen") and source.get("embedStatus") == 200, code
             assert classify_source_observation(source) == "reached", code
             published_hosts[inventory[code]["host"]] += 1
-        else:
+        elif row.get("sourceKind") != "catalog":
             assert paths["source"]["status"] == "verified", code
             assert classify_observation(paths["source"]["evidence"]) == "verified", code
             assert any(event in ("playing", "timeupdate")
                        for event in paths["source"]["evidence"].get("events", [])), code
+        if provider == "javryo_stream" and row.get("sourceKind") == "catalog":
+            published_hosts[inventory[code]["host"]] += 1
 
     for path in (root / "public").rglob("*.json"):
         assert not FORBIDDEN.search(path.read_bytes()), f"temporary or credential text in {path}"

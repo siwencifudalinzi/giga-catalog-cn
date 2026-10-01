@@ -43,6 +43,18 @@ class JavryoParsingTests(unittest.TestCase):
         playback["trustedVideoEvents"] = False
         self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
         playback["trustedVideoEvents"] = True
+        original_source = embeds["results"]["ATHB-16"]["paths"]["source"]
+        catalog_proof = {**playback, "catalogClickObserved": True, "catalogDocumentValidated": True}
+        embeds["results"]["ATHB-16"]["sourceKind"] = "catalog"
+        embeds["results"]["ATHB-16"]["paths"]["source"] = {"status": "verified", "evidence": catalog_proof}
+        self.assertIn("ATHB-16", build_manifest_entries(overlay, embeds, None, inventory))
+        catalog_proof["catalogClickObserved"] = False
+        self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
+        catalog_proof["catalogClickObserved"] = True
+        catalog_proof["catalogDocumentValidated"] = False
+        self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
+        embeds["results"]["ATHB-16"].pop("sourceKind")
+        embeds["results"]["ATHB-16"]["paths"]["source"] = original_source
         tapes = {"results": {"ATHB-16": {"playbackStatus": "verified", "verificationVersion": 4,
             "sourceUrlHash": source_url_hash(page), "finalUrl": tape,
             "checkedAt": "2026-09-29T00:00:00Z",
