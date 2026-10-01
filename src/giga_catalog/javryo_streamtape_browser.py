@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 from typing import Optional
 
 from .javryo_embeds_browser import (
-    EVENT_SCRIPT, MEDIA_EXT_RE, _observe, _route_media, aggregate_path_status,
+    EVENT_SCRIPT, _observe, aggregate_path_status, bounded_route_handler,
     classify_observation, safe_evidence, utc_now,
 )
 from .resolved_links import source_url_hash, validate_final_url
@@ -26,17 +26,7 @@ def matching_wrapper(crawl_row: dict, target: str):
 async def _context(browser):
     context = await browser.new_context(accept_downloads=False, service_workers="block")
     await context.add_init_script(EVENT_SCRIPT)
-    media_count = 0
-
-    async def route(route):
-        nonlocal media_count
-        media_count += 1
-        if media_count > 2:
-            await route.abort()
-        else:
-            await _route_media(route)
-
-    await context.route(MEDIA_EXT_RE, route)
+    await context.route("**/*", bounded_route_handler())
     return context
 
 

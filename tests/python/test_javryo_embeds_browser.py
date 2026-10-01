@@ -1,7 +1,9 @@
 import unittest
+from unittest.mock import AsyncMock, Mock
 
 from src.giga_catalog.javryo_embeds_browser import aggregate_path_status, classify_observation, safe_evidence, source_request_allowed
 from scripts.verify_javryo_embeds import should_queue_candidate
+from src.giga_catalog.javryo_embeds_browser import bounded_route_handler
 
 
 class PlaybackClassificationTests(unittest.TestCase):
@@ -63,3 +65,29 @@ class PlaybackClassificationTests(unittest.TestCase):
         serialized = str(safe_evidence(raw)).lower()
         for forbidden in ("m3u8", "token", "cookie", "one.ts", "secret"):
             self.assertNotIn(forbidden, serialized)
+
+
+class BoundedBrowserRequestTests(unittest.IsolatedAsyncioTestCase):
+    async def test_source_route_applies_media_limit_and_range(self):
+        handler = bounded_route_handler(source_embed_host="bysejikuar.com")
+        routes = []
+        for _ in range(3):
+            route = Mock(request=Mock(url="https://bysejikuar.com/startup.mp4", resource_type="media", headers={}),
+                         continue_=AsyncMock(), abort=AsyncMock())
+            await handler(route)
+            routes.append(route)
+        routes[0].continue_.assert_awaited_once_with(headers={"range": "bytes=0-262143"})
+        routes[1].continue_.assert_awaited_once()
+        routes[2].abort.assert_awaited_once()
+        routes[2].continue_.assert_not_awaited()
+
+    async def test_extensionless_media_is_bounded_and_images_are_skipped(self):
+        handler = bounded_route_handler()
+        media = Mock(request=Mock(url="https://cdn.example/start", resource_type="media", headers={}),
+                     continue_=AsyncMock(), abort=AsyncMock())
+        await handler(media)
+        media.continue_.assert_awaited_once_with(headers={"range": "bytes=0-262143"})
+        image = Mock(request=Mock(url="https://javryo.com/poster.jpg", resource_type="image"),
+                     continue_=AsyncMock(), abort=AsyncMock())
+        await handler(image)
+        image.abort.assert_awaited_once()

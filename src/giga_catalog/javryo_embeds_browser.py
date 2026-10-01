@@ -87,14 +87,29 @@ def source_request_allowed(url: str, embed_host: str) -> bool:
 
 
 async def _route_media(route):
-    url = route.request.url
-    if MEDIA_EXT_RE.search(urlsplit(url).path):
-        # A bounded range is enough to observe startup; never fetch the whole file.
-        headers = dict(route.request.headers)
-        headers["range"] = "bytes=0-262143"
-        await route.continue_(headers=headers)
-    else:
-        await route.continue_()
+    headers = dict(route.request.headers)
+    headers["range"] = "bytes=0-262143"
+    await route.continue_(headers=headers)
+
+
+def bounded_route_handler(*, source_embed_host: str = ""):
+    media_count = 0
+
+    async def handle(route):
+        nonlocal media_count
+        request = route.request
+        if (request.resource_type in {"image", "font"} or AD_HOST_RE.search(request.url)
+                or (source_embed_host and not source_request_allowed(request.url, source_embed_host))):
+            await route.abort()
+        elif request.resource_type == "media" or MEDIA_EXT_RE.search(urlsplit(request.url).path):
+            media_count += 1
+            if media_count > 2:
+                await route.abort()
+            else:
+                await _route_media(route)
+        else:
+            await route.continue_()
+    return handle
 
 
 async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
@@ -113,7 +128,7 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
         if path.endswith(".m3u8") or "mpegurl" in content_type:
             observation["manifestStatus"] = response.status
             observation["manifestHost"] = (urlsplit(response.url).hostname or "").lower()
-        elif MEDIA_EXT_RE.search(path) and media_requests < 2:
+        elif (MEDIA_EXT_RE.search(path) or response.request.resource_type == "media") and media_requests < 2:
             observation["mediaStatus"] = response.status
             media_requests += 1
 
@@ -218,25 +233,8 @@ async def verify_embed_candidate(candidate: JavryoEmbedCandidate, browser, *, ti
     for path_name, url in (("source", candidate.page_url), ("direct", candidate.embed_url)):
         context = await browser.new_context(accept_downloads=False, service_workers="block")
         await context.add_init_script(EVENT_SCRIPT)
-        await context.route(AD_HOST_RE, lambda route: route.abort())
-        media_count = 0
-
-        async def limited_media(route):
-            nonlocal media_count
-            media_count += 1
-            if media_count > 2:
-                await route.abort()
-            else:
-                await _route_media(route)
-
-        await context.route(MEDIA_EXT_RE, limited_media)
-        if path_name == "source":
-            async def restrict_source(route):
-                if source_request_allowed(route.request.url, candidate.host):
-                    await route.continue_()
-                else:
-                    await route.abort()
-            await context.route("**/*", restrict_source)
+        await context.route("**/*", bounded_route_handler(
+            source_embed_host=candidate.host if path_name == "source" else ""))
         page = await context.new_page()
         async def close_popup(opened):
             if opened is not page:
