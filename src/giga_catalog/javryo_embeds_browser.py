@@ -9,15 +9,25 @@ from typing import Mapping
 from urllib.parse import urlsplit
 
 from .javryo_streams import JavryoEmbedCandidate, normalize_embed_url
-from .resolved_links import source_url_hash
+from .resolved_links import source_url_hash, validate_final_url
+from .javryo_media_probe import MediaProbeBudget, fetch_probe
 
 
+VERIFICATION_VERSION = 2
 EVENT_SCRIPT = """(() => {
-  window.__gigaPlaybackEvents = [];
+  window.__gigaSourceClickObserved = false;
+  document.addEventListener('click', event => {
+    if (event.isTrusted && event.target?.closest?.('#player-option-1'))
+      window.__gigaSourceClickObserved = true;
+  }, true);
   for (const name of ['playing', 'timeupdate'])
-    document.addEventListener(name, () => {
-      if (!window.__gigaPlaybackEvents.includes(name)) window.__gigaPlaybackEvents.push(name);
-      for (const video of document.querySelectorAll('video')) video.pause();
+    document.addEventListener(name, event => {
+      const video = event.target;
+      if (!event.isTrusted || !(video instanceof HTMLVideoElement) || video.paused ||
+          (name === 'timeupdate' && !(video.currentTime > 0))) return;
+      video.__gigaPlaybackEvents ||= [];
+      if (!video.__gigaPlaybackEvents.includes(name)) video.__gigaPlaybackEvents.push(name);
+      video.pause();
     }, true);
 })()"""
 DELETED_RE = re.compile(r"no such file|file (?:was )?deleted|video not found|file not found", re.I)
@@ -34,7 +44,8 @@ def safe_evidence(observation: Mapping) -> dict:
     """Persist enumerated scalar evidence only; never network URL or response body."""
     keys = ("httpStatus", "videoCount", "duration", "manifestStatus", "manifestHost",
             "mediaStatus", "events", "challenge", "deleted", "errorCode",
-            "embedStatus", "embedFrameSeen", "apiStatus", "clicks", "clickErrors")
+            "embedStatus", "embedFrameSeen", "apiStatus", "clicks", "clickErrors",
+            "sourceClickObserved", "trustedVideoEvents", "playerDocumentValidated")
     result = {key: observation[key] for key in keys if key in observation}
     if "events" in result:
         result["events"] = [event for event in result["events"] if event in ("playing", "timeupdate")]
@@ -57,12 +68,32 @@ def classify_observation(value: Mapping) -> str:
     if status != 200:
         return "retryable"
     if (value.get("videoCount", 0) > 0
+            and value.get("trustedVideoEvents") is True
+            and value.get("playerDocumentValidated") is True
             and (value.get("manifestStatus") == 200 or value.get("mediaStatus") in (200, 206))
             and any(event in ("playing", "timeupdate") for event in value.get("events", []))):
         return "verified"
-    if value.get("videoCount", 0) > 0 and value.get("duration", 0) > 0 and value.get("manifestStatus") == 200:
+    if (value.get("playerDocumentValidated") is True and value.get("videoCount", 0) > 0
+            and value.get("duration", 0) > 0 and value.get("manifestStatus") == 200):
         return "media_reachable"
     return "retryable"
+
+
+def classify_source_observation(value: Mapping) -> str:
+    status = classify_observation(value)
+    if status in {"dead", "blocked"}:
+        return status
+    if (value.get("httpStatus") == 200 and value.get("embedStatus") == 200
+            and value.get("embedFrameSeen") and value.get("sourceClickObserved")):
+        return "reached"
+    return "retryable"
+
+
+def player_document_matches(value: str, expected: str) -> bool:
+    def normalize(url):
+        return normalize_embed_url(url) or validate_final_url(url, expected_provider="streamtape")
+    target = normalize(expected)
+    return bool(target and normalize(value) == target)
 
 
 def aggregate_path_status(paths: Mapping) -> str:
@@ -86,27 +117,28 @@ def source_request_allowed(url: str, embed_host: str) -> bool:
     return (urlsplit(url).hostname or "").lower() in {"javryo.com", embed_host}
 
 
-async def _route_media(route):
-    headers = dict(route.request.headers)
-    headers["range"] = "bytes=0-262143"
-    await route.continue_(headers=headers)
+async def _route_media(route, budget):
+    request = route.request
+    response = await asyncio.to_thread(fetch_probe, {
+        "url": request.url, "resourceType": request.resource_type, "method": request.method,
+        "headers": await request.all_headers(), "data": request.post_data_buffer,
+    }, budget)
+    if response is None:
+        await route.abort()
+    else:
+        await route.fulfill(**response)
 
 
 def bounded_route_handler(*, source_embed_host: str = ""):
-    media_count = 0
+    budget = MediaProbeBudget(allow_media=not bool(source_embed_host))
 
     async def handle(route):
-        nonlocal media_count
         request = route.request
         if (request.resource_type in {"image", "font"} or AD_HOST_RE.search(request.url)
                 or (source_embed_host and not source_request_allowed(request.url, source_embed_host))):
             await route.abort()
-        elif request.resource_type == "media" or MEDIA_EXT_RE.search(urlsplit(request.url).path):
-            media_count += 1
-            if media_count > 2:
-                await route.abort()
-            else:
-                await _route_media(route)
+        elif request.resource_type in {"media", "fetch", "xhr", "document"} or MEDIA_EXT_RE.search(urlsplit(request.url).path):
+            await _route_media(route, budget)
         else:
             await route.continue_()
     return handle
@@ -123,12 +155,16 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
         content_type = response.headers.get("content-type", "").lower()
         if source_page and "/wp-json/dooplayer/v1/post/" in urlsplit(response.url).path:
             observation["apiStatus"] = response.status
-        if expected_embed and normalize_embed_url(response.url) == expected_embed:
+        if (expected_embed and normalize_embed_url(response.url) == expected_embed
+                and response.request.resource_type == "document"):
             observation["embedStatus"] = response.status
+        if source_page or response.frame != page.main_frame or not player_document_matches(page.url, target_url):
+            return
         if path.endswith(".m3u8") or "mpegurl" in content_type:
             observation["manifestStatus"] = response.status
             observation["manifestHost"] = (urlsplit(response.url).hostname or "").lower()
-        elif (MEDIA_EXT_RE.search(path) or response.request.resource_type == "media") and media_requests < 2:
+        elif (MEDIA_EXT_RE.search(path) or response.request.resource_type == "media"
+              or response.headers.get("x-giga-bounded-probe") == "media") and media_requests < 2:
             observation["mediaStatus"] = response.status
             media_requests += 1
 
@@ -139,6 +175,8 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
             observation["httpStatus"] = response.status if response else None
         else:
             observation["httpStatus"] = 200 if page.url == target_url else None
+        if observation["httpStatus"] != 200:
+            return safe_evidence(observation)
         if source_page and observation["httpStatus"] == 200:
             try:
                 try:
@@ -151,48 +189,54 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
                 observation["errorCode"] = "source-player-click"
                 # Playwright can report a click timeout after the page has already
                 # issued the player API request. Keep watching for the exact iframe.
+            text = await page.evaluate("() => (document.body?.innerText || '').slice(0, 500)")
+            if CHALLENGE_RE.search(text):
+                observation["challenge"] = True
+            if DELETED_RE.search(text):
+                observation["deleted"] = True
         deadline = asyncio.get_running_loop().time() + timeout_ms / 1000
         source_retry_at = asyncio.get_running_loop().time() + 5
         source_retried = False
         clicked = set()
         while asyncio.get_running_loop().time() < deadline:
-            frames = list(page.frames)
-            if source_page and expected_embed and (observation.get("embedStatus") == 200 or observation.get("apiStatus") == 200):
-                if any(normalize_embed_url(frame.url) == expected_embed for frame in frames):
-                    observation["embedFrameSeen"] = True
+            if source_page:
+                observation["sourceClickObserved"] = bool(await page.evaluate(
+                    "() => window.__gigaSourceClickObserved === true"))
+                observation["embedFrameSeen"] = any(normalize_embed_url(frame.url) == expected_embed
+                                                   for frame in page.frames)
+                if classify_source_observation(observation) in {"reached", "blocked", "dead"}:
                     break
-            if (source_page and not source_retried and not observation.get("apiStatus")
+            if (source_page and not source_retried and not observation.get("sourceClickObserved")
                     and asyncio.get_running_loop().time() >= source_retry_at):
                 source_retried = True
                 try:
                     await page.locator("#player-option-1").click(timeout=3000, no_wait_after=True)
                 except Exception:
                     pass
-            for frame in frames:
-                if expected_embed:
-                    ancestor = frame
-                    allowed = False
-                    while ancestor:
-                        if normalize_embed_url(ancestor.url) == expected_embed:
-                            allowed = True
-                            break
-                        ancestor = ancestor.parent_frame
-                    if not allowed:
-                        continue
-                    observation["embedFrameSeen"] = True
+            if source_page:
+                await page.wait_for_timeout(500)
+                continue
+            if not player_document_matches(page.url, target_url):
+                observation["errorCode"] = "unexpected-player-destination"
+                break
+            observation["playerDocumentValidated"] = True
+            for frame in [page.main_frame]:
                 try:
-                    frame_data = await frame.evaluate("""() => ({
-                      events: window.__gigaPlaybackEvents || [],
-                      count: document.querySelectorAll('video').length,
-                      duration: Math.max(0, ...Array.from(document.querySelectorAll('video'), v =>
-                        Number.isFinite(v.duration) ? v.duration : 0)),
-                      text: (document.body?.innerText || '').slice(0, 500)
-                    })""")
+                    frame_data = await frame.evaluate("""() => {
+                      const videos = [...document.querySelectorAll('video')];
+                      const selected = videos.find(v => v.__gigaPlaybackEvents?.length) ||
+                        videos.find(v => v.closest('.jwplayer,.video-js,.plyr,#player')) ||
+                        (videos.length === 1 ? videos[0] : null);
+                      return {events: selected?.__gigaPlaybackEvents || [], count: selected ? 1 : 0,
+                        duration: Number.isFinite(selected?.duration) ? selected.duration : 0,
+                        text: (document.body?.innerText || '').slice(0, 500)};
+                    }""")
                 except Exception:
                     continue
                 observation["videoCount"] = max(observation["videoCount"], frame_data["count"])
                 observation["duration"] = max(observation["duration"], frame_data["duration"])
                 observation["events"] = list(set(observation["events"] + frame_data["events"]))
+                observation["trustedVideoEvents"] = bool(frame_data["events"])
                 if DELETED_RE.search(frame_data["text"]):
                     observation["deleted"] = True
                 if CHALLENGE_RE.search(frame_data["text"]):
@@ -247,18 +291,13 @@ async def verify_embed_candidate(candidate: JavryoEmbedCandidate, browser, *, ti
             evidence = await _observe(page, url, source_page=path_name == "source",
                                       timeout_ms=min(timeout_ms, 12000) if path_name == "source" else timeout_ms,
                                       expected_embed=candidate.embed_url if path_name == "source" else "")
-            if (path_name == "source" and evidence.get("embedFrameSeen")
-                    and (evidence.get("embedStatus") == 200 or evidence.get("apiStatus") == 200)):
-                path_status = "reached"
-            else:
-                path_status = classify_observation(evidence)
-                if path_name == "source" and path_status == "verified":
-                    path_status = "retryable"
+            path_status = classify_source_observation(evidence) if path_name == "source" else classify_observation(evidence)
             paths[path_name] = {"status": path_status, "evidence": evidence}
         finally:
             await context.close()
     status = aggregate_path_status(paths)
     return {"playbackStatus": status, "paths": paths, "checkedAt": utc_now(),
+            "verificationVersion": VERIFICATION_VERSION,
             "sourceUrlHash": candidate.source_url_hash,
             "embedUrlHash": source_url_hash(candidate.embed_url),
             "finalUrl": candidate.embed_url if status == "verified" else None}

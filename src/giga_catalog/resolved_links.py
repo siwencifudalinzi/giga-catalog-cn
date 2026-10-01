@@ -281,7 +281,9 @@ def seed_state_from_manifest(
 ) -> dict:
     seeded = dict(state) if isinstance(state, Mapping) else {}
     existing_results = seeded.get("results")
-    results = dict(existing_results) if isinstance(existing_results, Mapping) else {}
+    results = {key: value for key, value in existing_results.items()
+               if not (isinstance(key, str) and key.endswith("\0standard.javryo"))} \
+        if isinstance(existing_results, Mapping) else {}
     entries = manifest.get("entries", {}) if isinstance(manifest, Mapping) and manifest.get("schemaVersion") == 2 else {}
     if not isinstance(entries, Mapping):
         entries = {}

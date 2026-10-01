@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.giga_catalog.javryo_embeds_browser import utc_now  # noqa: E402
+from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION, utc_now  # noqa: E402
 from src.giga_catalog.javryo_checkpoints import durable_path, load_checkpoint, save_checkpoint  # noqa: E402
 from src.giga_catalog.javryo_streamtape_browser import matching_wrapper, verify_streamtape_candidate  # noqa: E402
 from src.giga_catalog.resolved_links import load_json, source_url_hash  # noqa: E402
@@ -31,7 +31,8 @@ async def run(args):
             continue
         page_url, final_url = item["pageUrl"], item["streamtapeUrl"]
         prior = results.get(code, {})
-        if (prior.get("sourceUrlHash") == source_url_hash(page_url)
+        if (prior.get("verificationVersion") == VERIFICATION_VERSION
+                and prior.get("sourceUrlHash") == source_url_hash(page_url)
                 and prior.get("targetUrlHash") == source_url_hash(final_url)
                 and (prior.get("playbackStatus") not in {"retryable", "blocked"}
                      or not args.retry or prior.get("attempts", 0) >= 2)):
@@ -56,12 +57,15 @@ async def run(args):
                     except asyncio.QueueEmpty:
                         return
                     previous = results.get(code, {})
+                    if previous.get("verificationVersion") != VERIFICATION_VERSION:
+                        previous = {}
                     try:
                         row = await verify_streamtape_candidate(browser, page_url=page_url,
                             final_url=final_url, wrapper_url=wrapper, timeout_ms=args.timeout_ms)
                     except Exception as error:
                         row = {"playbackStatus": "retryable", "errorCode": type(error).__name__}
                     row.setdefault("checkedAt", utc_now())
+                    row["verificationVersion"] = VERIFICATION_VERSION
                     row.setdefault("sourceUrlHash", source_url_hash(page_url))
                     row["targetUrlHash"] = source_url_hash(final_url)
                     row["attempts"] = int(previous.get("attempts", 0)) + 1

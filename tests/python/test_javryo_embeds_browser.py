@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 from src.giga_catalog.javryo_embeds_browser import aggregate_path_status, classify_observation, safe_evidence, source_request_allowed
 from scripts.verify_javryo_embeds import should_queue_candidate
@@ -7,8 +7,14 @@ from src.giga_catalog.javryo_embeds_browser import bounded_route_handler
 
 
 class PlaybackClassificationTests(unittest.TestCase):
-    def test_promising_retry_only_rechecks_direct_playback_evidence(self):
+    def test_older_verification_is_requeued_even_when_previously_verified(self):
         previous = {"sourceUrlHash": "source", "embedUrlHash": "embed",
+                    "playbackStatus": "verified", "verificationVersion": 1, "attempts": 3}
+        self.assertTrue(should_queue_candidate(previous, "source", "embed", retry=False,
+                                              retry_promising=False))
+
+    def test_promising_retry_only_rechecks_direct_playback_evidence(self):
+        previous = {"sourceUrlHash": "source", "embedUrlHash": "embed", "verificationVersion": 2,
                     "playbackStatus": "retryable", "attempts": 1,
                     "paths": {"direct": {"status": "verified"}}}
         self.assertTrue(should_queue_candidate(previous, "source", "embed", retry=True,
@@ -40,7 +46,8 @@ class PlaybackClassificationTests(unittest.TestCase):
                                                 "direct": {"status": "verified"}}), "blocked")
     def test_event_is_required_for_verified(self):
         observation = {"httpStatus": 200, "videoCount": 1, "duration": 3846,
-                       "manifestStatus": 200, "events": ["playing"]}
+                       "manifestStatus": 200, "events": ["playing"],
+                       "trustedVideoEvents": True, "playerDocumentValidated": True}
         self.assertEqual(classify_observation(observation), "verified")
         observation["events"] = []
         self.assertEqual(classify_observation(observation), "media_reachable")
@@ -48,7 +55,8 @@ class PlaybackClassificationTests(unittest.TestCase):
                           "duration": 0, "events": ["playing"]}), "retryable")
         self.assertEqual(classify_observation({"httpStatus": 200, "videoCount": 1,
                           "duration": 0, "mediaStatus": 206,
-                          "events": ["timeupdate"]}), "verified")
+                          "events": ["timeupdate"], "trustedVideoEvents": True,
+                          "playerDocumentValidated": True}), "verified")
 
     def test_empty_deleted_challenged_and_failed_media(self):
         self.assertEqual(classify_observation({"httpStatus": 200}), "retryable")
@@ -68,25 +76,28 @@ class PlaybackClassificationTests(unittest.TestCase):
 
 
 class BoundedBrowserRequestTests(unittest.IsolatedAsyncioTestCase):
-    async def test_source_route_applies_media_limit_and_range(self):
+    async def test_source_route_blocks_media_before_requesting_bytes(self):
         handler = bounded_route_handler(source_embed_host="bysejikuar.com")
-        routes = []
-        for _ in range(3):
-            route = Mock(request=Mock(url="https://bysejikuar.com/startup.mp4", resource_type="media", headers={}),
-                         continue_=AsyncMock(), abort=AsyncMock())
+        route = Mock(request=Mock(url="https://bysejikuar.com/startup.mp4", resource_type="media",
+                     method="GET", all_headers=AsyncMock(return_value={}), post_data_buffer=None),
+                     continue_=AsyncMock(), abort=AsyncMock(), fulfill=AsyncMock())
+        with patch("src.giga_catalog.javryo_media_probe.requests.request") as request:
             await handler(route)
-            routes.append(route)
-        routes[0].continue_.assert_awaited_once_with(headers={"range": "bytes=0-262143"})
-        routes[1].continue_.assert_awaited_once()
-        routes[2].abort.assert_awaited_once()
-        routes[2].continue_.assert_not_awaited()
+        request.assert_not_called()
+        route.abort.assert_awaited_once()
+        route.continue_.assert_not_awaited()
 
     async def test_extensionless_media_is_bounded_and_images_are_skipped(self):
         handler = bounded_route_handler()
-        media = Mock(request=Mock(url="https://cdn.example/start", resource_type="media", headers={}),
-                     continue_=AsyncMock(), abort=AsyncMock())
-        await handler(media)
-        media.continue_.assert_awaited_once_with(headers={"range": "bytes=0-262143"})
+        media = Mock(request=Mock(url="https://cdn.example/start", resource_type="media",
+                     method="GET", all_headers=AsyncMock(return_value={}), post_data_buffer=None),
+                     continue_=AsyncMock(), abort=AsyncMock(), fulfill=AsyncMock())
+        response = Mock(status_code=206, headers={"content-type": "video/mp4", "content-range": "bytes 0-3/1000"})
+        response.raw.read.return_value = b"abcd"
+        with patch("src.giga_catalog.javryo_media_probe.requests.request", return_value=response):
+            await handler(media)
+        self.assertEqual(media.fulfill.call_args.kwargs["body"], b"abcd")
+        media.continue_.assert_not_awaited()
         image = Mock(request=Mock(url="https://javryo.com/poster.jpg", resource_type="image"),
                      continue_=AsyncMock(), abort=AsyncMock())
         await handler(image)

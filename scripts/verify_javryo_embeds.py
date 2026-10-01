@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.giga_catalog.javryo_streams import JavryoEmbedCandidate  # noqa: E402
-from src.giga_catalog.javryo_embeds_browser import utc_now, verify_embed_candidate  # noqa: E402
+from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION, utc_now, verify_embed_candidate  # noqa: E402
 from src.giga_catalog.javryo_checkpoints import durable_path, load_checkpoint, save_checkpoint  # noqa: E402
 from src.giga_catalog.resolved_links import load_json, source_url_hash  # noqa: E402
 
@@ -29,6 +29,8 @@ def candidates_from_file(path: Path) -> list[JavryoEmbedCandidate]:
 
 
 def progress(results: dict, total: int, added: int) -> str:
+    results = {key: row for key, row in results.items()
+               if row.get("verificationVersion") == VERIFICATION_VERSION}
     counts = Counter(row.get("playbackStatus") for row in results.values())
     return (f"已处理：{len(results)} / {total}\n确认可播放：{counts['verified']}\n"
             f"播放器与媒体清单可达：{counts['media_reachable']}\n"
@@ -39,7 +41,7 @@ def progress(results: dict, total: int, added: int) -> str:
 
 def should_queue_candidate(previous: object, source_hash: str, embed_hash: str,
                            *, retry: bool, retry_promising: bool) -> bool:
-    if not isinstance(previous, dict):
+    if not isinstance(previous, dict) or previous.get("verificationVersion") != VERIFICATION_VERSION:
         return not retry_promising
     if previous.get("sourceUrlHash") != source_hash or previous.get("embedUrlHash") != embed_hash:
         return not retry_promising
@@ -93,11 +95,14 @@ async def run(args) -> None:
                     except asyncio.QueueEmpty:
                         return
                     previous = results.get(candidate.code, {})
+                    if previous.get("verificationVersion") != VERIFICATION_VERSION:
+                        previous = {}
                     try:
                         result = await verify_embed_candidate(candidate, browser, timeout_ms=args.timeout_ms)
                     except Exception as error:
                         result = {"playbackStatus": "retryable", "errorCode": type(error).__name__}
                     result.setdefault("checkedAt", utc_now())
+                    result["verificationVersion"] = VERIFICATION_VERSION
                     result.setdefault("sourceUrlHash", candidate.source_url_hash)
                     result.setdefault("embedUrlHash", source_url_hash(candidate.embed_url) if candidate.embed_url else "")
                     result["attempts"] = int(previous.get("attempts", 0)) + 1 if isinstance(previous, dict) else 1
@@ -107,7 +112,9 @@ async def run(args) -> None:
                         save_checkpoint(args.state, args.backup_state, state)
                         if result["playbackStatus"] == "verified" and previous.get("playbackStatus") != "verified":
                             added += 1
-                        if len(results) % 300 == 0 or len(results) == len(candidates):
+                        processed = sum(row.get("verificationVersion") == VERIFICATION_VERSION
+                                        for row in results.values())
+                        if processed % 300 == 0 or processed == len(candidates):
                             print(progress(results, len(candidates), added), flush=True)
                             added = 0
                     queue.task_done()

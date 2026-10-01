@@ -19,19 +19,35 @@ class JavryoParsingTests(unittest.TestCase):
         tape = "https://streamtape.com/v/abc/ATHB-16.mp4"
         overlay = {"entries": {"ATHB-16": {"pageUrl": page, "status": "streamtape_verified",
                                              "streamtapeUrl": tape, "checkedAt": "2026-09-29T00:00:00Z"}}}
-        embeds = {"results": {"ATHB-16": {"playbackStatus": "verified",
+        playback = {"httpStatus": 200, "videoCount": 1, "mediaStatus": 206,
+                    "events": ["playing"], "trustedVideoEvents": True,
+                    "playerDocumentValidated": True}
+        source = {"httpStatus": 200, "embedStatus": 200, "embedFrameSeen": True,
+                  "sourceClickObserved": True}
+        embeds = {"results": {"ATHB-16": {"playbackStatus": "verified", "verificationVersion": 2,
             "sourceUrlHash": source_url_hash(page), "embedUrlHash": source_url_hash(embed),
             "finalUrl": embed, "checkedAt": "2026-09-29T00:00:00Z",
-            "paths": {"source": {"status": "reached"}, "direct": {"status": "verified"}}}}}
+            "paths": {"source": {"status": "reached", "evidence": source},
+                      "direct": {"status": "verified", "evidence": playback}}}}}
         inventory = {"entries": {"ATHB-16": {"pageUrl": page,
             "sourceUrlHash": source_url_hash(page), "embedUrl": embed}}}
         entry = build_manifest_entries(overlay, embeds, None, inventory)["ATHB-16"]["standard.javryo"]
         self.assertEqual((entry["provider"], entry["finalUrl"], entry["playbackStatus"]),
                          ("javryo_stream", embed, "verified"))
-        tapes = {"results": {"ATHB-16": {"playbackStatus": "verified",
+        embeds["results"]["ATHB-16"]["verificationVersion"] = 1
+        self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
+        embeds["results"]["ATHB-16"]["verificationVersion"] = 2
+        source["sourceClickObserved"] = False
+        self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
+        source["sourceClickObserved"] = True
+        playback["trustedVideoEvents"] = False
+        self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
+        playback["trustedVideoEvents"] = True
+        tapes = {"results": {"ATHB-16": {"playbackStatus": "verified", "verificationVersion": 2,
             "sourceUrlHash": source_url_hash(page), "finalUrl": tape,
             "checkedAt": "2026-09-29T00:00:00Z",
-            "paths": {"source": {"status": "verified"}, "direct": {"status": "verified"}}}}}
+            "paths": {"source": {"status": "verified", "evidence": playback},
+                      "direct": {"status": "verified", "evidence": playback}}}}}
         entry = build_manifest_entries(overlay, embeds, tapes, inventory)["ATHB-16"]["standard.javryo"]
         self.assertEqual(entry["provider"], "streamtape")
         inventory["entries"]["ATHB-16"]["embedUrl"] = "https://bysejikuar.com/e/newplayer"

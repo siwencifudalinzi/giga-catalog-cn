@@ -24,6 +24,22 @@ from src.giga_catalog.resolved_links_browser import (
 
 
 class ResolvedLinkCandidateTests(unittest.TestCase):
+    def test_javryo_publication_replaces_page_only_cache_and_removes_revoked_cache(self):
+        candidate = next(iter_catalog_candidates({"series": [{"videos": [{"code": "ATHB-16", "links": {
+            "javryo": "https://javryo.com/movies/athb-16-sample/"}}]}]}))
+        entry = {"sourceUrlHash": candidate.source_url_hash, "status": "verified", "kind": "external",
+                 "provider": "streamtape", "finalUrl": "https://streamtape.com/v/abc",
+                 "checkedAt": "2026-10-01T00:00:00Z", "playbackStatus": "verified"}
+        manifest = {"schemaVersion": 2, "entries": {candidate.code: {candidate.slot: entry}}}
+        old = dict(entry)
+        old.pop("playbackStatus")
+        state = {"results": {candidate.key: old}}
+        seeded = seed_state_from_manifest([candidate], manifest, state)
+        self.assertEqual(seeded["results"][candidate.key]["playbackStatus"], "verified")
+        revoked = seed_state_from_manifest([candidate], {"schemaVersion": 2, "entries": {}}, seeded)
+        self.assertNotIn(candidate.key, revoked["results"])
+        self.assertEqual(build_manifest([candidate], revoked, generated_at="now")["entries"], {})
+
     def test_javryo_stream_requires_playback_status_and_round_trips(self):
         catalog = {"series": [{"videos": [{"code": "ATHB-16", "links": {
             "javryo": "https://javryo.com/movies/athb-16-sample/"}}]}]}

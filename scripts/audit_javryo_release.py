@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.giga_catalog.javryo import build_manifest_entries  # noqa: E402
+from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION, classify_observation, classify_source_observation  # noqa: E402
 from src.giga_catalog.resolved_links import load_json  # noqa: E402
 
 FORBIDDEN = re.compile(rb"\.m3u8|blob:|cookie|token|[?&](?:expires|signature|sig|x-amz-)", re.I)
@@ -48,6 +49,8 @@ def audit(root: Path, baseline_path: Path) -> dict:
     assert len(overlays) == len(inventory) == len(embed_rows) == 1923
     assert set(overlays) == set(inventory) == set(embed_rows)
     assert len(tape_rows) == 232
+    assert all(row.get("verificationVersion") == VERIFICATION_VERSION
+               for row in [*embed_rows.values(), *tape_rows.values()]), "obsolete verification evidence"
     for code, item in overlays.items():
         assert new_videos[code]["links"]["javryo"] == item["pageUrl"], code
 
@@ -65,15 +68,18 @@ def audit(root: Path, baseline_path: Path) -> dict:
         paths = row["paths"]
         direct = paths["direct"]["evidence"]
         assert paths["direct"]["status"] == "verified"
+        assert classify_observation(direct) == "verified", code
         assert any(event in ("playing", "timeupdate") for event in direct.get("events", [])), code
         assert direct.get("manifestStatus") == 200 or direct.get("mediaStatus") in (200, 206), code
         if provider == "javryo_stream":
             source = paths["source"]["evidence"]
             assert paths["source"]["status"] == "reached"
             assert source.get("embedFrameSeen") and source.get("embedStatus") == 200, code
+            assert classify_source_observation(source) == "reached", code
             published_hosts[inventory[code]["host"]] += 1
         else:
             assert paths["source"]["status"] == "verified", code
+            assert classify_observation(paths["source"]["evidence"]) == "verified", code
             assert any(event in ("playing", "timeupdate")
                        for event in paths["source"]["evidence"].get("events", [])), code
 

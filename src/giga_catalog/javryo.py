@@ -195,6 +195,7 @@ def build_manifest_entries(overlay: object, embed_verification: object = None,
                            embed_candidates: object = None) -> dict:
     """Publish only two-path playback-verified stable player landings."""
     from .javryo_streams import normalize_embed_url
+    from .javryo_embeds_browser import VERIFICATION_VERSION, classify_observation, classify_source_observation
     from .resolved_links import validate_final_url, source_url_hash
 
     embed_rows = embed_verification.get("results", {}) if isinstance(embed_verification, dict) else {}
@@ -211,7 +212,8 @@ def build_manifest_entries(overlay: object, embed_verification: object = None,
         digest = source_url_hash(source_url)
         selected = None
         for provider, row in (("streamtape", tape_rows.get(code)), ("javryo_stream", embed_rows.get(code))):
-            if not isinstance(row, dict) or row.get("sourceUrlHash") != digest:
+            if (not isinstance(row, dict) or row.get("sourceUrlHash") != digest
+                    or row.get("verificationVersion") != VERIFICATION_VERSION):
                 continue
             final_url = validate_final_url(row.get("finalUrl"), expected_provider=provider)
             paths = row.get("paths", {})
@@ -222,6 +224,14 @@ def build_manifest_entries(overlay: object, embed_verification: object = None,
                     or paths.get("source", {}).get("status") not in {"reached", "verified"}
                     or paths.get("direct", {}).get("status") != "verified"
                     or not isinstance(row.get("checkedAt"), str) or not row["checkedAt"]):
+                continue
+            direct_evidence = paths["direct"].get("evidence", {})
+            source_evidence = paths["source"].get("evidence", {})
+            if (not isinstance(direct_evidence, dict) or not isinstance(source_evidence, dict)
+                    or classify_observation(direct_evidence) != "verified"
+                    or (classify_source_observation(source_evidence) if provider == "javryo_stream"
+                        else classify_observation(source_evidence))
+                       != ("reached" if provider == "javryo_stream" else "verified")):
                 continue
             if provider == "streamtape" and final_url != item.get("streamtapeUrl"):
                 continue
