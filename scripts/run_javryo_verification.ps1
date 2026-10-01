@@ -11,6 +11,8 @@ $repo = (Split-Path -Parent $PSScriptRoot)
 $log = Join-Path $repo 'data/state/javryo-verification-run.log'
 Set-Location -LiteralPath $repo
 $env:PYTHONIOENCODING = 'utf-8'
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+$OutputEncoding = [Console]::OutputEncoding
 $failures = 0
 
 # Recycle the Playwright driver after one candidate per worker. Larger batches

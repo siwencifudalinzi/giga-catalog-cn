@@ -49,6 +49,7 @@ console.log(JSON.stringify([before,window.__gigaLastClickedHref || null]));
         valid = "https://n1mwq.org/dw3/7p4h1pwsjiaw"
         self.assertTrue(browser.internal_player_matches(valid, target))
         self.assertTrue(browser.internal_player_matches(valid.replace("/dw3/", "/zzab/"), target))
+        self.assertTrue(browser.internal_player_matches(valid.replace("/dw3/", "/3m9v/"), target))
         for url in (valid + "?sig=example", valid.replace("n1mwq.org", "n1mwq.org.evil"),
                     valid.replace("7p4h1pwsjiaw", "advert"), valid.replace("https:", "http:"),
                     valid.replace("/dw3/", "/ad/")):

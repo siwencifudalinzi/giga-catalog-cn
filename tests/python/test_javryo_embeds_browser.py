@@ -7,6 +7,19 @@ from src.giga_catalog.javryo_embeds_browser import bounded_route_handler
 
 
 class PlaybackClassificationTests(unittest.TestCase):
+    def test_missing_byse_frame_checks_are_repeated_once_without_restarting_other_rows(self):
+        from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION
+        previous = {"verificationVersion": VERIFICATION_VERSION, "sourceUrlHash": "source",
+                    "embedUrlHash": "embed", "playbackStatus": "retryable", "attempts": 3,
+                    "paths": {"direct": {"status": "retryable", "evidence": {"httpStatus": 200, "videoCount": 0}}}}
+        self.assertTrue(should_queue_candidate(previous, "source", "embed", retry=False,
+                        retry_promising=False, embed_host="bysejikuar.com"))
+        self.assertFalse(should_queue_candidate(previous, "source", "embed", retry=False,
+                         retry_promising=False, embed_host="ryonads.icu"))
+        previous["byseFrameCheckVersion"] = 1
+        self.assertFalse(should_queue_candidate(previous, "source", "embed", retry=False,
+                         retry_promising=False, embed_host="bysejikuar.com"))
+
     def test_driver_failure_without_path_evidence_is_resumed_automatically(self):
         from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION
         previous = {"verificationVersion": VERIFICATION_VERSION,

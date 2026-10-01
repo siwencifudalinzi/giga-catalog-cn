@@ -121,7 +121,7 @@ def internal_player_matches(value: str, expected: str) -> bool:
     return (parsed.scheme == "https" and parsed.netloc == "n1mwq.org"
             and not parsed.query and not parsed.fragment
             and namespace not in {"ad", "ads", "advert", "promo"}
-            and bool(re.fullmatch(r"/[a-z][a-z0-9]{1,7}/" +
+            and bool(re.fullmatch(r"/[a-z0-9]{2,8}/" +
                                   re.escape(urlsplit(target).path.rsplit("/", 1)[-1]), parsed.path)))
 
 

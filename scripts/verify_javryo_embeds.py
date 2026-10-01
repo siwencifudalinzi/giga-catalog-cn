@@ -40,13 +40,22 @@ def progress(results: dict, total: int, added: int) -> str:
 
 
 def should_queue_candidate(previous: object, source_hash: str, embed_hash: str,
-                           *, retry: bool, retry_promising: bool) -> bool:
+                           *, retry: bool, retry_promising: bool, embed_host: str = "") -> bool:
     if not isinstance(previous, dict) or previous.get("verificationVersion") != VERIFICATION_VERSION:
         return not retry_promising
     if previous.get("sourceUrlHash") != source_hash or previous.get("embedUrlHash") != embed_hash:
         return not retry_promising
     if previous.get("playbackStatus") not in {"retryable", "blocked"}:
         return False
+    direct = previous.get("paths", {}).get("direct", {})
+    evidence = direct.get("evidence", {})
+    if (not retry_promising and embed_host == "bysejikuar.com"
+            and previous.get("playbackStatus") == "retryable"
+            and previous.get("byseFrameCheckVersion") != 1
+            and evidence.get("httpStatus") == 200 and evidence.get("videoCount") == 0):
+        # Recheck only negative rows affected by digit-leading namespaces and
+        # explicit SPA 404 pages. Preserve all other completed checkpoints.
+        return True
     # A driver crash can interrupt context creation/cleanup before both paths
     # return evidence. Resume these incomplete checks even on the first pass.
     if (not retry_promising and previous.get("playbackStatus") == "retryable"
@@ -77,7 +86,8 @@ async def run(args) -> None:
         previous = results.get(candidate.code)
         embed_hash = source_url_hash(candidate.embed_url) if candidate.embed_url else ""
         if not should_queue_candidate(previous, candidate.source_url_hash, embed_hash,
-                                      retry=args.retry, retry_promising=args.retry_promising):
+                                      retry=args.retry, retry_promising=args.retry_promising,
+                                      embed_host=candidate.host):
             continue
         if args.max_links and queue.qsize() >= args.max_links:
             break
@@ -108,6 +118,8 @@ async def run(args) -> None:
                         result = {"playbackStatus": "retryable", "errorCode": type(error).__name__}
                     result.setdefault("checkedAt", utc_now())
                     result["verificationVersion"] = VERIFICATION_VERSION
+                    if candidate.host == "bysejikuar.com":
+                        result["byseFrameCheckVersion"] = 1
                     result.setdefault("sourceUrlHash", candidate.source_url_hash)
                     result.setdefault("embedUrlHash", source_url_hash(candidate.embed_url) if candidate.embed_url else "")
                     result["attempts"] = int(previous.get("attempts", 0)) + 1 if isinstance(previous, dict) else 1
