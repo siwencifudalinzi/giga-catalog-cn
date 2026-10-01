@@ -1,7 +1,7 @@
 import json
 import subprocess
 import unittest
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, PropertyMock
 
 from src.giga_catalog import javryo_embeds_browser as browser
 
@@ -56,6 +56,16 @@ console.log(JSON.stringify({rejected:[...rejected], accepted:video.__gigaPlaybac
 
 
 class IntendedPlayerGuardTests(unittest.IsolatedAsyncioTestCase):
+    async def test_popup_document_status_is_kept_before_its_frame_is_available(self):
+        target = "https://streamtape.com/v/example"
+        context = Mock(_gigaDocumentStatusesByUrl={})
+        response = Mock(url=target, status=404, request=Mock(resource_type="document"))
+        type(response).frame = PropertyMock(side_effect=RuntimeError("popup frame pending"))
+        browser.remember_document_status(response, context)
+        page = Mock(url=target, context=context, _gigaFrameStatuses={}, _gigaDocumentStatus=None)
+        evidence = await browser._observe(page, target, source_page=False, timeout_ms=5, navigate=False)
+        self.assertEqual(evidence["httpStatus"], 404)
+
     async def test_existing_watch_uses_observed_http_status_instead_of_assuming_200(self):
         target = "https://streamtape.com/v/example"
         page = Mock(url=target, _gigaFrameStatuses={}, _gigaDocumentStatus=404)

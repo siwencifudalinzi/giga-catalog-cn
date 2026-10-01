@@ -47,7 +47,7 @@ async def context_for(browser, preview):
     context = await browser.new_context(accept_downloads=False, service_workers="block",
                                         extra_http_headers={"Cache-Control": "no-cache"})
     await context.add_init_script(EVENT_SCRIPT)
-    context.on("response", remember_document_status)
+    context.on("response", lambda response: remember_document_status(response, context))
     bounded = bounded_route_handler()
 
     async def route_request(route):
@@ -145,7 +145,7 @@ async def run(args):
                     queue.task_done()
             finally:
                 await browser.close()
-        await asyncio.gather(*(worker() for _ in range(4)))
+        await asyncio.gather(*(worker() for _ in range(min(4, queue.qsize()))))
     failed = [code for code in local if results.get(code, {}).get("playbackStatus") != "verified"]
     print(json.dumps({"generation": bootstrap["generation"], "published": len(local),
                       "bothPathsVerified": len(local) - len(failed), "failedCodes": failed,

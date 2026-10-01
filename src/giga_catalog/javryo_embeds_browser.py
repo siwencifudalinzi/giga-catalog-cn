@@ -127,10 +127,16 @@ async def intended_player_frame(page, target_url: str):
     return page.main_frame
 
 
-def remember_document_status(response):
+def remember_document_status(response, context=None):
     """Retain navigation status in memory before a clicked watch is observed."""
     if response.request.resource_type != "document":
         return
+    if context is not None:
+        statuses_by_url = getattr(context, "_gigaDocumentStatusesByUrl", None)
+        if not isinstance(statuses_by_url, dict):
+            statuses_by_url = {}
+            context._gigaDocumentStatusesByUrl = statuses_by_url
+        statuses_by_url[response.url] = response.status
     try:
         frame = response.frame
         page = frame.page
@@ -199,6 +205,8 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
     media_requests = 0
     existing_statuses = getattr(page, "_gigaFrameStatuses", None)
     document_statuses = dict(existing_statuses) if isinstance(existing_statuses, dict) else {}
+    cached_urls = getattr(page.context, "_gigaDocumentStatusesByUrl", None)
+    cached_urls = cached_urls if isinstance(cached_urls, dict) else {}
 
     async def on_response(response):
         nonlocal media_requests
@@ -230,6 +238,8 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
             observation["httpStatus"] = response.status if response else None
         else:
             cached_status = getattr(page, "_gigaDocumentStatus", None)
+            if not isinstance(cached_status, int):
+                cached_status = cached_urls.get(page.url)
             observation["httpStatus"] = cached_status if isinstance(cached_status, int) and page.url == target_url else None
         if observation["httpStatus"] != 200:
             return safe_evidence(observation)
@@ -277,6 +287,8 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
                 break
             player_frame = await intended_player_frame(page, target_url)
             frame_status = document_statuses.get(player_frame)
+            if frame_status is None:
+                frame_status = cached_urls.get(player_frame.url)
             if player_frame == page.main_frame and frame_status is None:
                 frame_status = observation["httpStatus"]
             observation["playerFrameStatus"] = frame_status

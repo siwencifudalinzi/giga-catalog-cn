@@ -25,7 +25,7 @@ def matching_wrapper(crawl_row: dict, target: str):
 
 async def _context(browser):
     context = await browser.new_context(accept_downloads=False, service_workers="block")
-    context.on("response", remember_document_status)
+    context.on("response", lambda response: remember_document_status(response, context))
     await context.add_init_script(EVENT_SCRIPT)
     await context.route("**/*", bounded_route_handler())
     return context
