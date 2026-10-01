@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
 
 from src.giga_catalog.javryo import build_manifest_entries  # noqa: E402
 from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION, classify_observation, classify_source_observation  # noqa: E402
-from src.giga_catalog.resolved_links import load_json  # noqa: E402
+from src.giga_catalog.resolved_links import load_json, source_url_hash  # noqa: E402
 
 FORBIDDEN = re.compile(rb"\.m3u8|blob:|cookie|token|[?&](?:expires|signature|sig|x-amz-)", re.I)
 STATUSES = ("verified", "media_reachable", "blocked", "retryable", "dead", "unsupported")
@@ -23,6 +23,17 @@ STATUSES = ("verified", "media_reachable", "blocked", "retryable", "dead", "unsu
 
 def _videos(catalog: dict) -> dict:
     return {video["code"]: video for series in catalog["series"] for video in series["videos"]}
+
+
+def assert_preview_entry(code: str, entry: dict, preview: dict, generation: str) -> None:
+    assert (preview.get("generation") == generation
+            and preview.get("targetUrlHash") == source_url_hash(entry["finalUrl"])
+            and preview.get("verificationVersion") == VERIFICATION_VERSION
+            and preview.get("playbackStatus") == "verified"), f"fresh GIGA preview proof missing: {code}"
+    for path_name in ("catalog", "direct"):
+        proof = preview.get("paths", {}).get(path_name, {})
+        assert (proof.get("status") == "verified"
+                and classify_observation(proof.get("evidence", {})) == "verified"), code
 
 
 def audit(root: Path, baseline_path: Path) -> dict:
@@ -34,6 +45,7 @@ def audit(root: Path, baseline_path: Path) -> dict:
     tape_state = load_json(root / "data/state/javryo-streamtape-verification.json", {})
     manifest = load_json(root / "public/data/resolved-links.json", {})
     bootstrap = load_json(root / "public/data/catalog-bootstrap.json", {})
+    preview_rows = load_json(root / "data/state/javryo-preview-verification.json", {}).get("results", {})
     old_videos, new_videos = _videos(before), _videos(catalog)
     assert set(old_videos) == set(new_videos), "catalog film codes changed"
     assert before["totals"]["videos"] == catalog["totals"]["videos"] == len(new_videos)
@@ -62,6 +74,8 @@ def audit(root: Path, baseline_path: Path) -> dict:
     published_hosts = Counter()
     for code, slots in actual.items():
         entry = slots["standard.javryo"]
+        preview = preview_rows.get(code, {})
+        assert_preview_entry(code, entry, preview, bootstrap["generation"])
         provider = entry["provider"]
         providers[provider] += 1
         row = (embed_rows if provider == "javryo_stream" else tape_rows)[code]
@@ -98,11 +112,20 @@ def audit(root: Path, baseline_path: Path) -> dict:
         "javryoPages": len(overlays),
         "embedVerification": {status: embed_counts[status] for status in STATUSES},
         "streamtapeVerification": {status: tape_counts[status] for status in STATUSES},
+        "streamtapeEvidence": {
+            "directPageHttp200": sum(row.get("paths", {}).get("direct", {}).get("evidence", {}).get("httpStatus") == 200
+                                     for row in tape_rows.values()),
+            "directManifestSuccess": sum(row.get("paths", {}).get("direct", {}).get("evidence", {}).get("manifestStatus") == 200
+                                         for row in tape_rows.values()),
+            "directTrustedPlayback": sum(classify_observation(row.get("paths", {}).get("direct", {}).get("evidence", {})) == "verified"
+                                         for row in tape_rows.values()),
+        },
         "published": {"total": len(actual), "byProvider": dict(sorted(providers.items())),
                       "embedHosts": dict(sorted(published_hosts.items()))},
         "googleSheetAndOtherExistingLinksPreserved": True,
         "publicJsonContainsTemporaryMediaOrCredentials": False,
         "everyPublishedEntryHasBothPathEvidence": True,
+        "everyPublishedEntryPassedGigaButtonAndDirectPreview": True,
     }
     return summary
 
@@ -118,6 +141,30 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
                            encoding="utf-8")
+    counts = summary["embedVerification"]
+    tape = summary["streamtapeVerification"]
+    report = ["# JAVRyo 稳定播放器直达发布审计", "",
+              f"Generation：`{summary['generation']}`", "",
+              f"影片总数：{summary['films']}；JAVRyo 详情页：{summary['javryoPages']}。", "",
+              f"- 确认可播放、允许发布：{summary['published']['total']}",
+              f"- 内置播放器两路径确认可播放：{counts['verified']}",
+              f"- 仅播放器与媒体清单可达：{counts['media_reachable']}",
+              f"- 人机验证或网络受阻：{counts['blocked'] + counts['retryable']}",
+              f"- 已失效：{counts['dead']}", f"- 不支持：{counts['unsupported']}", "",
+              "## Streamtape 重新验证", "",
+              f"- 两路径确认可播放：{tape['verified']}",
+              f"- 仅播放器与媒体清单可达：{tape['media_reachable']}",
+              f"- 受阻或待重试：{tape['blocked'] + tape['retryable']}",
+              f"- 已失效：{tape['dead']}；不支持：{tape['unsupported']}",
+              f"- 直接打开页面 HTTP 200：{summary['streamtapeEvidence']['directPageHttp200']}",
+              f"- 直接打开媒体清单成功：{summary['streamtapeEvidence']['directManifestSuccess']}",
+              f"- 直接打开出现可信播放事件：{summary['streamtapeEvidence']['directTrustedPlayback']}", "",
+              "## 发布检查", "",
+              "影片总数及原 Google 表格和其他来源链接保持不变。公开 JSON 未发现临时媒体地址或凭据。",
+              "所有允许发布的条目都有来源点击、直接打开，以及 GIGA 站内按钮预览的真实播放证据。",
+              "私有逐条验证记录保存于本地和 Documents 持久备份，不提交 GitHub。", "",
+              "GitHub main 提交和 GitHub Pages 部署结果以最终发布报告及 Actions 记录为准。", ""]
+    args.output.with_name("report.md").write_text("\n".join(report), encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, sort_keys=True))
 
 
