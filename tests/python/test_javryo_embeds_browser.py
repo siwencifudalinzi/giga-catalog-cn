@@ -14,7 +14,7 @@ class PlaybackClassificationTests(unittest.TestCase):
                                               retry_promising=False))
 
     def test_promising_retry_only_rechecks_direct_playback_evidence(self):
-        previous = {"sourceUrlHash": "source", "embedUrlHash": "embed", "verificationVersion": 2,
+        previous = {"sourceUrlHash": "source", "embedUrlHash": "embed", "verificationVersion": 4,
                     "playbackStatus": "retryable", "attempts": 1,
                     "paths": {"direct": {"status": "verified"}}}
         self.assertTrue(should_queue_candidate(previous, "source", "embed", retry=True,

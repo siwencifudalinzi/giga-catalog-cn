@@ -1,10 +1,34 @@
 import unittest
+import gzip
+import io
 from unittest.mock import Mock, patch
 
 from src.giga_catalog.javryo_media_probe import MediaProbeBudget, fetch_probe
 
 
 class MediaTransferLimitTests(unittest.TestCase):
+    def test_compressed_metadata_is_fully_decoded_within_decoded_size_limit(self):
+        body = b'{"embed_url":"' + b'x' * 10000 + b'"}'
+        compressed = gzip.compress(body)
+        stream = io.BytesIO(compressed)
+        response = Mock(status_code=200, headers={"content-type": "application/json",
+            "content-encoding": "gzip", "content-length": str(len(compressed))})
+        response.raw.read.side_effect = lambda amount, decode_content: stream.read(amount)
+        with patch("src.giga_catalog.javryo_media_probe.requests.request", return_value=response):
+            result = fetch_probe(self.request("fetch", "https://cdn.example/api"), MediaProbeBudget())
+        self.assertEqual(result["body"], body)
+        self.assertNotIn("content-encoding", result["headers"])
+        self.assertEqual(result["headers"]["content-length"], str(len(body)))
+
+    def test_compressed_metadata_cannot_expand_past_response_limit(self):
+        compressed = gzip.compress(b'x' * 600000)
+        stream = io.BytesIO(compressed)
+        response = Mock(status_code=200, headers={"content-type": "application/json",
+            "content-encoding": "gzip", "content-length": str(len(compressed))})
+        response.raw.read.side_effect = lambda amount, decode_content: stream.read(amount)
+        with patch("src.giga_catalog.javryo_media_probe.requests.request", return_value=response):
+            self.assertIsNone(fetch_probe(self.request("fetch", "https://cdn.example/api"), MediaProbeBudget()))
+
     def request(self, resource_type="media", url="https://cdn.example/start.mp4"):
         return {"url": url, "resourceType": resource_type, "method": "GET", "headers": {}, "data": None}
 

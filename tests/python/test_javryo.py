@@ -24,7 +24,7 @@ class JavryoParsingTests(unittest.TestCase):
                     "playerDocumentValidated": True}
         source = {"httpStatus": 200, "embedStatus": 200, "embedFrameSeen": True,
                   "sourceClickObserved": True}
-        embeds = {"results": {"ATHB-16": {"playbackStatus": "verified", "verificationVersion": 2,
+        embeds = {"results": {"ATHB-16": {"playbackStatus": "verified", "verificationVersion": 4,
             "sourceUrlHash": source_url_hash(page), "embedUrlHash": source_url_hash(embed),
             "finalUrl": embed, "checkedAt": "2026-09-29T00:00:00Z",
             "paths": {"source": {"status": "reached", "evidence": source},
@@ -36,14 +36,14 @@ class JavryoParsingTests(unittest.TestCase):
                          ("javryo_stream", embed, "verified"))
         embeds["results"]["ATHB-16"]["verificationVersion"] = 1
         self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
-        embeds["results"]["ATHB-16"]["verificationVersion"] = 2
+        embeds["results"]["ATHB-16"]["verificationVersion"] = 4
         source["sourceClickObserved"] = False
         self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
         source["sourceClickObserved"] = True
         playback["trustedVideoEvents"] = False
         self.assertEqual(build_manifest_entries(overlay, embeds, None, inventory), {})
         playback["trustedVideoEvents"] = True
-        tapes = {"results": {"ATHB-16": {"playbackStatus": "verified", "verificationVersion": 2,
+        tapes = {"results": {"ATHB-16": {"playbackStatus": "verified", "verificationVersion": 4,
             "sourceUrlHash": source_url_hash(page), "finalUrl": tape,
             "checkedAt": "2026-09-29T00:00:00Z",
             "paths": {"source": {"status": "verified", "evidence": playback},

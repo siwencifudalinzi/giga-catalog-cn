@@ -9,7 +9,7 @@ from typing import Optional
 
 from .javryo_embeds_browser import (
     EVENT_SCRIPT, _observe, aggregate_path_status, bounded_route_handler,
-    classify_observation, safe_evidence, utc_now,
+    classify_observation, safe_evidence, utc_now, remember_document_status,
 )
 from .resolved_links import source_url_hash, validate_final_url
 
@@ -25,6 +25,7 @@ def matching_wrapper(crawl_row: dict, target: str):
 
 async def _context(browser):
     context = await browser.new_context(accept_downloads=False, service_workers="block")
+    context.on("response", remember_document_status)
     await context.add_init_script(EVENT_SCRIPT)
     await context.route("**/*", bounded_route_handler())
     return context

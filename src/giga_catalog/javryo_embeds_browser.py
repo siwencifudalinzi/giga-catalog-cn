@@ -13,7 +13,7 @@ from .resolved_links import source_url_hash, validate_final_url
 from .javryo_media_probe import MediaProbeBudget, fetch_probe
 
 
-VERIFICATION_VERSION = 2
+VERIFICATION_VERSION = 4
 EVENT_SCRIPT = """(() => {
   window.__gigaSourceClickObserved = false;
   document.addEventListener('click', event => {
@@ -45,7 +45,7 @@ def safe_evidence(observation: Mapping) -> dict:
     keys = ("httpStatus", "videoCount", "duration", "manifestStatus", "manifestHost",
             "mediaStatus", "events", "challenge", "deleted", "errorCode",
             "embedStatus", "embedFrameSeen", "apiStatus", "clicks", "clickErrors",
-            "sourceClickObserved", "trustedVideoEvents", "playerDocumentValidated")
+            "sourceClickObserved", "trustedVideoEvents", "playerDocumentValidated", "playerFrameStatus")
     result = {key: observation[key] for key in keys if key in observation}
     if "events" in result:
         result["events"] = [event for event in result["events"] if event in ("playing", "timeupdate")]
@@ -61,9 +61,12 @@ def safe_evidence(observation: Mapping) -> dict:
 
 def classify_observation(value: Mapping) -> str:
     status = value.get("httpStatus")
-    if status in (404, 410) or value.get("embedStatus") in (404, 410) or value.get("deleted"):
+    if (status in (404, 410) or value.get("embedStatus") in (404, 410)
+            or value.get("playerFrameStatus") in (404, 410) or value.get("deleted")):
         return "dead"
-    if status in (401, 403, 429) or value.get("embedStatus") in (401, 403, 429) or value.get("challenge") or value.get("manifestStatus") in (401, 403, 429):
+    if (status in (401, 403, 429) or value.get("embedStatus") in (401, 403, 429)
+            or value.get("playerFrameStatus") in (401, 403, 429) or value.get("challenge")
+            or value.get("manifestStatus") in (401, 403, 429)):
         return "blocked"
     if status != 200:
         return "retryable"
@@ -94,6 +97,52 @@ def player_document_matches(value: str, expected: str) -> bool:
         return normalize_embed_url(url) or validate_final_url(url, expected_provider="streamtape")
     target = normalize(expected)
     return bool(target and normalize(value) == target)
+
+
+def internal_player_matches(value: str, expected: str) -> bool:
+    """Allow the observed Byse primary frame, never an arbitrary ad frame."""
+    target = normalize_embed_url(expected)
+    if not target or urlsplit(target).hostname != "bysejikuar.com":
+        return False
+    parsed = urlsplit(value)
+    namespace = parsed.path.split("/")[1] if parsed.path.startswith("/") else ""
+    return (parsed.scheme == "https" and parsed.netloc == "n1mwq.org"
+            and not parsed.query and not parsed.fragment
+            and namespace not in {"ad", "ads", "advert", "promo"}
+            and bool(re.fullmatch(r"/[a-z][a-z0-9]{1,7}/" +
+                                  re.escape(urlsplit(target).path.rsplit("/", 1)[-1]), parsed.path)))
+
+
+async def intended_player_frame(page, target_url: str):
+    for frame in page.frames:
+        if frame.parent_frame != page.main_frame or not internal_player_matches(frame.url, target_url):
+            continue
+        try:
+            element = await frame.frame_element()
+            if await element.evaluate("""el => el.matches('.jw8-player-shell > iframe') &&
+                el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0"""):
+                return frame
+        except Exception:
+            pass
+    return page.main_frame
+
+
+def remember_document_status(response):
+    """Retain navigation status in memory before a clicked watch is observed."""
+    if response.request.resource_type != "document":
+        return
+    try:
+        frame = response.frame
+        page = frame.page
+        statuses = getattr(page, "_gigaFrameStatuses", None)
+        if not isinstance(statuses, dict):
+            statuses = {}
+            page._gigaFrameStatuses = statuses
+        statuses[frame] = response.status
+        if frame == page.main_frame:
+            page._gigaDocumentStatus = response.status
+    except Exception:
+        pass
 
 
 def aggregate_path_status(paths: Mapping) -> str:
@@ -148,17 +197,23 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
                    navigate: bool = True, expected_embed: str = "") -> dict:
     observation = {"httpStatus": None, "videoCount": 0, "duration": 0, "events": []}
     media_requests = 0
+    existing_statuses = getattr(page, "_gigaFrameStatuses", None)
+    document_statuses = dict(existing_statuses) if isinstance(existing_statuses, dict) else {}
 
     async def on_response(response):
         nonlocal media_requests
         path = urlsplit(response.url).path.lower()
         content_type = response.headers.get("content-type", "").lower()
+        if not source_page and response.request.resource_type == "document":
+            document_statuses[response.frame] = response.status
         if source_page and "/wp-json/dooplayer/v1/post/" in urlsplit(response.url).path:
             observation["apiStatus"] = response.status
         if (expected_embed and normalize_embed_url(response.url) == expected_embed
                 and response.request.resource_type == "document"):
             observation["embedStatus"] = response.status
-        if source_page or response.frame != page.main_frame or not player_document_matches(page.url, target_url):
+        if source_page or not player_document_matches(page.url, target_url):
+            return
+        if response.frame != await intended_player_frame(page, target_url):
             return
         if path.endswith(".m3u8") or "mpegurl" in content_type:
             observation["manifestStatus"] = response.status
@@ -174,7 +229,8 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
             response = await page.goto(target_url, wait_until="commit", timeout=timeout_ms)
             observation["httpStatus"] = response.status if response else None
         else:
-            observation["httpStatus"] = 200 if page.url == target_url else None
+            cached_status = getattr(page, "_gigaDocumentStatus", None)
+            observation["httpStatus"] = cached_status if isinstance(cached_status, int) and page.url == target_url else None
         if observation["httpStatus"] != 200:
             return safe_evidence(observation)
         if source_page and observation["httpStatus"] == 200:
@@ -219,13 +275,17 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
             if not player_document_matches(page.url, target_url):
                 observation["errorCode"] = "unexpected-player-destination"
                 break
-            observation["playerDocumentValidated"] = True
-            for frame in [page.main_frame]:
+            player_frame = await intended_player_frame(page, target_url)
+            frame_status = document_statuses.get(player_frame)
+            if player_frame == page.main_frame and frame_status is None:
+                frame_status = observation["httpStatus"]
+            observation["playerFrameStatus"] = frame_status
+            observation["playerDocumentValidated"] = frame_status == 200
+            for frame in [player_frame]:
                 try:
                     frame_data = await frame.evaluate("""() => {
                       const videos = [...document.querySelectorAll('video')];
-                      const selected = videos.find(v => v.__gigaPlaybackEvents?.length) ||
-                        videos.find(v => v.closest('.jwplayer,.video-js,.plyr,#player')) ||
+                      const selected = videos.find(v => v.closest('.jwplayer,.video-js,.plyr,#player')) ||
                         (videos.length === 1 ? videos[0] : null);
                       return {events: selected?.__gigaPlaybackEvents || [], count: selected ? 1 : 0,
                         duration: Number.isFinite(selected?.duration) ? selected.duration : 0,
@@ -260,7 +320,7 @@ async def _observe(page, target_url: str, *, source_page: bool, timeout_ms: int,
                         if len(observation.setdefault("clickErrors", [])) < 5:
                             observation["clickErrors"].append(f"{selector}:{type(error).__name__}")
                         continue
-            if observation["events"] or observation.get("deleted") or observation.get("challenge"):
+            if classify_observation(observation) == "verified" or observation.get("deleted") or observation.get("challenge"):
                 break
             await page.wait_for_timeout(500)
     except Exception as error:

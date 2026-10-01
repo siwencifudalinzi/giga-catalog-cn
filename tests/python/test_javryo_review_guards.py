@@ -7,6 +7,16 @@ from src.giga_catalog import javryo_embeds_browser as browser
 
 
 class SourceAndEventGuardTests(unittest.TestCase):
+    def test_internal_byse_frame_requires_exact_host_path_and_same_file_id(self):
+        target = "https://bysejikuar.com/e/7p4h1pwsjiaw"
+        valid = "https://n1mwq.org/dw3/7p4h1pwsjiaw"
+        self.assertTrue(browser.internal_player_matches(valid, target))
+        self.assertTrue(browser.internal_player_matches(valid.replace("/dw3/", "/zzab/"), target))
+        for url in (valid + "?sig=example", valid.replace("n1mwq.org", "n1mwq.org.evil"),
+                    valid.replace("7p4h1pwsjiaw", "advert"), valid.replace("https:", "http:"),
+                    valid.replace("/dw3/", "/ad/")):
+            self.assertFalse(browser.internal_player_matches(url, target))
+
     def test_script_rejects_untrusted_non_video_and_paused_events(self):
         program = """
 const listeners = {};
@@ -46,6 +56,26 @@ console.log(JSON.stringify({rejected:[...rejected], accepted:video.__gigaPlaybac
 
 
 class IntendedPlayerGuardTests(unittest.IsolatedAsyncioTestCase):
+    async def test_existing_watch_uses_observed_http_status_instead_of_assuming_200(self):
+        target = "https://streamtape.com/v/example"
+        page = Mock(url=target, _gigaFrameStatuses={}, _gigaDocumentStatus=404)
+        evidence = await browser._observe(page, target, source_page=False, timeout_ms=5, navigate=False)
+        self.assertEqual(evidence["httpStatus"], 404)
+        self.assertEqual(browser.classify_observation(evidence), "dead")
+
+    async def test_only_real_primary_shell_can_select_internal_player(self):
+        target = "https://bysejikuar.com/e/example"
+        main = Mock(url=target)
+        element = Mock(evaluate=AsyncMock(return_value=False))
+        child = Mock(url="https://n1mwq.org/dw3/example", parent_frame=main,
+                     frame_element=AsyncMock(return_value=element))
+        page = Mock(main_frame=main, frames=[main, child])
+        self.assertIs(await browser.intended_player_frame(page, target), main)
+        element.evaluate.return_value = True
+        self.assertIs(await browser.intended_player_frame(page, target), child)
+        child.parent_frame = Mock()
+        self.assertIs(await browser.intended_player_frame(page, target), main)
+
     async def test_foreign_ad_frame_cannot_verify_empty_player(self):
         target = "https://bysejikuar.com/e/example"
         locator = Mock(count=AsyncMock(return_value=0))

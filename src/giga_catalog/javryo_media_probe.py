@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 import re
 import threading
+import zlib
 from urllib.parse import urlsplit
 
 import requests
@@ -36,7 +37,7 @@ class MediaProbeBudget:
             if amount <= 0:
                 return None
             self.bytes_read += amount
-        chunk = raw.read(amount, decode_content=True)
+        chunk = raw.read(amount, decode_content=False)
         with self.lock:
             self.bytes_read -= amount - len(chunk)
         return chunk
@@ -85,6 +86,9 @@ def fetch_probe(request: dict, budget: MediaProbeBudget):
         if media and not known_media and not budget.claim_media():
             return None
         limit = MAX_MEDIA_BYTES if media else (131072 if manifest else MAX_FETCH_BYTES)
+        encoding = result_headers.get("content-encoding", "identity").lower().strip()
+        if encoding not in {"identity", "", "gzip", "deflate"} or (media and encoding not in {"identity", ""}):
+            return None
         expected = None
         length = result_headers.get("content-length")
         if length is not None:
@@ -118,12 +122,18 @@ def fetch_probe(request: dict, budget: MediaProbeBudget):
             body.extend(chunk)
         if (expected is not None and len(body) != expected) or (expected is None and len(body) == limit):
             return None
+        if encoding in {"gzip", "deflate"}:
+            decoder = zlib.decompressobj(31 if encoding == "gzip" else zlib.MAX_WBITS)
+            decoded = decoder.decompress(bytes(body), limit + 1)
+            if len(decoded) > limit or not decoder.eof or decoder.unused_data or decoder.unconsumed_tail:
+                return None
+            body = bytearray(decoded)
         result_headers.pop("content-encoding", None)
         result_headers.pop("transfer-encoding", None)
         result_headers["content-length"] = str(len(body))
         result_headers["x-giga-bounded-probe"] = "media" if media else ("manifest" if manifest else "metadata")
         return {"status": status, "headers": result_headers, "body": bytes(body)}
-    except (requests.RequestException, HTTPError, OSError, ValueError):
+    except (requests.RequestException, HTTPError, OSError, ValueError, zlib.error):
         return None
     finally:
         if response is not None:
