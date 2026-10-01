@@ -47,6 +47,11 @@ def should_queue_candidate(previous: object, source_hash: str, embed_hash: str,
         return not retry_promising
     if previous.get("playbackStatus") not in {"retryable", "blocked"}:
         return False
+    # A driver crash can interrupt context creation/cleanup before both paths
+    # return evidence. Resume these incomplete checks even on the first pass.
+    if (not retry_promising and previous.get("playbackStatus") == "retryable"
+            and previous.get("errorCode") and not previous.get("paths")):
+        return previous.get("attempts", 0) < 3
     if not retry or previous.get("attempts", 0) >= 3:
         return False
     if retry_promising:

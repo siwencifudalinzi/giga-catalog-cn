@@ -1,5 +1,6 @@
 param(
-    [int]$BatchSize = 16,
+    [ValidateRange(1, 4)]
+    [int]$BatchSize = 4,
     [int]$TimeoutMs = 30000,
     [switch]$Retry,
     [switch]$RetryPromising
@@ -11,6 +12,9 @@ $log = Join-Path $repo 'data/state/javryo-verification-run.log'
 Set-Location -LiteralPath $repo
 $env:PYTHONIOENCODING = 'utf-8'
 $failures = 0
+
+# Recycle the Playwright driver after one candidate per worker. Larger batches
+# exhausted Node's 4 GB heap on the live player pages, losing the connection.
 
 while ($true) {
     $verifierArgs = @('-X', 'utf8', 'scripts/verify_javryo_embeds.py', '--max-links', $BatchSize,

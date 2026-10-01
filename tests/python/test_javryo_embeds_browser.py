@@ -7,6 +7,17 @@ from src.giga_catalog.javryo_embeds_browser import bounded_route_handler
 
 
 class PlaybackClassificationTests(unittest.TestCase):
+    def test_driver_failure_without_path_evidence_is_resumed_automatically(self):
+        from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION
+        previous = {"verificationVersion": VERIFICATION_VERSION,
+                    "sourceUrlHash": "source", "embedUrlHash": "embed",
+                    "playbackStatus": "retryable", "errorCode": "Exception", "attempts": 1}
+        self.assertTrue(should_queue_candidate(previous, "source", "embed",
+                        retry=False, retry_promising=False))
+        previous["attempts"] = 3
+        self.assertFalse(should_queue_candidate(previous, "source", "embed",
+                         retry=False, retry_promising=False))
+
     def test_media_403_remains_blocked_even_when_manifest_and_duration_exist(self):
         self.assertEqual(classify_observation({"httpStatus": 200, "videoCount": 1,
             "duration": 100, "manifestStatus": 200, "mediaStatus": 403,
