@@ -1,0 +1,35 @@
+{
+  "embedVerification": {
+    "blocked": 49,
+    "dead": 154,
+    "media_reachable": 5,
+    "retryable": 1712,
+    "unsupported": 3,
+    "verified": 0
+  },
+  "everyPublishedEntryHasBothPathEvidence": true,
+  "everyPublishedEntryPassedGigaButtonAndDirectPreview": true,
+  "films": 4094,
+  "generation": "49b24193c41b065285ff1b9715cc03b9265bc19e43a3201ab7fcff9711454406",
+  "googleSheetAndOtherExistingLinksPreserved": true,
+  "javryoPages": 1923,
+  "publicJsonContainsTemporaryMediaOrCredentials": false,
+  "published": {
+    "byProvider": {},
+    "embedHosts": {},
+    "total": 0
+  },
+  "streamtapeEvidence": {
+    "directManifestSuccess": 0,
+    "directPageHttp200": 0,
+    "directTrustedPlayback": 0
+  },
+  "streamtapeVerification": {
+    "blocked": 202,
+    "dead": 9,
+    "media_reachable": 0,
+    "retryable": 21,
+    "unsupported": 0,
+    "verified": 0
+  }
+}
