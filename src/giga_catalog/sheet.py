@@ -21,7 +21,7 @@ _PROVIDER_HEADERS = {
 _PROVIDER_HEADER_SLOTS = (
     (("STREAMTAPE LINK",), True),
     (("PLAYER4ME LINK", "VIDARA LINK"), False),
-    (("GOFILE LINK",), True),
+    (("GOFILE LINK",), False),
 )
 _TRANSIENT_STATUS_CODES = {408, 425, 429}
 _CODE_AT_START = re.compile(r"^\s*([A-Za-z][A-Za-z0-9]*[\s_-]\d+)\b")
@@ -239,8 +239,7 @@ def _provider_columns(
             for index in range(start, end)
             if header[index] in aliases
         ]
-        normal_gofile_retired = group == "normal" and aliases == ("GOFILE LINK",)
-        if not indexes and (not required or normal_gofile_retired):
+        if not indexes and not required:
             continue
         if len(indexes) != 1:
             expected = " or ".join(repr(name) for name in aliases)

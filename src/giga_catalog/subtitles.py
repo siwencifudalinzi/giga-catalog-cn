@@ -26,7 +26,6 @@ COLLECTION_LINK_COLORS = frozenset({"#0000ff", "#1155cc", "#ff0000", "#ff9900"})
 _IDENTITY_LABELS = {
     "NEW CODE",
     "STREAMTAPE LINK",
-    "GOFILE LINK",
     "UNCENSORED",
 }
 _IDENTITY_NOTE = (

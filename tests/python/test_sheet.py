@@ -19,6 +19,42 @@ FIXTURE_PATH = Path(__file__).parents[1] / "fixtures" / "sheet.csv"
 
 
 class SheetParserTests(unittest.TestCase):
+    def test_imports_streamtape_after_gofile_headers_are_cleared(self) -> None:
+        """Retired provider columns must not block either group or mix title codes."""
+        text = (
+            "NEW CODE,STREAMTAPE LINK,,,UNCENSORED,STREAMTAPE LINK,,\n"
+            "HTB-15,https://ouo.io/normal,,,SPSF-59 RM,https://ouo.io/unc,,\n"
+            ",,,,TRE-41 UMR.mp4,https://ouo.io/tre,,\n"
+        )
+
+        links, conflicts = parse_sheet_csv(text)
+
+        self.assertEqual(links, {
+            "HTB-15": {"streamtape": "https://ouo.io/normal"},
+            "SPSF-59": {"uncensored": {"streamtape": "https://ouo.io/unc"}},
+            "TRE-41": {"uncensored": {"streamtape": "https://ouo.io/tre"}},
+        })
+        self.assertEqual(conflicts, [])
+
+    def test_imports_named_providers_without_guessing_unnamed_columns(self) -> None:
+        """Cleared headers are not permission to assign leftover links by position."""
+        text = (
+            "NEW CODE,STREAMTAPE LINK,GOFILE LINK,,UNCENSORED,STREAMTAPE LINK,,\n"
+            "HTB-15,https://ouo.io/normal,https://ouo.io/gofile,,"
+            "SPSF-59 RM,https://ouo.io/unc,https://ouo.io/unknown,\n"
+        )
+
+        links, conflicts = parse_sheet_csv(text)
+
+        self.assertEqual(links, {
+            "HTB-15": {
+                "streamtape": "https://ouo.io/normal",
+                "gofile": "https://ouo.io/gofile",
+            },
+            "SPSF-59": {"uncensored": {"streamtape": "https://ouo.io/unc"}},
+        })
+        self.assertEqual(conflicts, [])
+
     def test_keys_uncensored_links_by_the_code_in_the_uncensored_column(self) -> None:
         """A neighboring NEW CODE must not receive another title's uncensored links."""
         text = (
@@ -218,7 +254,11 @@ class SheetParserTests(unittest.TestCase):
             ),
             (
                 "NEW CODE,STREAMTAPE LINK,PLAYER4ME LINK,GOFILE LINK,"
-                "UNCENSORED,STREAMTAPE LINK,PLAYER4ME LINK\n"
+                "UNCENSORED,PLAYER4ME LINK,GOFILE LINK\n"
+            ),
+            (
+                "NEW CODE,STREAMTAPE LINK,,,UNCENSORED,"
+                "STREAMTAPE LINK,GOFILE LINK,GOFILE LINK\n"
             ),
             (
                 "NEW CODE,STREAMTAPE LINK,STREAMTAPE LINK,PLAYER4ME LINK,"

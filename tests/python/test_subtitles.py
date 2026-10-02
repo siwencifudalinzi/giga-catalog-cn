@@ -55,13 +55,14 @@ def subtitle_directory_xlsx(
     portal_target="https://ouo.io/BAbfv4",
     pink_target="https://ouo.io/2yaA66",
     middle_provider_label="PLAYER4ME LINK",
+    gofile_label="GOFILE LINK",
 ):
     """Build the smallest workbook that mirrors Google's public XLSX contract."""
     strings = [
         "NEW CODE",
         "STREAMTAPE LINK",
         middle_provider_label,
-        "GOFILE LINK",
+        gofile_label,
         "UNCENSORED",
         "SRT ENGSUB DOWNLOAD",
         "PGHD",
@@ -371,6 +372,35 @@ class SubtitleStateManifestTests(unittest.TestCase):
 
 
 class SubtitleDirectoryParserTests(unittest.TestCase):
+    def test_collection_directory_accepts_retired_gofile_header(self) -> None:
+        sources = subtitle_module.parse_collection_directory_html(
+            COLLECTION_DIRECTORY_HTML.replace("GOFILE LINK", ""),
+            source_url=DIRECTORY_URL,
+            catalog_series={"AHEF", "AVGP", "CSFT", "PGHD", "SPSF"},
+        )
+        self.assertEqual([source.series for source in sources],
+                         ["AHEF", "AVGP", "CSFT", "SPSF"])
+
+    def test_subtitle_html_accepts_retired_gofile_header(self) -> None:
+        directory = parse_subtitle_directory_html(
+            DIRECTORY_FIXTURE.read_text(encoding="utf-8").replace("GOFILE LINK", ""),
+            source_url=DIRECTORY_URL,
+            catalog_series=CATALOG_SERIES,
+        )
+        self.assertEqual(directory.series_links, {})
+        self.assertEqual(directory.portal_url, "https://ouo.io/BAbfv4")
+        self.assertEqual(directory.unresolved_sources[0].series, "PGHD")
+
+    def test_subtitle_xlsx_accepts_retired_gofile_header(self) -> None:
+        directory = subtitle_module.parse_subtitle_directory_xlsx(
+            subtitle_directory_xlsx(gofile_label=""),
+            source_url=DIRECTORY_URL,
+            catalog_series=CATALOG_SERIES,
+        )
+        self.assertEqual(directory.portal_url, "https://ouo.io/BAbfv4")
+        self.assertEqual(directory.series_links, {})
+        self.assertEqual(directory.unresolved_sources[0].series, "PGHD")
+
     def test_collection_directory_includes_black_sheet_archives_but_not_subtitles(self) -> None:
         """Black directory colors can be stale even when child rows have URLs."""
         parser = getattr(subtitle_module, "parse_collection_directory_html", None)
