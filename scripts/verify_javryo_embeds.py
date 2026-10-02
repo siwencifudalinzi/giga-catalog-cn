@@ -39,6 +39,16 @@ def progress(results: dict, total: int, added: int) -> str:
             f"本批新增直达：{added}\n当前阶段：后台验证")
 
 
+def needs_play_gate_wait(previous: dict) -> bool:
+    direct = previous.get("paths", {}).get("direct", {})
+    evidence = direct.get("evidence", {})
+    return (previous.get("playGateWaitAttempts", 0) < 1
+            and direct.get("status") in {"retryable", "blocked"}
+            and evidence.get("httpStatus") == 200
+            and evidence.get("playerDocumentValidated") is True
+            and ".captcha-gate__play" in evidence.get("clicks", []))
+
+
 def should_queue_candidate(previous: object, source_hash: str, embed_hash: str,
                            *, retry: bool, retry_promising: bool, embed_host: str = "") -> bool:
     if not isinstance(previous, dict) or previous.get("verificationVersion") != VERIFICATION_VERSION:
@@ -47,6 +57,8 @@ def should_queue_candidate(previous: object, source_hash: str, embed_hash: str,
         return not retry_promising
     if previous.get("playbackStatus") not in {"retryable", "blocked"}:
         return False
+    if retry and retry_promising and needs_play_gate_wait(previous):
+        return True
     direct = previous.get("paths", {}).get("direct", {})
     evidence = direct.get("evidence", {})
     if (not retry_promising and embed_host == "bysejikuar.com"
@@ -118,6 +130,9 @@ async def run(args) -> None:
                         result = {"playbackStatus": "retryable", "errorCode": type(error).__name__}
                     result.setdefault("checkedAt", utc_now())
                     result["verificationVersion"] = VERIFICATION_VERSION
+                    result["observationTimeoutMs"] = args.timeout_ms
+                    result["playGateWaitAttempts"] = int(previous.get("playGateWaitAttempts", 0)) + int(
+                        args.retry and args.retry_promising and needs_play_gate_wait(previous))
                     if candidate.host == "bysejikuar.com":
                         result["byseFrameCheckVersion"] = 1
                     result.setdefault("sourceUrlHash", candidate.source_url_hash)

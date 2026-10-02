@@ -7,6 +7,22 @@ from src.giga_catalog.javryo_embeds_browser import bounded_route_handler
 
 
 class PlaybackClassificationTests(unittest.TestCase):
+    def test_native_player_gate_gets_one_long_wait_even_after_short_attempts_exhausted(self):
+        from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION
+        previous = {"verificationVersion": VERIFICATION_VERSION, "sourceUrlHash": "source",
+                    "embedUrlHash": "embed", "playbackStatus": "retryable", "attempts": 3,
+                    "paths": {"direct": {"status": "retryable", "evidence": {"httpStatus": 200,
+                        "playerDocumentValidated": True, "clicks": [".captcha-gate__play"]}}}}
+        self.assertTrue(should_queue_candidate(previous, "source", "embed", retry=True,
+                        retry_promising=True))
+        previous["playGateWaitAttempts"] = 1
+        self.assertFalse(should_queue_candidate(previous, "source", "embed", retry=True,
+                         retry_promising=True))
+        previous.pop("playGateWaitAttempts")
+        previous["paths"]["direct"]["evidence"]["playerDocumentValidated"] = False
+        self.assertFalse(should_queue_candidate(previous, "source", "embed", retry=True,
+                         retry_promising=True))
+
     def test_missing_byse_frame_checks_are_repeated_once_without_restarting_other_rows(self):
         from src.giga_catalog.javryo_embeds_browser import VERIFICATION_VERSION
         previous = {"verificationVersion": VERIFICATION_VERSION, "sourceUrlHash": "source",
