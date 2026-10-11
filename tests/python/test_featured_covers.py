@@ -104,6 +104,17 @@ class _ResponseMapSession:
 
 
 class FeaturedCoverCacheTests(unittest.TestCase):
+    def test_caches_recent_window_across_series_by_date_then_code(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            older = [_video(i) | {"releaseDate": "2026-09-01"} for i in range(1, 26)]
+            newer = {"code": "AAA-2", "cover": "https://www.giga-web.jp/db_titles/aaa/aaa02/pac_s.jpg", "releaseDate": "2026-10-01"}
+            payload = {"series": [{"code": "NEW", "videos": older}, {"code": "AAA", "videos": [newer]}]}
+            catalog_path = root / "catalog.json"
+            catalog_path.write_text(json.dumps(payload), encoding="utf-8")
+            result = cache_featured_covers(catalog_path, root / "media" / "featured-covers", root / "featured-covers.json", session=_Session(_jpeg_bytes()), retries=1)
+            self.assertEqual(result["cached"], ["AAA-2", *[f"NEW-{i}" for i in range(1, 24)]])
+
     def test_no_eligible_giga_cover_is_a_zero_write_noop(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -134,7 +145,7 @@ class FeaturedCoverCacheTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("--catalog", completed.stdout)
 
-    def test_caches_first_six_latest_series_covers_in_display_order(self):
+    def test_caches_available_covers_in_display_order(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             catalog_path = root / "catalog.json"
@@ -152,11 +163,11 @@ class FeaturedCoverCacheTests(unittest.TestCase):
                 retries=1,
             )
 
-            self.assertEqual(result["cached"], ["NEW-1", "NEW-2", "NEW-3", "NEW-4", "NEW-5", "NEW-6"])
+            self.assertEqual(result["cached"], [f"NEW-{i}" for i in range(1, 8)])
             manifest = json.loads((root / "featured-covers.json").read_text(encoding="utf-8"))
             self.assertEqual(
                 [cover["code"] for cover in manifest["covers"]],
-                ["NEW-1", "NEW-2", "NEW-3", "NEW-4", "NEW-5", "NEW-6"],
+                [f"NEW-{i}" for i in range(1, 8)],
             )
             self.assertRegex(manifest["generation"], r"^[0-9a-f]{64}$")
             self.assertEqual(

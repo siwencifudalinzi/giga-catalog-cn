@@ -65,7 +65,8 @@
           </span>
         </form>
 
-        <div class="header-tools" aria-label="显示设置">
+        <button class="icon-button mobile-tools-toggle" type="button" data-action="toggle-tools" aria-label="打开更多设置" aria-controls="header-tools" aria-expanded="false">⋯</button>
+        <div id="header-tools" class="header-tools" aria-label="显示设置">
           <span
             id="connection-status"
             class="connection-status catalog-cache-state"
@@ -138,7 +139,8 @@
             data-action="switch-view"
             data-view="recent"
           >
-            近期发行
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v4m8-4v4M4 10h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"/></svg>
+            <span>近期发行</span>
           </button>
           <button
             type="button"
@@ -149,7 +151,8 @@
             data-view="all"
             tabindex="-1"
           >
-            按系列浏览
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z"/></svg>
+            <span>按系列浏览</span>
           </button>
           <button
             type="button"
@@ -160,7 +163,8 @@
             data-view="tags"
             tabindex="-1"
           >
-            标签索引
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h9l9 9-8 8-10-10Z"/><circle cx="8" cy="9" r="1"/></svg>
+            <span>标签索引</span>
           </button>
           <button
             type="button"
@@ -171,7 +175,8 @@
             data-view="favorites"
             tabindex="-1"
           >
-            收藏
+            <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z"/></svg>
+            <span>收藏</span>
             <span id="favorite-count" class="tab-count" aria-label="收藏数量">0</span>
           </button>
         </div>
@@ -224,6 +229,7 @@
           <span class="state-kicker">正在整理展柜</span>
           <h2 id="initial-loading">载入影片目录…</h2>
           <p>先载入最新目录，其余内容按需读取。</p>
+          <div class="skeleton-grid" aria-hidden="true"><span class="skeleton-card"></span><span class="skeleton-card"></span><span class="skeleton-card"></span><span class="skeleton-card"></span></div>
         </section>
       </main>
     </div>

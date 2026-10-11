@@ -1,4 +1,4 @@
-"""Refresh the at-most-six locally hosted covers used on the homepage."""
+"""Refresh the first 24 locally hosted covers used on the recent homepage."""
 
 from __future__ import annotations
 

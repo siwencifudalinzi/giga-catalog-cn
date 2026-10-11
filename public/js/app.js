@@ -1,5 +1,6 @@
 import {
   derivePreviewUrls,
+  collectPreviewUrls,
   mountSeries,
   normalizeFeaturedCovers,
   observeDeferredCovers,
@@ -14,6 +15,7 @@ import { getLocalStorage } from "./storage.js";
 import { openCatalogCache } from "./catalog-cache.js";
 import { createRuntimeCatalogStore } from "./runtime-catalog.js";
 import { createRuntimeLoader } from "./runtime-loader.js";
+import { createCatalogPrefetcher } from "./catalog-prefetch.js";
 import { nextTagSelection } from "./tags.js";
 import { compareVideoCodes } from "./catalog.js";
 import { filterSeries } from './series-navigation.js';
@@ -1202,6 +1204,7 @@ function startApplication() {
   }
 
   function appendLoadMore(container, metadata, context) {
+    container.querySelector(".pagination")?.remove();
     const nav = createElement("div", "pagination");
     nav.setAttribute("aria-label", "显示更多影片");
     const status = createElement(
@@ -1314,7 +1317,7 @@ function startApplication() {
       renderViewHeading(
         "RECENT EDITIONS",
         "近期发行",
-        "按发行日期从新到旧排列，同一天按番号顺序；即将发行日期以目录同步信息为准。",
+        "按发行日期排序 · 包含即将发行的影片",
       ),
     );
     if (!recent.length) {
@@ -1328,6 +1331,7 @@ function startApplication() {
     state.mountedSeries = null;
     const metadata = renderSearchResults(container, recent, {
       context: "recent",
+      featuredCovers: state.featuredCovers,
       visibleCount: state.visible.recent,
       tagLookup: (tagId) => state.store.getTag(tagId),
       asOfDate: state.bootstrap?.generatedAt?.slice(0, 10),
@@ -1374,7 +1378,7 @@ function startApplication() {
     }
   }
 
-  function renderSearchView() {
+  function renderSearchView({ append = false } = {}) {
     const results = state.store.search(state.query);
     const fragment = document.createDocumentFragment();
     fragment.append(
@@ -1384,12 +1388,16 @@ function startApplication() {
         `找到 ${formatNumber(results.length)} 部影片，按番号顺序排列。`,
       ),
     );
-    const container = createElement("div", "result-section");
-    fragment.append(container);
-    ui.main.replaceChildren(fragment);
+    let container = append ? ui.main.querySelector(".result-section") : null;
+    if (!container) {
+      container = createElement("div", "result-section");
+      fragment.append(container);
+      ui.main.replaceChildren(fragment);
+    }
     state.mountedSeries = null;
     const metadata = renderSearchResults(container, results, {
       visibleCount: state.visible.search,
+      append,
       featuredCovers: state.featuredCovers,
       emptyMessage: "没有匹配的影片，试试番号、标题、演员、系列名或标签。",
       tagLookup: (tagId) => state.store.getTag(tagId),
@@ -1400,6 +1408,7 @@ function startApplication() {
   }
 
   function renderFavoritesView() {
+    const existingCards = new Map([...ui.main.querySelectorAll(".video-card[data-code]")].map((card) => [card.dataset.code, card]));
     const entries = getFavoriteVideos(
       favorites.getAll(),
       (code) => state.store.getVideo(code),
@@ -1444,18 +1453,23 @@ function startApplication() {
       fragment.append(section);
       groups.push({ container, favoriteState, videos });
     }
-    ui.main.replaceChildren(fragment);
     state.mountedSeries = null;
-    for (const { container, favoriteState, videos } of groups) {
-      const metadata = renderSearchResults(container, videos, {
+    for (const group of groups) {
+      const { container, favoriteState, videos } = group;
+      group.metadata = renderSearchResults(container, videos, {
         context: "favorites",
         visibleCount: state.visible.favorites[favoriteState],
         featuredCovers: state.featuredCovers,
         tagLookup: (tagId) => state.store.getTag(tagId),
         asOfDate: state.bootstrap?.generatedAt?.slice(0, 10),
       });
-      appendLoadMore(container, metadata, `favorites:${favoriteState}`);
+      for (const card of container.querySelectorAll(".video-card[data-code]")) {
+        const existing = existingCards.get(card.dataset.code);
+        if (existing) card.replaceWith(existing);
+      }
     }
+    ui.main.replaceChildren(fragment);
+    for (const { container, favoriteState, metadata } of groups) appendLoadMore(container, metadata, `favorites:${favoriteState}`);
     refreshDeferredCovers();
   }
 
@@ -1915,12 +1929,7 @@ function startApplication() {
         state.tagsReady = true;
         state.tagError = null;
         removeResourceError("tags");
-        if (ui.videoDialog.open && state.activeDialogCode) {
-          void openVideoDialog(state.activeDialogCode, state.dialogTrigger, {
-            force: true,
-            historyMode: "none",
-          }).catch(() => {});
-        }
+        if (ui.videoDialog.open && state.activeDialogCode) refreshDialogTags();
         return true;
       } catch (error) {
         if (error?.name !== "AbortError") {
@@ -2113,7 +2122,12 @@ function startApplication() {
     }
   }
 
+  let imageViewer = null;
+  let imageViewerModule = null;
+  let galleryRequest = 0;
   function disconnectPreviewObserver() {
+    galleryRequest += 1;
+    imageViewer?.dismiss();
     state.previewObserver?.disconnect();
     state.previewObserver = null;
     state.previewRail = null;
@@ -2132,16 +2146,13 @@ function startApplication() {
   }
 
   function replacePreviewWithError(image) {
-    const error = createElement("div", "preview-error", "预览图加载失败");
-    error.setAttribute("role", "img");
-    error.setAttribute("aria-label", "预览图加载失败");
-    image.replaceWith(error);
+    if (image.dataset.failed) return;
+    image.dataset.failed = "true";
+    image.hidden = true;
+    image.parentElement?.append(createElement("span", "preview-error", "图片暂不可用 · 点击重试"));
   }
 
-  function appendPreviewBatch(
-    limit = PREVIEW_BATCH_SIZE,
-    { probe = false } = {},
-  ) {
+  function appendPreviewBatch(limit = PREVIEW_BATCH_SIZE) {
     if (
       !ui.videoDialog.open ||
       !state.previewVideo ||
@@ -2158,26 +2169,27 @@ function startApplication() {
     const images = [];
     for (const [offset, url] of urls.entries()) {
       const figure = createElement("figure", "preview-item");
+      const button = createElement("button", "preview-button");
+      button.type = "button";
+      button.dataset.action = "open-preview";
+      button.dataset.index = String(state.previewStart + offset);
+      button.setAttribute("aria-label", `放大预览图 ${state.previewStart + offset + 1}`);
       const image = createElement("img", "preview-image");
       image.alt = `${state.previewVideo.code} 预览 ${state.previewStart + offset + 1}`;
       image.width = 480;
       image.height = 320;
       image.decoding = "async";
-      if (probe && offset === 0) {
-        image.loading = "eager";
-        image.dataset.previewProbe = "true";
-        image.dataset.previewSource = url;
-      } else {
-        image.loading = "lazy";
-        image.src = url;
-      }
-      figure.append(image);
+      image.loading = state.previewStart + offset === 0 ? "eager" : "lazy";
+      image.src = url;
+      button.append(image);
+      figure.append(button);
       state.previewRail.insertBefore(figure, state.previewSentinel);
       images.push(image);
     }
     state.previewStart += urls.length;
     state.previewLoading = false;
-    if (!urls.length || state.previewStart >= Number(state.previewVideo.previewCount)) {
+    const count = state.previewVideo.previewImages?.length || Number(state.previewVideo.previewCount);
+    if (!urls.length || state.previewStart >= count) {
       state.previewObserver?.disconnect();
       state.previewSentinel?.remove();
       state.previewSentinel = null;
@@ -2201,31 +2213,11 @@ function startApplication() {
     );
   }
 
-  function failPreviewProbe(image) {
-    const rail = state.previewRail;
-    if (!rail || !rail.contains(image)) {
-      return;
-    }
-    state.previewObserver?.disconnect();
-    state.previewObserver = null;
-    state.previewSentinel?.remove();
-    const empty = createElement(
-      "p",
-      "empty-state empty-state--compact",
-      "暂无预览",
-    );
-    rail.replaceWith(empty);
-    state.previewRail = null;
-    state.previewSentinel = null;
-    state.previewVideo = null;
-    state.previewStart = 0;
-    state.previewLoading = false;
-  }
-
   function createPreviewSection(video) {
     const section = createElement("section", "preview-section");
     const heading = createElement("h3", "", "预览图");
     section.append(heading);
+    section.append(createElement("p", "preview-caption", "点击查看大图，左右滑动浏览"));
     const firstBatch = derivePreviewUrls(video, {
       start: 0,
       limit: PREVIEW_BATCH_SIZE,
@@ -2249,29 +2241,26 @@ function startApplication() {
   }
 
   function startPreviewLoading() {
-    const [probe] = appendPreviewBatch(1, { probe: true });
-    if (!probe) {
-      return;
-    }
-    const source = probe.dataset.previewSource;
-    delete probe.dataset.previewSource;
-    const started = startPreviewProbeRequest(probe, source, {
-      onSuccess: () => {
-        delete probe.dataset.previewProbe;
-        if (!state.previewRail?.contains(probe)) {
-          return;
-        }
-        appendPreviewBatch(PREVIEW_BATCH_SIZE - 1);
-        beginPreviewObservation();
-      },
-      onFailure: () => {
-        delete probe.dataset.previewProbe;
-        failPreviewProbe(probe);
-      },
-    });
-    if (!started) {
-      delete probe.dataset.previewProbe;
-      failPreviewProbe(probe);
+    appendPreviewBatch(PREVIEW_BATCH_SIZE);
+    beginPreviewObservation();
+  }
+
+  async function openPreview(control) {
+    const video = state.previewVideo;
+    if (!video || !ui.videoDialog.open) return;
+    const token = ++galleryRequest;
+    const index = Number.parseInt(control.dataset.index, 10);
+    control.setAttribute("aria-busy", "true");
+    try {
+      imageViewerModule ??= import("./image-viewer.js").catch((error) => { imageViewerModule = null; throw error; });
+      const { createImageViewer } = await imageViewerModule;
+      if (token !== galleryRequest || !ui.videoDialog.open || state.previewVideo !== video) return;
+      imageViewer ??= createImageViewer({ isParentOpen: (code) => ui.videoDialog.open && state.previewVideo?.code === code });
+      imageViewer.open({ code: video.code, urls: collectPreviewUrls(video), index, trigger: control });
+    } catch {
+      showToast("大图暂时无法打开，请再试一次。");
+    } finally {
+      control.removeAttribute("aria-busy");
     }
   }
 
@@ -2345,6 +2334,22 @@ function startApplication() {
       section.append(block);
     }
     return section;
+  }
+
+  function refreshDialogTags() {
+    const video = state.store.getVideo(state.activeDialogCode);
+    if (!video) return;
+    const tags = createOfficialTagSection(video);
+    const old = ui.videoDialogContent.querySelector(".detail-tags");
+    if (!tags) { old?.remove(); return; }
+    if (old) { tags.open = old.open; old.replaceWith(tags); return; }
+    let metadata = ui.videoDialogContent.querySelector(".detail-metadata");
+    if (!metadata) {
+      metadata = createElement("details", "detail-metadata");
+      metadata.append(createElement("summary", "", "演员与标签"));
+      ui.videoDialogContent.append(metadata);
+    }
+    metadata.append(tags);
   }
 
   function createDialogActions(video) {
@@ -2433,6 +2438,8 @@ function startApplication() {
       coverFrame.append(missing);
     }
     const details = createElement("div", "detail-copy");
+    const metadata = createElement("details", "detail-metadata");
+    metadata.append(createElement("summary", "", "演员与标签"));
     details.append(
       createElement("span", "detail-code", video.code),
       createElement("h2", "detail-title", video.title || video.code),
@@ -2458,14 +2465,13 @@ function startApplication() {
         chip.dataset.actor = actor.trim();
         actors.append(chip);
       }
-      details.append(actors);
+      metadata.append(actors);
     }
     const officialTags = createOfficialTagSection(video);
-    details.append(createDialogActions(video));
-    details.append(createLinkSection(video));
-    if (officialTags) details.append(officialTags);
+    if (officialTags) metadata.append(officialTags);
     layout.append(coverFrame, details);
-    ui.videoDialogContent.replaceChildren(layout, createPreviewSection(video));
+    ui.videoDialogContent.replaceChildren(layout, createDialogActions(video), createLinkSection(video), createPreviewSection(video));
+    if (metadata.children.length > 1) ui.videoDialogContent.append(metadata);
     if (!ui.videoDialog.open) {
       ui.videoDialog.showModal();
     }
@@ -2474,6 +2480,8 @@ function startApplication() {
   }
 
   function hideVideoDialog({ context } = {}) {
+    galleryRequest += 1;
+    imageViewer?.dismiss();
     if (!state.dialogTrigger && context?.trigger) {
       state.dialogTrigger = context.trigger;
     }
@@ -2655,7 +2663,17 @@ function startApplication() {
       return;
     }
     const action = control.dataset.action;
-    if (action === "switch-view") {
+    if (action !== "toggle-tools") {
+      document.querySelector(".header-tools").classList.remove("is-open");
+      document.querySelector(".mobile-tools-toggle").setAttribute("aria-expanded", "false");
+    }
+    if (action === "toggle-tools") {
+      const expanded = control.getAttribute("aria-expanded") !== "true";
+      control.setAttribute("aria-expanded", String(expanded));
+      document.querySelector(".header-tools").classList.toggle("is-open", expanded);
+    } else if (action === "open-preview") {
+      void openPreview(control);
+    } else if (action === "switch-view") {
       state.view = control.dataset.view;
       clearSearch({
         focusMain: true,
@@ -2809,7 +2827,7 @@ function startApplication() {
         renderRecentView();
       } else if (context === "search") {
         state.visible.search = nextVisible;
-        renderSearchView();
+        renderSearchView({ append: true });
       } else if (context === "tags") {
         state.visible.tags = nextVisible;
         renderTagView();
@@ -2851,9 +2869,6 @@ function startApplication() {
         return;
       }
       if (image.classList.contains("preview-image")) {
-        if (image.dataset.previewProbe === "true") {
-          return;
-        }
         replacePreviewWithError(image);
       } else if (
         image.classList.contains("video-cover") ||
@@ -2864,6 +2879,25 @@ function startApplication() {
     },
     true,
   );
+
+  const warmCatalog = createCatalogPrefetcher({
+    getLoader: () => state.loader,
+    getGeneration: () => state.generation,
+    connection: navigator.connection,
+  });
+  function warmControl(target) {
+    if (target === ui.search) { warmCatalog("search"); return; }
+    const control = target?.closest?.('[data-action="select-series"], [data-action="mount-series"], [data-action="open-video"]');
+    const code = control?.dataset.series || control?.dataset.code?.split("-")[0];
+    if (code) warmCatalog("series", code);
+  }
+  let warmTimer;
+  document.addEventListener("pointerover", (event) => {
+    clearTimeout(warmTimer);
+    warmTimer = setTimeout(() => warmControl(event.target), 140);
+  }, { passive: true });
+  document.addEventListener("focusin", (event) => warmControl(event.target));
+  document.addEventListener("pointerdown", (event) => warmControl(event.target), { passive: true });
 
   bindDebouncedSearchInput({
     input: ui.search,

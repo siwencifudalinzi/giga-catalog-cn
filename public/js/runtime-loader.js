@@ -77,10 +77,12 @@ export function createRuntimeLoader({
     .catch(() => unavailableCatalogCache());
   let activeBootstrap = null;
   const pending = new Map();
+  const memory = new Map();
 
   function setBootstrap(value) {
     const checked = parseBootstrap(value);
     if (activeBootstrap?.generation !== checked.generation) {
+      memory.clear();
       for (const [key, entry] of pending) {
         if (entry.generation === checked.generation) continue;
         entry.controller.abort();
@@ -106,6 +108,7 @@ export function createRuntimeLoader({
   }
 
   function ensureArtifact(kind, code, signal) {
+    if (signal?.aborted) return Promise.reject(abortError());
     const bootstrap = activeBootstrap;
     if (!bootstrap) return Promise.reject(new Error("目录尚未载入"));
     let path;
@@ -124,6 +127,7 @@ export function createRuntimeLoader({
       parser = (value) => parseTagPayload(value, bootstrap);
     }
     const key = `${bootstrap.generation}:${path}`;
+    if (memory.has(key)) return Promise.resolve(memory.get(key));
     let entry = pending.get(key);
     if (!entry) {
       const controller = new AbortController();
@@ -136,6 +140,7 @@ export function createRuntimeLoader({
           if (cached != null) {
             const parsed = parser(cached);
             if (activeBootstrap?.generation !== bootstrap.generation) throw abortError();
+            memory.set(key, parsed);
             return parsed;
           }
         } catch (error) {
@@ -157,6 +162,8 @@ export function createRuntimeLoader({
           } catch {
             // Cache quota or transaction failures must not discard valid network data.
           }
+          if (activeBootstrap?.generation !== bootstrap.generation) throw abortError();
+          memory.set(key, parsed);
           return parsed;
         } catch (error) {
           throw error;

@@ -199,7 +199,7 @@ export function normalizeFeaturedCovers(manifest) {
   ) {
     return covers;
   }
-  for (const entry of manifest.covers.slice(0, DESKTOP_PRIORITY_COVERS)) {
+  for (const entry of manifest.covers.slice(0, RESULT_WINDOW_SIZE)) {
     const code = canonicalVideoCode(entry?.code);
     const expectedPath = featuredCoverPath(code, generation);
     if (code && entry?.path === expectedPath) {
@@ -674,13 +674,20 @@ export function renderSearchResults(container, videos = [], options = {}) {
   const context = ["favorites", "tags", "recent"].includes(options.context)
     ? options.context
     : "search";
+  const existing = options.append ? container.querySelector?.(".results-grid") : null;
+  const rendered = Number.parseInt(existing?.dataset.rendered, 10);
+  if (existing?.dataset.view === context && Number.isInteger(rendered) && rendered <= window.rendered) {
+    existing.insertAdjacentHTML("beforeend", renderItems({ ...window, items: window.items.slice(rendered) }, { ...options, priorityLimit: 0 }));
+    existing.dataset.rendered = String(window.rendered);
+    return windowMetadata(window, "real-only");
+  }
   const content = window.total
-    ? `<div class="video-grid results-grid" data-view="${context}">${renderItems(
+    ? `<div class="video-grid results-grid" data-view="${context}" data-rendered="${window.rendered}">${renderItems(
         window,
         {
           ...options,
           priorityLimit: MOBILE_PRIORITY_COVERS,
-          featuredCovers: null,
+          featuredCovers: options.featuredCovers,
         },
       )}</div>`
     : renderEmptyState(options.emptyMessage || "没有匹配的影片");
@@ -727,4 +734,14 @@ export function derivePreviewUrls(video = {}, options = {}) {
     urls.push(new URL(filename, parsedBase).href);
   }
   return Object.freeze(urls);
+}
+
+export function collectPreviewUrls(video) {
+  const urls = [];
+  for (let start = 0; start < 4096; start += MAX_PREVIEW_BATCH) {
+    const batch = derivePreviewUrls(video, { start, limit: MAX_PREVIEW_BATCH });
+    urls.push(...batch);
+    if (batch.length < MAX_PREVIEW_BATCH) break;
+  }
+  return Object.freeze(urls.slice(0, 4096));
 }

@@ -5,6 +5,32 @@ import { createRuntimeLoader } from "../../public/js/runtime-loader.js";
 
 const generatedAt = "2026-08-29T00:00:00Z";
 
+test("validated artifacts are reused in memory even when persistent storage is unavailable", async () => {
+  const value = bootstrap("a".repeat(64));
+  let requests = 0;
+  const loader = createRuntimeLoader({ fetcher: async () => { requests++; return response(searchPayload(value)); } });
+  loader.setBootstrap(value);
+  const first = await loader.ensureSearch();
+  const second = await loader.ensureSearch();
+  assert.equal(requests, 1);
+  assert.equal(second, first);
+  const controller = new AbortController(); controller.abort();
+  await assert.rejects(loader.ensureSearch({ signal: controller.signal }), { name: "AbortError" });
+});
+
+test("a generation change cannot return a prior in-memory artifact", async () => {
+  let value = bootstrap("a".repeat(64));
+  let requests = 0;
+  const loader = createRuntimeLoader({ fetcher: async () => { requests++; return response(searchPayload(value)); } });
+  loader.setBootstrap(value);
+  await loader.ensureSearch();
+  value = bootstrap("b".repeat(64));
+  loader.setBootstrap(value);
+  assert.equal((await loader.ensureSearch()).generation, value.generation);
+  await loader.ensureSearch();
+  assert.equal(requests, 2);
+});
+
 function clone(value) {
   return structuredClone(value);
 }

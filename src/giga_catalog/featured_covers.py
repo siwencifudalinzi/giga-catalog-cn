@@ -23,7 +23,7 @@ from src.giga_catalog.codes import normalize_code
 
 COVER_WIDTH = 320
 COVER_HEIGHT = 480
-MAX_FEATURED_COVERS = 6
+MAX_FEATURED_COVERS = 24
 MANIFEST_SCHEMA_VERSION = 2
 MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024
 MAX_IMAGE_DIMENSION = 8192
@@ -43,7 +43,7 @@ def cache_featured_covers(
     timeout: Tuple[float, float] = (5.0, 20.0),
     replacer: Optional[object] = None,
 ) -> dict:
-    """Prepare and atomically publish at most six current homepage covers.
+    """Prepare and atomically publish the first 24 recent homepage covers.
 
     A failed source never replaces a working manifest.  Existing entries whose
     source and validated WebP are unchanged make this operation completely
@@ -136,15 +136,22 @@ def _select_featured(catalog: Mapping[str, object]) -> list[dict]:
     series = catalog.get("series") if isinstance(catalog, Mapping) else None
     if not isinstance(series, Sequence) or not series or not isinstance(series[0], Mapping):
         return []
-    videos = series[0].get("videos")
-    if not isinstance(videos, Sequence):
-        return []
+    videos = [video for group in series if isinstance(group, Mapping)
+              for video in (group.get("videos") or []) if isinstance(video, Mapping)]
+    # Match the runtime recent view: descending date, then prefix/numeric code.
+    ordered = sorted(videos, key=lambda video: (
+        (normalize_code(video.get("code")) or "ZZZ-999999999").rsplit("-", 1)[0],
+        _display_order(video),
+    ))
+    ordered.sort(key=lambda video: str(video.get("releaseDate") or ""), reverse=True)
     selected = []
-    for video in sorted((item for item in videos if isinstance(item, Mapping)), key=_display_order):
+    seen = set()
+    for video in ordered:
         code = normalize_code(video.get("code"))
         source = video.get("cover")
-        if code is None or not _is_giga_cover(source):
+        if code is None or code in seen or not _is_giga_cover(source):
             continue
+        seen.add(code)
         selected.append({"code": code, "source": source})
         if len(selected) == MAX_FEATURED_COVERS:
             break
