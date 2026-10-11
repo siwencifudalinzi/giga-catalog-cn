@@ -2125,9 +2125,9 @@ function startApplication() {
   let imageViewer = null;
   let imageViewerModule = null;
   let galleryRequest = 0;
-  function disconnectPreviewObserver() {
+  function disconnectPreviewObserver({ preserveGalleryRestoration = false } = {}) {
     galleryRequest += 1;
-    imageViewer?.dismiss();
+    imageViewer?.dismiss({ preserveRestoration: preserveGalleryRestoration });
     state.previewObserver?.disconnect();
     state.previewObserver = null;
     state.previewRail = null;
@@ -2255,7 +2255,10 @@ function startApplication() {
       imageViewerModule ??= import("./image-viewer.js").catch((error) => { imageViewerModule = null; throw error; });
       const { createImageViewer } = await imageViewerModule;
       if (token !== galleryRequest || !ui.videoDialog.open || state.previewVideo !== video) return;
-      imageViewer ??= createImageViewer({ isParentOpen: (code) => ui.videoDialog.open && state.previewVideo?.code === code });
+      imageViewer ??= createImageViewer({
+        isParentOpen: (code) => ui.videoDialog.open && state.previewVideo?.code === code,
+        restoreParent: (code) => openVideoDialog(code, findVideoDialogTrigger(code), { historyMode: "none" }),
+      });
       imageViewer.open({ code: video.code, urls: collectPreviewUrls(video), index, trigger: control });
     } catch {
       showToast("大图暂时无法打开，请再试一次。");
@@ -2411,7 +2414,7 @@ function startApplication() {
   function showVideoDialog(video, { trigger } = {}) {
     videoDialogLifecycle.beginOpen();
     removeResourceError("detail");
-    disconnectPreviewObserver();
+    disconnectPreviewObserver({ preserveGalleryRestoration: true });
     state.dialogTrigger = trigger ?? document.activeElement;
     const layout = createElement("div", "detail-layout");
     const coverFrame = createElement("figure", "detail-cover-frame");

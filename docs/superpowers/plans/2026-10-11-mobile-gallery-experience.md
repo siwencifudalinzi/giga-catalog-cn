@@ -47,8 +47,8 @@ Files: runtime loader and tests, featured cover cache and tests, app loading hoo
 
 ## Task 4: Verification and release
 
-- [ ] Run full Python and JavaScript suites; verify 390px, 320px, landscape and desktop, image retry, rapid close/reopen, Back/Forward, focus and reduced motion.
-- [ ] Obtain an independent whole-change review; fix important findings and verify regressions.
+- [x] Run full Python and JavaScript suites; verify 390px, 320px, landscape and desktop, image retry, rapid close/reopen, Back/Forward, focus and reduced motion.
+- [x] Obtain an independent whole-change review; fix important findings and verify regressions.
 - [ ] Commit only this work, fast-forward against current main, publish, confirm Actions success and deployed assets.
 
 ## Execution record
@@ -60,3 +60,8 @@ Files: runtime loader and tests, featured cover cache and tests, app loading hoo
 - Task 3: memory reuse/generation, 24-cover selection/renderer, intent budget tests RED then GREEN. Generated all 24 covers with zero source failures; total 985,490 bytes. Viewer module absent from initial resource requests. Warm-browser timings are not valid cold-load speed comparisons, so no percentage/time gain claimed.
 - Validation: Python 382 tests passed (one existing skip); JavaScript 172 tests, latest focused viewer suite 9/9. Browser smoke: 23 checks passed, including real swipe, double tap, pinch, zoom-pan isolation, rapid close, Back/Forward, focus/scroll, 320/390/844/1440px and reduced motion; zero script exceptions.
 - Execution uses native PowerShell and this plan's execution record in place of the skill's Bash-only ledger helpers.
+- Additional fault QA: 8/8 browser checks passed (first thumbnail failure, retry recovery, next image, delayed tag hydration, favorite node reuse, incremental search); no script exceptions.
+- Final independent review (gpt-6-astra, read-only `36393c3..5cbcb61`): no Critical/Minor findings, two confirmed P2 defects; no declined-to-judge behaviors.
+- Final: fixed async parent/gallery restoration and destination-marker ownership across popstate listener microtask ordering. Regression tests RED then GREEN for async Forward, cancellation, and parent-before-gallery listener. Real browser go(-2)/go(2) now restores both dialogs and marker, then close returns to detail only.
+- Final: fixed mouse pointer-capture retargeting that prevented desktop double-click zoom. Browser check RED then GREEN, touch-generated double-click suppression still passes.
+- Final verification: JavaScript 175/175 passed; browser smoke 24/24 passed including desktop double-click, cold local startup 484,401 transferred bytes / 23 resources, viewer absent until needed. Eight fault checks passed. Python 382 passed with one preexisting skip. No speed ratio claimed because a comparable cold production baseline was not measured.

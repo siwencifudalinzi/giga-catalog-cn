@@ -1,6 +1,6 @@
 import { fitImage, clampTransform, zoomAtPoint, swipeDirection, createImageViewerNavigation, shouldHandleMouseDoubleClick } from "./image-viewer-state.js";
 
-export function createImageViewer({ isParentOpen }) {
+export function createImageViewer({ isParentOpen, restoreParent }) {
   const dialog = document.createElement("dialog");
   dialog.className = "image-viewer";
   dialog.setAttribute("aria-label", "预览大图");
@@ -109,7 +109,7 @@ export function createImageViewer({ isParentOpen }) {
     if (origin?.isConnected && isParentOpen(context.code)) origin.focus({ preventScroll: true });
     context = null;
   }
-  const navigation = createImageViewerNavigation({ history: window.history, eventTarget: window, isParentOpen, show, hide });
+  const navigation = createImageViewerNavigation({ history: window.history, eventTarget: window, isParentOpen, restoreParent, show, hide });
   function change(delta) {
     if (!context) return;
     const index = context.index + delta;
@@ -130,7 +130,12 @@ export function createImageViewer({ isParentOpen }) {
     if (event.key === "ArrowRight") { event.preventDefault(); change(1); }
     if (event.key === "0") { transform = { scale: 1, x: 0, y: 0 }; paint(); }
   });
-  stage.addEventListener("dblclick", (event) => { if (shouldHandleMouseDoubleClick(event, performance.now() - lastTouchTime) && event.target === picture) { event.preventDefault(); toggleZoom(localPoint({ x: event.clientX, y: event.clientY })); } });
+  stage.addEventListener("dblclick", (event) => {
+    // Pointer capture retargets desktop clicks to the stage.
+    if (shouldHandleMouseDoubleClick(event, performance.now() - lastTouchTime) && (event.target === picture || event.target === stage)) {
+      event.preventDefault(); toggleZoom(localPoint({ x: event.clientX, y: event.clientY }));
+    }
+  });
   function pinch() {
     const [a, b] = [...pointers.values()];
     return { distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), midpoint: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } };
@@ -138,6 +143,7 @@ export function createImageViewer({ isParentOpen }) {
   stage.addEventListener("pointerdown", (event) => {
     if (pointers.size >= 2 || event.target.closest("button") || (event.pointerType === "mouse" && event.button !== 0)) return;
     if (event.pointerType === "touch") lastTouchTime = performance.now();
+    if (event.pointerType === "mouse") lastTouchTime = -Infinity;
     stage.setPointerCapture(event.pointerId);
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (pointers.size === 1) gesture = { start: { x: event.clientX, y: event.clientY }, base: { ...transform }, multi: false, time: performance.now(), touch: event.pointerType === "touch" };

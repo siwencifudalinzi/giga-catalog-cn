@@ -55,7 +55,7 @@ test("swipe switches only on a deliberate horizontal gesture at original size", 
   assert.equal(swipeDirection(-100, 0, 2), 0);
 });
 
-function harness() {
+function harness({ isParentOpen = () => true, restoreParent } = {}) {
   const parent = { gigaCatalog: { videoDetail: { code: "ABC-1", sessionId: "parent", entryId: "detail" } }, filter: "recent" };
   const entries = [null, parent];
   let index = 1;
@@ -63,7 +63,7 @@ function harness() {
   let shown = null;
   let closes = 0;
   const listeners = new Set();
-  const dispatch = () => { for (const fn of listeners) fn({ state: entries[index] }); };
+  const dispatch = () => { const state = entries[index]; history.beforePop?.(); for (const fn of listeners) fn({ state }); };
   const history = {
     get state() { return entries[index]; },
     backCalls: 0,
@@ -76,7 +76,7 @@ function harness() {
   const nav = createImageViewerNavigation({
     history, eventTarget: { addEventListener: (_, fn) => listeners.add(fn), removeEventListener: (_, fn) => listeners.delete(fn) },
     show: (context) => { shown = context; }, hide: () => { shown = null; closes++; },
-    isParentOpen: () => true, sessionId: "gallery",
+    isParentOpen, restoreParent, sessionId: "gallery",
   });
   return { nav, history, entries, parent, get shown() { return shown; }, get closes() { return closes; } };
 }
@@ -104,4 +104,47 @@ test("direct parent dismissal strips only the viewer marker without extra Back",
   assert.deepEqual(h.history.state, h.parent);
   assert.equal(h.history.backCalls, 0);
   assert.equal(h.shown, null);
+});
+
+test("Forward to a gallery waits for async parent restoration and preserves its marker", async () => {
+  let parentOpen = true;
+  let complete;
+  const restored = new Promise(resolve => { complete = resolve; });
+  const h = harness({ isParentOpen: () => parentOpen, restoreParent: () => restored });
+  h.nav.open({ code: "ABC-1", urls: ["one", "two"], index: 1 });
+  h.nav.requestClose(); h.history.flush();
+  parentOpen = false;
+  h.history.forward();
+  assert.ok(h.history.state.gigaImageViewer);
+  h.nav.dismiss({ preserveRestoration: true });
+  assert.ok(h.history.state.gigaImageViewer);
+  parentOpen = true; complete(true);
+  await restored; await Promise.resolve();
+  assert.equal(h.shown?.index, 1);
+  assert.ok(h.history.state.gigaImageViewer);
+});
+
+test("Back during async gallery restoration prevents a late reopen", async () => {
+  let parentOpen = true;
+  let complete;
+  const restored = new Promise(resolve => { complete = resolve; });
+  const h = harness({ isParentOpen: () => parentOpen, restoreParent: () => restored });
+  h.nav.open({ code: "ABC-1", urls: ["one"], index: 0 });
+  h.nav.requestClose(); h.history.flush();
+  parentOpen = false; h.history.forward();
+  h.history.back(); h.history.flush();
+  parentOpen = true; complete(true);
+  await restored; await Promise.resolve();
+  assert.equal(h.shown, null);
+  assert.deepEqual(h.history.state, h.parent);
+});
+
+test("a parent restored before the gallery popstate listener preserves the owned entry", () => {
+  const h = harness();
+  h.nav.open({ code: "ABC-1", urls: ["one"], index: 0 });
+  h.nav.requestClose(); h.history.flush();
+  h.history.beforePop = () => h.nav.dismiss({ preserveRestoration: true });
+  h.history.forward();
+  assert.ok(h.history.state.gigaImageViewer);
+  assert.equal(h.shown?.index, 0);
 });

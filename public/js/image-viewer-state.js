@@ -32,22 +32,39 @@ function withoutMarker(value) {
 }
 
 // One history entry belongs to each gallery opening; image changes replace it.
-export function createImageViewerNavigation({ history, eventTarget, show, hide, isParentOpen, sessionId = `gallery-${Date.now()}-${Math.random()}` }) {
+export function createImageViewerNavigation({ history, eventTarget, show, hide, isParentOpen, restoreParent, sessionId = `gallery-${Date.now()}-${Math.random()}` }) {
   let active = null;
   let pendingClose = false;
   let sequence = 0;
+  let restorationToken = 0;
+  let restoring = false;
   const contexts = new Map();
   const marker = () => history.state?.[MARKER];
-  function dismiss() {
+  function dismiss({ preserveRestoration = false } = {}) {
+    const entry = marker();
+    // Browsers run microtasks between popstate listeners. Parent hydration can
+    // finish before our listener starts; retain its owned destination as well.
+    if (preserveRestoration && (restoring || (entry?.sessionId === sessionId && contexts.has(entry.entryId)))) return;
+    restorationToken += 1;
+    restoring = false;
     if (marker()) history.replaceState(withoutMarker(history.state), "");
     if (active) hide();
     active = null;
   }
-  function handlePop(event) {
+  async function handlePop(event) {
+    const token = ++restorationToken;
+    restoring = false;
     pendingClose = false;
     const entry = event.state?.[MARKER];
     const context = entry?.sessionId === sessionId ? contexts.get(entry.entryId) : null;
-    if (context && isParentOpen(context.code)) {
+    if (context) {
+      if (!isParentOpen(context.code)) {
+        restoring = true;
+        try { await restoreParent?.(context.code); } catch { /* Failed hydration leaves the underlying detail error available. */ }
+        if (token !== restorationToken || marker()?.entryId !== entry.entryId) return;
+        restoring = false;
+        if (!isParentOpen(context.code)) { dismiss(); return; }
+      }
       active = entry.entryId;
       show({ ...context, index: entry.index });
     } else {
@@ -58,7 +75,7 @@ export function createImageViewerNavigation({ history, eventTarget, show, hide, 
   eventTarget.addEventListener("popstate", handlePop);
   return {
     open(context) {
-      if (pendingClose || !context.urls?.length || !isParentOpen(context.code)) return false;
+      if (pendingClose || restoring || !context.urls?.length || !isParentOpen(context.code)) return false;
       if (active) dismiss();
       active = `${sessionId}-${++sequence}`;
       contexts.set(active, context);
@@ -73,7 +90,8 @@ export function createImageViewerNavigation({ history, eventTarget, show, hide, 
       if (active && entry?.entryId === active) history.replaceState({ ...history.state, [MARKER]: { ...entry, index } }, "");
     },
     requestClose() {
-      if (pendingClose || !active) return;
+      if (pendingClose || (!active && !restoring)) return;
+      if (restoring) { pendingClose = true; history.back(); return; }
       if (marker()?.entryId === active) { pendingClose = true; history.back(); }
       else dismiss();
     },
