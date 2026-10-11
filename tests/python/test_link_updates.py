@@ -142,7 +142,8 @@ class LinkUpdateTests(unittest.TestCase):
             history = folder / "link-updates.json"
             before.write_text(json.dumps(catalog()), encoding="utf-8")
             changed = catalog({"code": "SPSF-58", "links": {"reupload": "https://ouo.io/secret"}})
-            changed["generatedAt"] = "2026-09-11T03:30:00Z"
+            # The real CLI prunes against wall time, so its fixture must stay fresh.
+            changed["generatedAt"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
             after.write_text(json.dumps(changed), encoding="utf-8")
 
             result = subprocess.run(
@@ -163,7 +164,7 @@ class LinkUpdateTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             payload = history.read_text(encoding="utf-8")
             self.assertNotIn("https://", payload)
-            self.assertEqual(json.loads(payload)["entries"][0]["code"], "SPSF-58")
+            self.assertEqual([entry["code"] for entry in json.loads(payload)["entries"]], ["SPSF-58"])
 
 
 if __name__ == "__main__":
