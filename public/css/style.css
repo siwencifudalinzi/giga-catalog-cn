@@ -2267,6 +2267,7 @@ body:has(dialog[open]) { overflow: hidden; }
 .detail-title { font-size: clamp(1.25rem, 2.5vw, 1.8rem); overflow-wrap: anywhere; }
 .detail-metadata { margin-top: var(--sp-5); padding-top: var(--sp-3); border-top: 1px solid var(--border); }
 .detail-metadata > summary { padding-block: var(--sp-3); cursor: pointer; font-weight: 600; }
+.detail-tag-status { color: var(--muted); font-size: 0.875rem; }
 .image-viewer {
   position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; height: 100dvh;
   max-height: none; margin: 0; padding: 0; overflow: hidden; color: #f7f7fa;

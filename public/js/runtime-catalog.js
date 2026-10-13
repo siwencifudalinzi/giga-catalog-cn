@@ -439,10 +439,6 @@ export function parseTagPayload(value, bootstrap) {
   return frozen(value);
 }
 
-function addTags(value, assignments) {
-  return frozen({ ...value, tagIds: assignments.get(value.code) ?? [] });
-}
-
 export function createRuntimeCatalogStore(bootstrap) {
   const checked = parseBootstrap(bootstrap);
   const rawSeries = new Map();
@@ -451,9 +447,30 @@ export function createRuntimeCatalogStore(bootstrap) {
   let rawSearch = new Map();
   let assignments = new Map();
   let tagIndex = createTagIndex([]);
+  let taggedRecords = new WeakMap();
+  let recentView = null;
+  const seriesViews = new Map();
+  const detailRecords = new Map();
+  const noTags = Object.freeze([]);
+  let searchVideos = Object.freeze([]);
+  let searchRows = [];
 
-  const currentRecent = () => Object.freeze([...rawRecent.values()].map((item) => addTags(item, assignments)));
-  const currentSearch = () => new Map([...rawSearch].map(([code, item]) => [code, addTags(item, assignments)]));
+  function taggedRecord(value) {
+    if (!taggedRecords.has(value)) {
+      // Parsed records and assigned tag arrays are already deeply immutable.
+      taggedRecords.set(value, Object.freeze({ ...value, tagIds: assignments.get(value.code) ?? noTags }));
+    }
+    return taggedRecords.get(value);
+  }
+
+  function rebuildSearchRows() {
+    searchVideos = Object.freeze([...rawSearch.values()].map(taggedRecord).sort(compareVideoCodes));
+    searchRows = searchVideos.map((item) => ({
+      video: item,
+      text: normalizeText([item.code, item.title, ...item.actors, item.series,
+        ...item.tagIds.flatMap((id) => tagIndex.get(id)?.aliases ?? [])].join(" ")),
+    }));
+  }
 
   return Object.freeze({
     metadata: frozen({
@@ -471,33 +488,27 @@ export function createRuntimeCatalogStore(bootstrap) {
       return seriesPreviews.get(code) ?? null;
     },
     getRecentVideos() {
-      return Object.freeze([...currentRecent()].sort((left, right) =>
+      recentView ??= Object.freeze([...rawRecent.values()].map(taggedRecord).sort((left, right) =>
         String(right.releaseDate ?? "").localeCompare(String(left.releaseDate ?? "")) || compareVideoCodes(left, right)));
+      return recentView;
     },
     getSeries(code) {
       const key = typeof code === "string" ? code.trim().toUpperCase() : "";
       const payload = rawSeries.get(key);
       if (!payload) return null;
-      return frozen({ ...payload.series, videos: payload.series.videos.map((item) => addTags(item, assignments)) });
+      if (!seriesViews.has(key)) seriesViews.set(key, Object.freeze({ ...payload.series, videos: Object.freeze(payload.series.videos.map(taggedRecord)) }));
+      return seriesViews.get(key);
     },
     getVideo(code) {
       const key = normalizeVideoCode(code);
       if (!key) return null;
-      for (const payload of rawSeries.values()) {
-        const found = payload.series.videos.find((item) => item.code === key);
-        if (found) return addTags(found, assignments);
-      }
-      if (rawRecent.has(key)) return addTags(rawRecent.get(key), assignments);
-      return currentSearch().get(key) ?? null;
+      const value = detailRecords.get(key) ?? rawRecent.get(key) ?? rawSearch.get(key);
+      return value ? taggedRecord(value) : null;
     },
     search(query) {
       const needle = normalizeSearchQuery(query);
       if (!needle) return Object.freeze([]);
-      return Object.freeze([...currentSearch().values()].filter((item) => {
-        const tags = item.tagIds.map((id) => tagIndex.get(id)).filter(Boolean);
-        return normalizeText([item.code, item.title, ...item.actors, item.series,
-          ...tags.flatMap((tag) => tag.aliases)].join(" ")).includes(needle);
-      }).sort(compareVideoCodes));
+      return Object.freeze(searchRows.filter((row) => row.text.includes(needle)).map((row) => row.video));
     },
     getTag(id) {
       return tagIndex.get(id);
@@ -506,17 +517,21 @@ export function createRuntimeCatalogStore(bootstrap) {
       return group === undefined ? tagIndex.getAll() : tagIndex.getGroup(group);
     },
     filterByTags(options) {
-      return filterVideosByTags([...currentSearch().values()], options);
+      return filterVideosByTags(searchVideos, options);
     },
     installSeries(payload) {
       const code = payload?.series?.code;
       const next = parseSeriesPayload(payload, checked, code);
+      for (const item of rawSeries.get(code)?.series.videos ?? []) detailRecords.delete(item.code);
       rawSeries.set(code, next);
+      seriesViews.delete(code);
+      for (const item of next.series.videos) detailRecords.set(item.code, item);
     },
     installSearch(payload) {
       const next = parseSearchPayload(payload, checked);
       rawSearch = new Map(next.videos.map((item) => [item.code, item]));
       seriesPreviews = buildSeriesPreviews(rawSearch.values());
+      rebuildSearchRows();
     },
     installTags(payload) {
       const next = parseTagPayload(payload, checked);
@@ -526,8 +541,13 @@ export function createRuntimeCatalogStore(bootstrap) {
         if (!searchCodes.has(code)) fail("tags");
         nextAssignments.set(code, ids);
       }
+      const nextTagIndex = createTagIndex(next.tags);
       assignments = nextAssignments;
-      tagIndex = createTagIndex(next.tags);
+      tagIndex = nextTagIndex;
+      taggedRecords = new WeakMap();
+      recentView = null;
+      seriesViews.clear();
+      rebuildSearchRows();
     },
   });
 }

@@ -5,6 +5,7 @@ import {
   normalizeFeaturedCovers,
   observeDeferredCovers,
   optimizedCoverUrl,
+  siteAssetUrl,
   RESULT_WINDOW_SIZE,
   renderSearchResults,
   renderSeriesShell,
@@ -16,6 +17,7 @@ import { openCatalogCache } from "./catalog-cache.js";
 import { createRuntimeCatalogStore } from "./runtime-catalog.js";
 import { createRuntimeLoader } from "./runtime-loader.js";
 import { createCatalogPrefetcher } from "./catalog-prefetch.js";
+import { afterFirstPreview, createViewerModuleLoader, previewBatchSize, selectDetailCover, startFollowingPreviews } from "./preview-loading.js";
 import { nextTagSelection } from "./tags.js";
 import { compareVideoCodes } from "./catalog.js";
 import { filterSeries } from './series-navigation.js';
@@ -2123,10 +2125,18 @@ function startApplication() {
   }
 
   let imageViewer = null;
-  let imageViewerModule = null;
+  const viewerModules = createViewerModuleLoader({ importer: async attempt => {
+    // A rejected browser module fetch is cached by URL; retry both modules with fresh URLs.
+    const suffix = attempt ? `?retry=${attempt}` : "";
+    const [viewer, viewerState] = await Promise.all([import(`./image-viewer.js${suffix}`), import(`./image-viewer-state.js${suffix}`)]);
+    return { ...viewer, viewerState };
+  } });
+  let detailLoadController = null;
   let galleryRequest = 0;
   function disconnectPreviewObserver({ preserveGalleryRestoration = false } = {}) {
     galleryRequest += 1;
+    detailLoadController?.abort();
+    detailLoadController = null;
     imageViewer?.dismiss({ preserveRestoration: preserveGalleryRestoration });
     state.previewObserver?.disconnect();
     state.previewObserver = null;
@@ -2152,7 +2162,7 @@ function startApplication() {
     image.parentElement?.append(createElement("span", "preview-error", "图片暂不可用 · 点击重试"));
   }
 
-  function appendPreviewBatch(limit = PREVIEW_BATCH_SIZE) {
+  function appendPreviewBatch(limit = previewBatchSize(navigator.connection), { deferSource = false } = {}) {
     if (
       !ui.videoDialog.open ||
       !state.previewVideo ||
@@ -2180,7 +2190,9 @@ function startApplication() {
       image.height = 320;
       image.decoding = "async";
       image.loading = state.previewStart + offset === 0 ? "eager" : "lazy";
-      image.src = url;
+      image.fetchPriority = state.previewStart + offset === 0 ? "high" : "low";
+      if (deferSource) image.dataset.previewSource = url;
+      else image.src = url;
       button.append(image);
       figure.append(button);
       state.previewRail.insertBefore(figure, state.previewSentinel);
@@ -2240,9 +2252,19 @@ function startApplication() {
     return section;
   }
 
-  function startPreviewLoading() {
-    appendPreviewBatch(PREVIEW_BATCH_SIZE);
-    beginPreviewObservation();
+  function startPreviewLoading(onReady) {
+    const video = state.previewVideo;
+    const signal = detailLoadController.signal;
+    const [first] = appendPreviewBatch(1, { deferSource: true });
+    if (!first) { onReady(); return; }
+    if (!navigator.connection?.saveData) viewerModules.warm({ signal });
+    afterFirstPreview({ image: first, source: first.dataset.previewSource, signal, onReady: () => {
+      if (signal.aborted || !ui.videoDialog.open || state.previewVideo !== video) return;
+      const following = appendPreviewBatch(previewBatchSize(navigator.connection), { deferSource: true });
+      beginPreviewObservation();
+      // Give the next image a head start over the large optional link manifest.
+      startFollowingPreviews({ images: following, signal, onReady });
+    } });
   }
 
   async function openPreview(control) {
@@ -2252,10 +2274,10 @@ function startApplication() {
     const index = Number.parseInt(control.dataset.index, 10);
     control.setAttribute("aria-busy", "true");
     try {
-      imageViewerModule ??= import("./image-viewer.js").catch((error) => { imageViewerModule = null; throw error; });
-      const { createImageViewer } = await imageViewerModule;
+      const { createImageViewer, viewerState } = await viewerModules.load();
       if (token !== galleryRequest || !ui.videoDialog.open || state.previewVideo !== video) return;
       imageViewer ??= createImageViewer({
+        viewerState,
         isParentOpen: (code) => ui.videoDialog.open && state.previewVideo?.code === code,
         restoreParent: (code) => openVideoDialog(code, findVideoDialogTrigger(code), { historyMode: "none" }),
       });
@@ -2294,19 +2316,23 @@ function startApplication() {
     return section;
   }
 
-  function createLinkSection(video) {
+  function createLinkSection(video, { ready, release, signal }) {
     const groups = collectLinkGroups(video.links);
     const section = renderLinkSection(groups);
-    void loadResolvedLinks()
+    if (!groups.length) return section;
+    for (const event of ["pointerover", "focusin", "pointerdown"]) {
+      section.addEventListener(event, release, { once: true, signal });
+    }
+    void ready.then(() => signal.aborted ? null : loadResolvedLinks())
       .then((manifest) => upgradeLinkGroups(video.code, groups, manifest))
       .then((upgraded) => {
         const hasResolved = upgraded.some((group) =>
           group.links.some((item) => item.resolved)
         );
-        if (section.isConnected && hasResolved) {
+        if (!signal.aborted && section.isConnected && hasResolved) {
           section.replaceWith(renderLinkSection(upgraded));
         }
-      });
+      }).catch(() => {});
     return section;
   }
 
@@ -2343,6 +2369,7 @@ function startApplication() {
     const video = state.store.getVideo(state.activeDialogCode);
     if (!video) return;
     const tags = createOfficialTagSection(video);
+    ui.videoDialogContent.querySelector(".detail-tag-status")?.remove();
     const old = ui.videoDialogContent.querySelector(".detail-tags");
     if (!tags) { old?.remove(); return; }
     if (old) { tags.open = old.open; old.replaceWith(tags); return; }
@@ -2354,6 +2381,28 @@ function startApplication() {
     }
     metadata.append(tags);
   }
+
+  async function loadDialogTags(metadata) {
+    if (state.tagsReady || !metadata?.isConnected || !ui.videoDialog.open) return;
+    const status = metadata.querySelector(".detail-tag-status");
+    if (!status || status.getAttribute("aria-busy") === "true") return;
+    status.setAttribute("aria-busy", "true");
+    status.textContent = "正在加载标签…";
+    const loaded = await ensureTagCatalog(null);
+    if (!metadata.isConnected || !ui.videoDialog.open || !status.isConnected) return;
+    status.removeAttribute("aria-busy");
+    if (loaded) { refreshDialogTags(); return; }
+    status.textContent = "标签暂时无法加载 ";
+    const retry = createElement("button", "button button--quiet", "重试");
+    retry.type = "button";
+    retry.dataset.action = "retry-detail-tags";
+    status.append(retry);
+  }
+
+  document.addEventListener("toggle", event => {
+    const metadata = event.target;
+    if (metadata.matches?.(".detail-metadata") && metadata.open) void loadDialogTags(metadata);
+  }, true);
 
   function createDialogActions(video) {
     const actions = createElement("div", "detail-actions");
@@ -2415,11 +2464,21 @@ function startApplication() {
     videoDialogLifecycle.beginOpen();
     removeResourceError("detail");
     disconnectPreviewObserver({ preserveGalleryRestoration: true });
+    detailLoadController = new AbortController();
+    const signal = detailLoadController.signal;
+    let releaseExtras;
+    const extrasReady = new Promise(resolve => { releaseExtras = resolve; });
     state.dialogTrigger = trigger ?? document.activeElement;
     const layout = createElement("div", "detail-layout");
     const coverFrame = createElement("figure", "detail-cover-frame");
     const originalCoverUrl = safeHttpUrl(video.cover);
-    const coverUrl = optimizedCoverUrl(originalCoverUrl, {
+    const cardImage = (trigger ?? findVideoDialogTrigger(video.code))?.closest(".video-card")?.querySelector("img");
+    const loadedCover = cardImage?.complete && cardImage.naturalWidth > 0 ? {
+      original: cardImage.dataset.originalSrc || cardImage.getAttribute("src"),
+      source: cardImage.currentSrc || cardImage.getAttribute("src"),
+    } : null;
+    const selectedCover = selectDetailCover(video, state.featuredCovers, loadedCover);
+    const coverUrl = selectedCover?.startsWith("/media/") ? siteAssetUrl(selectedCover) : optimizedCoverUrl(safeHttpUrl(selectedCover), {
       width: 640,
       height: 960,
     });
@@ -2472,13 +2531,16 @@ function startApplication() {
     }
     const officialTags = createOfficialTagSection(video);
     if (officialTags) metadata.append(officialTags);
+    if (!state.tagsReady) metadata.append(createElement("p", "detail-tag-status", "展开后加载官方标签"));
     layout.append(coverFrame, details);
-    ui.videoDialogContent.replaceChildren(layout, createDialogActions(video), createLinkSection(video), createPreviewSection(video));
+    ui.videoDialogContent.replaceChildren(layout, createDialogActions(video), createLinkSection(video, {
+      ready: extrasReady, release: releaseExtras, signal,
+    }), createPreviewSection(video));
     if (metadata.children.length > 1) ui.videoDialogContent.append(metadata);
     if (!ui.videoDialog.open) {
       ui.videoDialog.showModal();
     }
-    startPreviewLoading();
+    startPreviewLoading(releaseExtras);
     ui.videoDialog.querySelector("[data-action='close-dialog']").focus();
   }
 
@@ -2752,7 +2814,8 @@ function startApplication() {
       void openVideoDialog(control.dataset.code, control, {
         source: control.closest("[data-context]")?.dataset.context ?? document.body.dataset.view,
       }).catch(() => {});
-      if (!state.tagsReady) void ensureTagCatalog(findTagTabControl());
+    } else if (action === "retry-detail-tags") {
+      void loadDialogTags(control.closest(".detail-metadata"));
     } else if (action === "copy-code") {
       void copyCode(control.dataset.code);
     } else if (action === "cycle-favorite") {
@@ -2891,8 +2954,9 @@ function startApplication() {
   function warmControl(target) {
     if (target === ui.search) { warmCatalog("search"); return; }
     const control = target?.closest?.('[data-action="select-series"], [data-action="mount-series"], [data-action="open-video"]');
+    if (control?.dataset.action === "open-video" && state.store.getRecentVideos().some(video => video.code === control.dataset.code)) return;
     const code = control?.dataset.series || control?.dataset.code?.split("-")[0];
-    if (code) warmCatalog("series", code);
+    if (code && !state.store.getSeries(code)) warmCatalog("series", code);
   }
   let warmTimer;
   document.addEventListener("pointerover", (event) => {

@@ -1,6 +1,5 @@
-import { fitImage, clampTransform, zoomAtPoint, swipeDirection, createImageViewerNavigation, shouldHandleMouseDoubleClick } from "./image-viewer-state.js";
-
-export function createImageViewer({ isParentOpen, restoreParent }) {
+export function createImageViewer({ isParentOpen, restoreParent, viewerState }) {
+  const { fitImage, clampTransform, zoomAtPoint, swipeDirection, createImageViewerNavigation, shouldHandleMouseDoubleClick } = viewerState;
   const dialog = document.createElement("dialog");
   dialog.className = "image-viewer";
   dialog.setAttribute("aria-label", "预览大图");
@@ -59,7 +58,7 @@ export function createImageViewer({ isParentOpen, restoreParent }) {
     // The current image already has a request; only warm its immediate neighbors.
     for (const url of urls) {
       if (url === context.urls[context.index] || preloads.has(url)) continue;
-      const image = new Image(); image.decoding = "async"; image.src = url; preloads.set(url, image);
+      const image = new Image(); image.decoding = "async"; image.fetchPriority = "low"; image.src = url; preloads.set(url, image);
     }
   }
   function renderImage() {
@@ -90,6 +89,7 @@ export function createImageViewer({ isParentOpen, restoreParent }) {
     };
     picture.onerror = failed;
     timer = setTimeout(failed, 20000);
+    picture.fetchPriority = "high";
     picture.src = context.urls[context.index];
     preloadNeighbors();
   }

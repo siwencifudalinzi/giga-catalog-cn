@@ -15,6 +15,78 @@ import {
 const generation = "a".repeat(64);
 const generatedAt = "2026-08-29T00:00:00Z";
 
+test("immutable catalog records and series views are reused across queries", () => {
+  const boot = validBootstrap();
+  boot.recentVideos = boot.recentVideos.filter(v => v.code === "SPSF-2");
+  const store = createRuntimeCatalogStore(boot);
+  store.installSearch(validSearch());
+  const found = store.getVideo("SPSF-1");
+  assert.equal(store.getVideo("spsf_001"), found);
+  assert.equal(store.search("女战士")[0], found);
+  assert.equal(store.getRecentVideos(), store.getRecentVideos());
+  store.installSeries(validSeries());
+  assert.equal(store.getSeries("spsf"), store.getSeries("SPSF"));
+  assert.equal(store.getSeries("SPSF").videos[0], store.getVideo("SPSF-1"));
+  assert.throws(() => { store.getVideo("SPSF-1").actors.push("changed"); }, TypeError);
+});
+
+test("tag replacement invalidates cached records and normalized search aliases atomically", () => {
+  const store = createRuntimeCatalogStore(validBootstrap());
+  store.installSearch(validSearch());
+  store.installSeries(validSeries());
+  const before = store.getVideo("SPSF-1");
+  assert.deepEqual(store.search("戦士"), []);
+  store.installTags(validTags());
+  const after = store.getVideo("SPSF-1");
+  assert.notEqual(before, after);
+  assert.equal(store.getVideo("SPSF-1"), after);
+  assert.deepEqual(before.tagIds, []);
+  assert.deepEqual(after.tagIds, [6]);
+  assert.deepEqual(store.search("女战士").map(v => v.code), ["SPSF-1"]);
+  assert.equal(store.getSeries("SPSF").videos[0], after);
+  assert.equal(store.search("戦士")[0].code, "SPSF-1");
+  const invalid = validTags(); invalid.assignments.push(["SPSF-999", [6]]);
+  assert.throws(() => store.installTags(invalid));
+  assert.equal(store.getVideo("SPSF-1"), after);
+  assert.equal(store.filterByTags({ include: [6] })[0].code, "SPSF-1");
+  const replacement = validTags();
+  replacement.tags[0].nameJa = "電撃"; replacement.tags[0].nameZh = "雷电";
+  store.installTags(replacement);
+  assert.deepEqual(store.search("戦士"), []);
+  assert.equal(store.search("雷电")[0].code, "SPSF-1");
+});
+
+test("replacing a series updates direct lookups while failed replacement preserves the prior view", () => {
+  const store = createRuntimeCatalogStore(validBootstrap());
+  store.installSearch(validSearch());
+  const first = validSeries(); first.series.videos[0].title = "完整详情标题";
+  store.installSeries(first);
+  const prior = store.getVideo("SPSF-1");
+  assert.equal(prior.title, "完整详情标题");
+  const next = validSeries(); next.series.videos[0].title = "更新详情标题";
+  store.installSeries(next);
+  const replaced = store.getVideo("SPSF-1");
+  assert.equal(replaced.title, "更新详情标题");
+  assert.equal(store.getSeries("SPSF").videos[0], replaced);
+  next.series.count = 999;
+  assert.throws(() => store.installSeries(next));
+  assert.equal(store.getVideo("SPSF-1"), replaced);
+  assert.equal(prior.title, "完整详情标题");
+});
+
+test("replacing a shard cannot leave removed detail records in the lookup index", () => {
+  const store = createRuntimeCatalogStore(validBootstrap());
+  store.installSearch(validSearch());
+  const first = validSeries(); first.series.videos[0].title = "旧详情";
+  store.installSeries(first);
+  const replacement = validSeries();
+  replacement.series.videos[0].code = "SPSF-3";
+  replacement.series.videos[0].number = 3;
+  store.installSeries(replacement);
+  assert.equal(store.getVideo("SPSF-1").title, "女战士");
+  assert.equal(store.getVideo("SPSF-3").code, "SPSF-3");
+});
+
 test("search uses numeric product order independent of artifact order", () => {
   const bootstrap = parseBootstrap(validBootstrap());
   const store = createRuntimeCatalogStore(bootstrap);
