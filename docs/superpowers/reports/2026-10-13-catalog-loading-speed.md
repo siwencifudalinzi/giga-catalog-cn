@@ -24,10 +24,11 @@ Building the reusable tag/search rows increased the one-time tag installation fr
 
 ## Verification
 
-- JavaScript: 188 passing tests, including immutable identity, tag replacement, full-series precedence, removed-series records, first-image load/error/timeout/abort, sequential follow-up scheduling and failed module import retry.
+- JavaScript: 189 passing tests, including immutable identity, tag replacement, full-series precedence, removed-series records, tag-filter insertion order, first-image load/error/timeout/abort, sequential follow-up scheduling and failed module import retry.
 - Browser flow: mobile touch swipe, double tap, pinch, desktop double-click, nested Back/Forward, focus and scroll restoration, 320/390/844/1440 layouts and reduced motion.
 - Browser faults: preview retry, late tags while the gallery stays open, favorite/card preservation and search pagination.
 - Browser scheduling: slow/save-data budgets, deferred data, loaded-cover reuse, close/reopen cancellation, cached first images, metadata failure/retry, and separate viewer/state import failures.
+- Independent review found two DOM edge cases; targeted RED/GREEN checks now verify that wide save-data rails wait for the next image before observing later images, and that focused links remain in place while resolved URLs are upgraded.
 - Python and deployment checks are recorded in the accompanying plan execution record.
 
 The images are still full-size upstream JPEGs. Generating responsive preview derivatives, reducing drawer thumbnail sizes, splitting resolved link data and decoupling refresh timestamps from cache identities remain subsequent rounds.

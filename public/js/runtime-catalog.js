@@ -464,8 +464,8 @@ export function createRuntimeCatalogStore(bootstrap) {
   }
 
   function rebuildSearchRows() {
-    searchVideos = Object.freeze([...rawSearch.values()].map(taggedRecord).sort(compareVideoCodes));
-    searchRows = searchVideos.map((item) => ({
+    searchVideos = Object.freeze([...rawSearch.values()].map(taggedRecord));
+    searchRows = [...searchVideos].sort(compareVideoCodes).map((item) => ({
       video: item,
       text: normalizeText([item.code, item.title, ...item.actors, item.series,
         ...item.tagIds.flatMap((id) => tagIndex.get(id)?.aliases ?? [])].join(" ")),

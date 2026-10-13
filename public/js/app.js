@@ -2217,11 +2217,12 @@ function startApplication() {
     ) {
       return;
     }
+    const signal = detailLoadController.signal;
     state.previewObserver = createPreviewIntersectionObserver(
       window.IntersectionObserver,
       state.previewRail,
       state.previewSentinel,
-      appendPreviewBatch,
+      () => { if (!signal.aborted) appendPreviewBatch(); },
     );
   }
 
@@ -2261,9 +2262,11 @@ function startApplication() {
     afterFirstPreview({ image: first, source: first.dataset.previewSource, signal, onReady: () => {
       if (signal.aborted || !ui.videoDialog.open || state.previewVideo !== video) return;
       const following = appendPreviewBatch(previewBatchSize(navigator.connection), { deferSource: true });
-      beginPreviewObservation();
       // Give the next image a head start over the large optional link manifest.
-      startFollowingPreviews({ images: following, signal, onReady });
+      startFollowingPreviews({ images: following, signal, onReady: () => {
+        beginPreviewObservation();
+        onReady();
+      } });
     } });
   }
 
@@ -2305,6 +2308,7 @@ function startApplication() {
       const list = createElement("div", "link-group__items");
       for (const item of group.links) {
         const anchor = createElement("a", "external-link", item.label);
+        anchor.dataset.slot = item.slot;
         anchor.href = item.url;
         anchor.target = "_blank";
         anchor.rel = "noopener noreferrer";
@@ -2330,7 +2334,14 @@ function startApplication() {
           group.links.some((item) => item.resolved)
         );
         if (!signal.aborted && section.isConnected && hasResolved) {
-          section.replaceWith(renderLinkSection(upgraded));
+          const anchors = new Map([...section.querySelectorAll("a")].map(anchor => [anchor.dataset.slot, anchor]));
+          for (const item of upgraded.flatMap(group => group.links)) {
+            const anchor = anchors.get(item.slot);
+            if (anchor && item.resolved) {
+              anchor.href = item.url;
+              anchor.textContent = item.label;
+            }
+          }
         }
       }).catch(() => {});
     return section;

@@ -15,6 +15,14 @@ import {
 const generation = "a".repeat(64);
 const generatedAt = "2026-08-29T00:00:00Z";
 
+test("tag filters retain search payload order while text search stays code sorted", () => {
+  const store = createRuntimeCatalogStore(validBootstrap());
+  const payload = validSearch();
+  payload.videos.reverse();
+  store.installSearch(payload);
+  assert.deepEqual(store.filterByTags({}).map(video => video.code), payload.videos.map(video => video.code));
+  assert.deepEqual(store.search("SPSF").map(video => video.code), ["SPSF-1", "SPSF-2"]);
+});
 test("immutable catalog records and series views are reused across queries", () => {
   const boot = validBootstrap();
   boot.recentVideos = boot.recentVideos.filter(v => v.code === "SPSF-2");
