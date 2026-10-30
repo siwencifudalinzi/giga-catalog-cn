@@ -792,6 +792,50 @@ test("deferred production covers reveal only approved same-origin paths", () => 
   assert.equal(images[4].attributes.has("src"), false);
 });
 
+for (const supportsObserver of [true, false]) {
+  test(`deferred featured covers respect deployment paths ${supportsObserver ? "on intersection" : "without IntersectionObserver"}`, () => {
+    const originalDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
+    const path = `/media/featured-covers/g/${"a".repeat(64)}/spsf-44.webp`;
+    try {
+      for (const baseURI of [
+        "https://siwencifudalinzi.github.io/giga-catalog-cn/",
+        "https://preview.example/nested/catalog/index.html?view=recent",
+        "https://giga-catalog-cn.netlify.app/",
+      ]) {
+        Object.defineProperty(globalThis, "document", { configurable: true, value: { baseURI } });
+        const expected = siteAssetUrl(path);
+        const sources = [expected, `/other-project${path}`, `${expected}?extra=1`, `${expected}#hash`, `/../${expected}`, "//evil.example" + path, "/admin/private.jpg"];
+        const images = sources.map(source => {
+          const attributes = new Map([["data-src", source]]);
+          return {
+            attributes,
+            getAttribute: name => attributes.get(name) ?? null,
+            setAttribute: (name, value) => attributes.set(name, value),
+            removeAttribute: name => attributes.delete(name),
+          };
+        });
+        let reveal;
+        class Observer {
+          constructor(callback) { reveal = callback; }
+          observe() {}
+          unobserve() {}
+        }
+        observeDeferredCovers(supportsObserver ? Observer : undefined, { querySelectorAll: () => images });
+        if (supportsObserver) {
+          assert.equal(images[0].attributes.has("src"), false);
+          reveal(images.map(target => ({ target, isIntersecting: true })));
+        }
+        assert.equal(images[0].attributes.get("src"), expected, baseURI);
+        assert.equal(images[0].attributes.has("data-src"), false);
+        for (const image of images.slice(1)) assert.equal(image.attributes.has("src"), false);
+      }
+    } finally {
+      if (originalDocument) Object.defineProperty(globalThis, "document", originalDocument);
+      else delete globalThis.document;
+    }
+  });
+}
+
 test("production GIGA covers use the restricted Netlify image transform", () => {
   const source =
     "https://www.giga-web.jp/db_titles/spsf/spsf-44/spsf-44.jpg";

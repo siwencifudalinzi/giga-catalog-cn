@@ -59,9 +59,12 @@ function safeDeferredCoverUrl(value) {
     return null;
   }
   const source = value.trim();
+  const localCover = source.match(
+    /\/media\/featured-covers\/g\/[0-9a-f]{64}\/[a-z][a-z0-9]*-(?:0|[1-9]\d*)\.webp$/u,
+  )?.[0];
   if (
-    /^\/media\/featured-covers\/g\/[0-9a-f]{64}\/[a-z][a-z0-9]*-(?:0|[1-9]\d*)\.webp$/u
-      .test(source)
+    localCover &&
+    (source === localCover || source === siteAssetUrl(localCover))
   ) {
     return source;
   }
