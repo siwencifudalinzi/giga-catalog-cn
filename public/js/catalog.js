@@ -38,6 +38,14 @@ export function normalizeSearchQuery(value) {
 
 const codeCollator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
+/** Preserve whole product-code queries; otherwise require every normalized keyword. */
+export function searchQueryTerms(value) {
+  const normalized = normalizeSearchQuery(value);
+  if (!normalized) return [];
+  if (normalizeVideoCode(normalized)) return [normalized];
+  return [...new Set(normalized.split(/\s+/u).map(normalizeSearchQuery).filter(Boolean))];
+}
+
 export function compareVideoCodes(left, right) {
   return codeCollator.compare(String(left.code ?? ""), String(right.code ?? ""));
 }

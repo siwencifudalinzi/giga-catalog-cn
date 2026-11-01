@@ -313,6 +313,30 @@ test("runtime activation fetches the tag index before rendering tag-aware search
   assert.deepEqual(render.calls.at(-1).videos.map((video) => video.code), ["SPSF-61"]);
 });
 
+test("pending and failed tag indexes cannot produce a final zero or unfiltered tagged result", () => {
+  const policy = runtimeApplication.searchResultPresentation;
+  assert.equal(typeof policy, "function");
+  assert.deepEqual(policy({ searchReady: true, resultCount: 0 }), { phase: "loading", showResults: false, complete: false });
+  assert.equal(policy({ searchReady: true, resultCount: 3 }).showResults, true);
+  assert.equal(policy({ searchReady: true, resultCount: 3, tagScoped: true }).showResults, false);
+  assert.deepEqual(policy({ searchReady: true, tagError: new Error(), resultCount: 0 }), { phase: "partial", showResults: false, complete: false });
+  assert.equal(policy({ searchReady: true, tagError: new Error(), resultCount: 3 }).showResults, true);
+  assert.equal(policy({ searchReady: true, tagError: new Error(), resultCount: 3, tagScoped: true }).showResults, false);
+  assert.deepEqual(policy({ searchReady: true, tagsReady: true, resultCount: 0 }), { phase: "ready", showResults: true, complete: true });
+  assert.deepEqual(policy({ searchError: new Error() }), { phase: "search-error", showResults: false, complete: false });
+});
+
+test("a failed tag readiness result reports an incomplete search for inline retry", async () => {
+  const events = [];
+  await runtimeApplication.activateSearchWithOptionalTags({
+    ensureSearch: async () => true,
+    ensureTags: async () => false,
+    renderSearch: () => events.push("basic"),
+    onTagsError: () => events.push("incomplete"),
+  });
+  assert.deepEqual(events, ["basic", "incomplete"]);
+});
+
 test("search renders basic results before a failed tag enhancement and keeps retry state", async () => {
   const events = [];
   const result = await runtimeApplication.activateSearchWithOptionalTags({

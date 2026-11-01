@@ -1,4 +1,4 @@
-import { normalizeText, normalizeVideoCode, normalizeSearchQuery, compareVideoCodes } from "./catalog.js";
+import { normalizeText, normalizeVideoCode, searchQueryTerms, compareVideoCodes } from "./catalog.js";
 import { createTagIndex, filterVideosByTags } from "./tags.js";
 import { buildSeriesPreviews } from './series-navigation.js';
 
@@ -505,10 +505,12 @@ export function createRuntimeCatalogStore(bootstrap) {
       const value = detailRecords.get(key) ?? rawRecent.get(key) ?? rawSearch.get(key);
       return value ? taggedRecord(value) : null;
     },
-    search(query) {
-      const needle = normalizeSearchQuery(query);
-      if (!needle) return Object.freeze([]);
-      return Object.freeze(searchRows.filter((row) => row.text.includes(needle)).map((row) => row.video));
+    search(query, tagOptions = {}) {
+      const terms = searchQueryTerms(query);
+      if (!terms.length) return Object.freeze([]);
+      const matches = searchRows.filter(row => terms.every(term => row.text.includes(term))).map(row => row.video);
+      return tagOptions.include?.length || tagOptions.exclude?.length
+        ? filterVideosByTags(matches, tagOptions) : Object.freeze(matches);
     },
     getTag(id) {
       return tagIndex.get(id);

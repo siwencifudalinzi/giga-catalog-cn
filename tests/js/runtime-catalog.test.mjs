@@ -15,6 +15,28 @@ import {
 const generation = "a".repeat(64);
 const generatedAt = "2026-08-29T00:00:00Z";
 
+test("combined keywords match across fields while product-code variants remain normalized", () => {
+  const store = createRuntimeCatalogStore(validBootstrap());
+  store.installSearch(validSearch());
+  store.installTags(validTags());
+  assert.deepEqual(store.search("SPSF 女战士").map(v => v.code), ["SPSF-1"]);
+  assert.deepEqual(store.search("  ＳＰＳＦ－００１　戦士 ").map(v => v.code), ["SPSF-1"]);
+  assert.deepEqual(store.search("SPSF ００１").map(v => v.code), ["SPSF-1"]);
+  assert.deepEqual(store.search("SPSF 不存在"), []);
+});
+
+test("keyword results intersect include/all/any/exclude tags without changing query order", () => {
+  const store = createRuntimeCatalogStore(validBootstrap());
+  store.installSearch(validSearch());
+  store.installTags(validTags());
+  assert.deepEqual(store.search("SPSF", { include: [6] }).map(v => v.code), ["SPSF-1"]);
+  assert.deepEqual(store.search("SPSF", { exclude: [6] }).map(v => v.code), ["SPSF-2"]);
+  assert.deepEqual(store.search("SPSF", { include: [6, 999], match: "any" }).map(v => v.code), ["SPSF-1"]);
+  assert.deepEqual(store.search("SPSF", { include: [6, 999], match: "all" }), []);
+  assert.deepEqual(store.search("SPSF", { include: [6], exclude: [6] }), []);
+  assert.ok(Object.isFrozen(store.search("SPSF", { include: [6] })));
+});
+
 test("tag filters retain search payload order while text search stays code sorted", () => {
   const store = createRuntimeCatalogStore(validBootstrap());
   const payload = validSearch();

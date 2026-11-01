@@ -255,6 +255,14 @@ export async function activateSearchResources({
   return { search, tags };
 }
 
+export function searchResultPresentation({ searchReady = false, tagsReady = false,
+  searchError = null, tagError = null, resultCount = 0, tagScoped = false } = {}) {
+  const phase = !searchReady ? (searchError ? "search-error" : "loading")
+    : tagsReady ? "ready" : tagError ? "partial" : "loading";
+  const complete = phase === "ready";
+  return { phase, complete, showResults: searchReady && (!tagScoped || tagsReady) && (complete || resultCount > 0) };
+}
+
 /** Render canonical search fields immediately, then enhance with localized tags. */
 export async function activateSearchWithOptionalTags({
   ensureSearch,
@@ -272,8 +280,8 @@ export async function activateSearchWithOptionalTags({
   renderSearch?.(search);
   if (tagsTask) {
     const result = await tagsTask;
-    if (result.ok) {
-      if (result.tags) onTagsReady?.(result.tags);
+    if (result.ok && result.tags) {
+      onTagsReady?.(result.tags);
     } else {
       onTagsError?.(result.error);
     }
