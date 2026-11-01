@@ -22,7 +22,15 @@ test("combined keywords match across fields while product-code variants remain n
   assert.deepEqual(store.search("SPSF 女战士").map(v => v.code), ["SPSF-1"]);
   assert.deepEqual(store.search("  ＳＰＳＦ－００１　戦士 ").map(v => v.code), ["SPSF-1"]);
   assert.deepEqual(store.search("SPSF ００１").map(v => v.code), ["SPSF-1"]);
+  assert.deepEqual(store.search("SPSF ００１ 女战士").map(v => v.code), ["SPSF-1"]);
   assert.deepEqual(store.search("SPSF 不存在"), []);
+});
+
+test("non-series words followed by numbers remain independent keywords", () => {
+  const store = createRuntimeCatalogStore(validBootstrap());
+  const payload = validSearch(); payload.videos[0].title = "RED 42 女战士";
+  store.installSearch(payload);
+  assert.deepEqual(store.search("RED 42 女战士").map(v => v.code), ["SPSF-1"]);
 });
 
 test("keyword results intersect include/all/any/exclude tags without changing query order", () => {

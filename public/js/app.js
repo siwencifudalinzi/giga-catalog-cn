@@ -1210,7 +1210,7 @@ function startApplication() {
 
   function updateTabs() {
     for (const tab of document.querySelectorAll("[role='tab'][data-view]")) {
-      const selected = tab.dataset.view === state.view && !state.query;
+      const selected = tab.dataset.view === state.view && (!state.query || state.view === "tags");
       tab.setAttribute("aria-selected", String(selected));
       tab.tabIndex = selected ? 0 : -1;
     }
@@ -1394,8 +1394,50 @@ function startApplication() {
   function finishSearchRender() {
     if (!state.searchScrollPending || !state.query) return;
     const target = state.view === "tags" ? ui.main.querySelector("#tag-results") : ui.main;
-    (target ?? ui.main).scrollIntoView({ block: "start", behavior: "instant" });
-    if (state.view !== "tags" || target) state.searchScrollPending = false;
+    const destination = target ?? ui.main;
+    const headerBottom = document.querySelector(".app-header").getBoundingClientRect().bottom;
+    window.scrollTo({ top: Math.max(0, window.scrollY + destination.getBoundingClientRect().top - headerBottom - 12), behavior: "instant" });
+    state.searchScrollPending = false;
+  }
+
+  function searchReadingAnchor() {
+    if (!state.query || state.searchScrollPending || ui.main.dataset.searchQuery !== state.query) return null;
+    const headerBottom = document.querySelector(".app-header").getBoundingClientRect().bottom;
+    const cards = [...ui.main.querySelectorAll(".video-card")];
+    const card = cards.find(card => { const r = card.getBoundingClientRect(); return r.top >= headerBottom && r.top < window.innerHeight; })
+      ?? cards.find(card => { const r = card.getBoundingClientRect(); return r.bottom > headerBottom && r.top < window.innerHeight; });
+    return card ? { code: card.dataset.code, top: card.getBoundingClientRect().top } : null;
+  }
+
+  function retainSearchWindow(videos, context, anchor) {
+    if (!anchor) return;
+    const index = videos.findIndex(video => video.code === anchor.code);
+    if (index >= 0) state.visible[context] = Math.max(state.visible[context], Math.ceil((index + 1) / RESULT_WINDOW_SIZE) * RESULT_WINDOW_SIZE);
+  }
+
+  function restoreSearchAnchor(anchor) {
+    if (!anchor) return;
+    const card = [...ui.main.querySelectorAll(".video-card")].find(card => card.dataset.code === anchor.code);
+    if (!card) return;
+    const query = state.query;
+    let cancelled = false;
+    const cancel = () => { cancelled = true; };
+    const events = ["pointerdown", "touchstart", "wheel", "keydown"];
+    for (const type of events) document.addEventListener(type, cancel, { once: true, passive: true });
+    const align = () => {
+      if (cancelled || !card.isConnected || state.query !== query || state.searchScrollPending || ui.videoDialog.open) return;
+      window.scrollBy({ top: card.getBoundingClientRect().top - anchor.top, behavior: "instant" });
+    };
+    card.scrollIntoView({ block: "start", behavior: "instant" });
+    align();
+    // content-visibility may replace estimated card heights over the next layout frames.
+    requestAnimationFrame(() => {
+      align();
+      requestAnimationFrame(() => {
+        align();
+        for (const type of events) document.removeEventListener(type, cancel);
+      });
+    });
   }
 
   function markNewSearch(query) {
@@ -1411,8 +1453,13 @@ function startApplication() {
   }
 
   function renderSearchView({ append = false } = {}) {
-    const results = state.store.search(state.query);
-    const presentation = searchResultPresentation({ ...state, resultCount: results.length, tagScoped: state.view === "tags" });
+    const anchor = append ? null : searchReadingAnchor();
+    const matches = state.store.search(state.query);
+    const results = state.view === "tags" ? sortTagResults(matches) : matches;
+    retainSearchWindow(results, "search", anchor);
+    const presentation = searchResultPresentation({ ...state, resultCount: results.length,
+      tagScoped: state.view === "tags" && Boolean(state.tagInclude.size || state.tagExclude.size) });
+    ui.main.dataset.searchQuery = state.query;
     const description = presentation.complete
       ? `找到 ${formatNumber(results.length)} 部影片，按番号顺序排列。`
       : presentation.phase === "search-error" ? "搜索暂时无法载入，请重试。"
@@ -1461,6 +1508,7 @@ function startApplication() {
     });
     appendLoadMore(container, metadata, "search");
     refreshDeferredCovers();
+    restoreSearchAnchor(anchor);
     finishSearchRender();
   }
 
@@ -1614,6 +1662,8 @@ function startApplication() {
   }
 
   function renderTagView() {
+    const anchor = searchReadingAnchor();
+    ui.main.dataset.searchQuery = state.query;
     const fragment = document.createDocumentFragment();
     fragment.append(
       renderViewHeading(
@@ -1732,6 +1782,7 @@ function startApplication() {
       const tagOptions = { include: [...state.tagInclude], exclude: [...state.tagExclude], match: state.tagMatch };
       const videos = sortTagResults(state.query
         ? state.store.search(state.query, tagOptions) : state.store.filterByTags(tagOptions));
+      retainSearchWindow(videos, "tags", anchor);
       resultSection.append(
         createElement("h3", "tag-results__title", `匹配影片 · ${formatNumber(videos.length)}`),
       );
@@ -1754,6 +1805,7 @@ function startApplication() {
       });
       appendLoadMore(grid, metadata, "tags");
       refreshDeferredCovers();
+      restoreSearchAnchor(anchor);
       finishSearchRender();
       return;
     }
@@ -1817,7 +1869,7 @@ function startApplication() {
     if (state.resourceLoads.activeCount === 0) {
       ui.main.removeAttribute("aria-busy");
     }
-    document.body.dataset.view = state.query ? "search" : state.view;
+    document.body.dataset.view = state.query && state.view !== "tags" ? "search" : state.view;
     if (state.query) {
       if (state.searchReady && state.tagsReady) {
         renderActiveSearchView();
@@ -2001,7 +2053,8 @@ function startApplication() {
         if (error?.name !== "AbortError") {
           state.tagError = error;
           if (state.query || state.view === "tags") {
-            renderTagLoadError();
+            if (state.query) renderActiveSearchView();
+            else renderTagLoadError();
             showToast("标签索引载入失败；再次打开标签页可重试。");
           }
         } else {

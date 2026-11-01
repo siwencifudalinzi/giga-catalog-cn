@@ -24,8 +24,8 @@ Review focus: rapid query changes or clearing/switching views while requests fin
 - [x] Browser checks cover delayed/failed/retried resources, rapid input/clear changes, combined filters, and 320/390 px layouts.
 
 ## Task 3: Verification and publication
-- [ ] Full Python and JavaScript suites; mobile detail/gallery/favorites smoke checks.
-- [ ] Fresh read-only whole-branch review, fix important findings with regressions.
+- [x] Full Python and JavaScript suites; mobile detail/gallery/favorites smoke checks.
+- [x] Fresh read-only whole-branch review, fix important findings with regressions.
 - [ ] Commit, synchronize public main, publish and verify live source identity and mobile behavior.
 
 Execution record:
@@ -34,3 +34,8 @@ Execution record:
 - Task 1: four new tests observed RED for combined queries, tag options, readiness policy and failed readiness notification; GREEN full JavaScript 195/195.
 - Task 2: browser RED confirmed disabled input, missing inline feedback, false zero, discarded tag scope (13 instead of 5) and offscreen result heading. GREEN core 7/7; fault/navigation checks 13/13 cover search/tag retry, pending clear, 5-result intersection and 8-result exclusion, pagination, favorites, gallery history and 320px layout. Full JavaScript 195/195.
 - Pagination check measures the existing card at the actual click event: Playwright may first scroll the button clear of the fixed mobile navigation. Pointer pagination keeps reading position; keyboard activation retains visible focus on the next pagination control.
+- Independent review: one fresh read-only reviewer checked e746918f..756e1dee. Five Important issues and one Minor were reproduced. URL/homepage/links/favorites redesign were set aside as outside the accepted four fixes; that boundary stands. Python/publication checks remained with the implementer.
+- Final fixes: retain the first fully visible card and its viewport offset across enrichment, grow the 24-card window when needed, and correct estimated content-visibility heights across two frames. User interaction cancels pending corrections. Browser RED lost GDSC-19; GREEN preserves its top at 220 px (difference 0.3 px).
+- Final fixes: new-search scrolling uses measured sticky-header height and is consumed once, including provisional loading; scoped queries preserve the Tags tab/tabIndex/layout; only actual include/exclude constraints withhold partial matches; spaced codes inside combinations normalize only known series names. RED browser checks and spaced-code test now GREEN.
+- Minor duplicate retry controls were resolved as part of active-search ownership of partial-failure feedback; no separate error panel is injected into the active search on repeated failure.
+- Final validation: node --test 196/196; Python unittest discovery 382 run, OK with one existing skip; browser core 7, fault/navigation 13 and review regressions 5, all passing. No second reviewer dispatched.

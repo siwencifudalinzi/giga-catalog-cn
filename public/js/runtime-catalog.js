@@ -442,6 +442,7 @@ export function parseTagPayload(value, bootstrap) {
 export function createRuntimeCatalogStore(bootstrap) {
   const checked = parseBootstrap(bootstrap);
   const rawSeries = new Map();
+  const searchSeriesCodes = new Set(checked.series.map(series => series.code.toLowerCase()));
   const rawRecent = new Map(checked.recentVideos.map((item) => [item.code, item]));
   let seriesPreviews = buildSeriesPreviews(rawRecent.values());
   let rawSearch = new Map();
@@ -506,7 +507,7 @@ export function createRuntimeCatalogStore(bootstrap) {
       return value ? taggedRecord(value) : null;
     },
     search(query, tagOptions = {}) {
-      const terms = searchQueryTerms(query);
+      const terms = searchQueryTerms(query, searchSeriesCodes);
       if (!terms.length) return Object.freeze([]);
       const matches = searchRows.filter(row => terms.every(term => row.text.includes(term))).map(row => row.video);
       return tagOptions.include?.length || tagOptions.exclude?.length

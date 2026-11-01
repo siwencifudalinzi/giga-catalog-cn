@@ -39,11 +39,14 @@ export function normalizeSearchQuery(value) {
 const codeCollator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
 
 /** Preserve whole product-code queries; otherwise require every normalized keyword. */
-export function searchQueryTerms(value) {
+export function searchQueryTerms(value, seriesCodes = new Set()) {
   const normalized = normalizeSearchQuery(value);
   if (!normalized) return [];
   if (normalizeVideoCode(normalized)) return [normalized];
-  return [...new Set(normalized.split(/\s+/u).map(normalizeSearchQuery).filter(Boolean))];
+  const combined = normalized.replace(/(^|\s)([a-z][a-z0-9]*)\s+(\d+)(?=\s|$)/gu,
+    (original, space, series, number) => seriesCodes.has(series)
+      ? space + normalizeSearchQuery(`${series}-${number}`) : original);
+  return [...new Set(combined.split(/\s+/u).map(normalizeSearchQuery).filter(Boolean))];
 }
 
 export function compareVideoCodes(left, right) {
