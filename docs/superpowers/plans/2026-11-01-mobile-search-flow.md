@@ -18,10 +18,10 @@ Review focus: rapid query changes or clearing/switching views while requests fin
 - [x] Add testable search feedback policy in app.js; focused and full JavaScript suites GREEN.
 
 ## Task 2: Mobile UI integration
-- [ ] Render visible loading/error/partial feedback and retry actions; leave input editable during resource loads.
-- [ ] Route tag-tab queries through the existing tag controls and apply keyword/tag constraints, with visible keyword context and clear action.
-- [ ] Scroll each newly committed search once to its results; do not scroll on load-more, enrichment or history restore.
-- [ ] Browser checks cover delayed/failed/retried resources, rapid input/clear/tab changes, combined filters, and 320/390 px layouts.
+- [x] Render visible loading/error/partial feedback and retry actions; leave input editable during resource loads.
+- [x] Route tag-tab queries through the existing tag controls and apply keyword/tag constraints, with visible keyword context and clear action.
+- [x] Scroll each newly committed search once to its results; do not scroll on enrichment or history restore; preserve reading position for pointer pagination and existing visible focus for keyboard pagination.
+- [x] Browser checks cover delayed/failed/retried resources, rapid input/clear changes, combined filters, and 320/390 px layouts.
 
 ## Task 3: Verification and publication
 - [ ] Full Python and JavaScript suites; mobile detail/gallery/favorites smoke checks.
@@ -32,3 +32,5 @@ Execution record:
 - Base e746918f; baseline JavaScript 191/191 passing. Context and accepted behavior come from output/playwright/2026-10-31-mobile-ux-review.md in the shared root and the approval in chat.
 - Native PowerShell and this execution record replace Bash-only skill ledger scripts. Shared interfaces: Task 1 runtime search options and feedback policy are consumed by Task 2 UI; their names and semantics above agree.
 - Task 1: four new tests observed RED for combined queries, tag options, readiness policy and failed readiness notification; GREEN full JavaScript 195/195.
+- Task 2: browser RED confirmed disabled input, missing inline feedback, false zero, discarded tag scope (13 instead of 5) and offscreen result heading. GREEN core 7/7; fault/navigation checks 13/13 cover search/tag retry, pending clear, 5-result intersection and 8-result exclusion, pagination, favorites, gallery history and 320px layout. Full JavaScript 195/195.
+- Pagination check measures the existing card at the actual click event: Playwright may first scroll the button clear of the fixed mobile navigation. Pointer pagination keeps reading position; keyboard activation retains visible focus on the next pagination control.

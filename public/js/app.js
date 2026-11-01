@@ -589,6 +589,7 @@ export function bindDebouncedSearchInput({
   clearTimer = globalThis.clearTimeout,
   setTimer = globalThis.setTimeout,
   delayMs = SEARCH_DELAY_MS,
+  onCommit,
 }) {
   input.addEventListener("input", () => {
     clearTimer(state.searchTimer);
@@ -597,6 +598,7 @@ export function bindDebouncedSearchInput({
       state.query = input.value.trim();
       state.searchStart = 0;
       resetProgressiveCounter(state.visible, { query: state.query });
+      onCommit?.(state.query);
       render();
     }, delayMs);
   });
@@ -1008,6 +1010,7 @@ function startApplication() {
     seriesQuery: "",
     tagSort: "newest",
     searchReady: false,
+    searchScrollPending: false,
     searchError: null,
     searchAborted: false,
     searchLoad: null,
@@ -1237,12 +1240,12 @@ function startApplication() {
       nav.append(status);
     }
     container.append(nav);
-    if (state.progressFocus === context) {
+    if (state.progressFocus?.context === context) {
       if (more) {
-        more.focus();
+        more.focus({ preventScroll: state.progressFocus.preventScroll });
       } else {
         status.tabIndex = -1;
-        status.focus();
+        status.focus({ preventScroll: state.progressFocus.preventScroll });
       }
       state.progressFocus = null;
     }
@@ -1388,16 +1391,59 @@ function startApplication() {
     }
   }
 
+  function finishSearchRender() {
+    if (!state.searchScrollPending || !state.query) return;
+    const target = state.view === "tags" ? ui.main.querySelector("#tag-results") : ui.main;
+    (target ?? ui.main).scrollIntoView({ block: "start", behavior: "instant" });
+    if (state.view !== "tags" || target) state.searchScrollPending = false;
+  }
+
+  function markNewSearch(query) {
+    state.searchScrollPending = Boolean(query);
+    state.searchError = null;
+    state.tagError = null;
+    if (state.view === "tags") resetProgressiveCounter(state.visible, { view: "tags" });
+  }
+
+  function renderActiveSearchView() {
+    if (state.view === "tags" && state.tagsReady && state.searchReady) renderTagView();
+    else renderSearchView();
+  }
+
   function renderSearchView({ append = false } = {}) {
     const results = state.store.search(state.query);
+    const presentation = searchResultPresentation({ ...state, resultCount: results.length, tagScoped: state.view === "tags" });
+    const description = presentation.complete
+      ? `找到 ${formatNumber(results.length)} 部影片，按番号顺序排列。`
+      : presentation.phase === "search-error" ? "搜索暂时无法载入，请重试。"
+      : presentation.phase === "partial" ? "标签暂时无法载入，当前结果可能不完整。"
+      : results.length && presentation.showResults ? `已找到 ${formatNumber(results.length)} 部，正在补充标签结果…`
+      : "正在搜索，请稍候…";
     const fragment = document.createDocumentFragment();
-    fragment.append(
-      renderViewHeading(
+    const heading = renderViewHeading(
         "SEARCH RESULTS",
         `“${state.query}” 的结果`,
-        `找到 ${formatNumber(results.length)} 部影片，按番号顺序排列。`,
-      ),
+        description,
     );
+    if (!presentation.complete) {
+      const feedback = heading.querySelector("p");
+      feedback.classList.add("search-feedback");
+      feedback.setAttribute("role", "status");
+      if (presentation.phase === "partial" || presentation.phase === "search-error") {
+        const retry = createElement("button", "button button--quiet", "重试");
+        retry.type = "button";
+        retry.dataset.action = presentation.phase === "partial" ? "retry-tags" : "retry-search";
+        heading.append(retry);
+      }
+    }
+    fragment.append(heading);
+    if (!presentation.showResults) {
+      ui.main.replaceChildren(fragment);
+      state.mountedSeries = null;
+      refreshDeferredCovers();
+      finishSearchRender();
+      return;
+    }
     let container = append ? ui.main.querySelector(".result-section") : null;
     if (!container) {
       container = createElement("div", "result-section");
@@ -1415,6 +1461,7 @@ function startApplication() {
     });
     appendLoadMore(container, metadata, "search");
     refreshDeferredCovers();
+    finishSearchRender();
   }
 
   function renderFavoritesView() {
@@ -1616,6 +1663,14 @@ function startApplication() {
     clear.disabled = !state.tagInclude.size && !state.tagExclude.size;
     toolbar.append(searchLabel, matchLabel, sortLabel, clear);
     fragment.append(toolbar);
+    if (state.query) {
+      const keyword = createElement("p", "search-keyword", `关键词：“${state.query}”（与下方标签共同筛选）`);
+      const clear = createElement("button", "button button--quiet", "清除关键词");
+      clear.type = "button";
+      clear.dataset.action = "clear-search";
+      keyword.append(clear);
+      fragment.append(keyword);
+    }
 
     const selected = createElement("div", "tag-selection");
     selected.setAttribute("aria-live", "polite");
@@ -1668,19 +1723,15 @@ function startApplication() {
     const resultSection = createElement("section", "tag-results");
     resultSection.id = "tag-results";
     resultSection.tabIndex = -1;
-    const hasSelection = state.tagInclude.size || state.tagExclude.size;
+    const hasSelection = state.tagInclude.size || state.tagExclude.size || state.query;
     if (!hasSelection) {
       resultSection.append(
         createElement("p", "empty-state empty-state--compact", "选择标签后，这里会按时间或番号显示影片。"),
       );
     } else {
-      const videos = sortTagResults(
-        state.store.filterByTags({
-          include: [...state.tagInclude],
-          exclude: [...state.tagExclude],
-          match: state.tagMatch,
-        }),
-      );
+      const tagOptions = { include: [...state.tagInclude], exclude: [...state.tagExclude], match: state.tagMatch };
+      const videos = sortTagResults(state.query
+        ? state.store.search(state.query, tagOptions) : state.store.filterByTags(tagOptions));
       resultSection.append(
         createElement("h3", "tag-results__title", `匹配影片 · ${formatNumber(videos.length)}`),
       );
@@ -1703,6 +1754,7 @@ function startApplication() {
       });
       appendLoadMore(grid, metadata, "tags");
       refreshDeferredCovers();
+      finishSearchRender();
       return;
     }
     fragment.append(resultSection);
@@ -1768,8 +1820,9 @@ function startApplication() {
     document.body.dataset.view = state.query ? "search" : state.view;
     if (state.query) {
       if (state.searchReady && state.tagsReady) {
-        renderSearchView();
+        renderActiveSearchView();
       } else {
+        renderSearchView();
         void activateSearchView(ui.search);
       }
     } else if (state.view === "tags") {
@@ -1807,7 +1860,7 @@ function startApplication() {
     const token = state.resourceLoads.begin(control);
     ui.main.setAttribute("aria-busy", "true");
     if (control) {
-      control.disabled = true;
+      if (control !== ui.search) control.disabled = true;
       control.setAttribute?.("aria-busy", "true");
     }
     ui.connectionStatus.textContent = label;
@@ -1893,7 +1946,7 @@ function startApplication() {
   async function activateSearchView(control = ui.search) {
     if (!state.searchReady) {
       const ready = await ensureSearchCatalog(control);
-      if (!ready) return false;
+      if (!ready) { if (state.query) renderActiveSearchView(); return false; }
     }
     await activateSearchWithOptionalTags({
       ensureSearch: async () => state.searchReady,
@@ -1901,10 +1954,13 @@ function startApplication() {
         ? null
         : () => ensureTagCatalog(control),
       renderSearch: () => {
-        if (state.query) renderSearchView();
+        if (state.query) renderActiveSearchView();
       },
       onTagsReady: () => {
-        if (state.query) renderSearchView();
+        if (state.query) renderActiveSearchView();
+      },
+      onTagsError: () => {
+        if (state.query) renderActiveSearchView();
       },
     });
     return true;
@@ -1929,7 +1985,7 @@ function startApplication() {
         if (!state.searchReady) {
           const searchReady = await ensureSearchCatalog(control);
           if (!searchReady) {
-            if (!state.searchAborted) renderTagLoadError();
+            if (!state.searchAborted && (state.query || state.view === "tags")) renderTagLoadError();
             return false;
           }
         }
@@ -1944,8 +2000,10 @@ function startApplication() {
       } catch (error) {
         if (error?.name !== "AbortError") {
           state.tagError = error;
-          renderTagLoadError();
-          showToast("标签索引载入失败；再次打开标签页可重试。");
+          if (state.query || state.view === "tags") {
+            renderTagLoadError();
+            showToast("标签索引载入失败；再次打开标签页可重试。");
+          }
         } else {
           state.searchAborted = true;
         }
@@ -2023,7 +2081,7 @@ function startApplication() {
       getQuery: () => state.query,
       getView: () => state.view,
       renderSearch: () => {
-        if (state.query) renderSearchView();
+        if (state.query) renderActiveSearchView();
       },
       renderTags: () => {
         if (state.view === "tags" && !state.query) renderTagView();
@@ -2084,6 +2142,7 @@ function startApplication() {
       return;
     }
     state.query = "";
+    state.searchScrollPending = false;
     resetProgressiveCounter(state.visible, { query: "" });
     resetProgressiveCounter(state.visible, { series: code });
     ui.search.value = "";
@@ -2110,6 +2169,7 @@ function startApplication() {
   } = {}) {
     window.clearTimeout(state.searchTimer);
     state.query = "";
+    state.searchScrollPending = false;
     resetProgressiveCounter(state.visible, { query: "" });
     if (resetView) {
       resetViewProgressiveCounter(
@@ -2766,6 +2826,9 @@ function startApplication() {
       });
     } else if (action === "clear-search") {
       clearSearch({ focus: true, resetView: true });
+    } else if (action === "retry-search") {
+      state.searchError = null;
+      renderCurrentView();
     } else if (action === "toggle-theme") {
       state.preferences.theme =
         state.preferences.theme === "dark" ? "light" : "dark";
@@ -2860,6 +2923,7 @@ function startApplication() {
       ui.search.value = actor;
       ui.searchClear.hidden = !actor;
       state.query = actor.trim();
+      markNewSearch(state.query);
       resetProgressiveCounter(state.visible, { query: state.query });
       renderCurrentView();
       ui.search.focus();
@@ -2906,7 +2970,7 @@ function startApplication() {
       if (!Number.isInteger(nextVisible) || nextVisible < RESULT_WINDOW_SIZE) {
         return;
       }
-      state.progressFocus = context;
+      state.progressFocus = { context, preventScroll: event.detail > 0 };
       if (context === "recent") {
         state.visible.recent = nextVisible;
         renderRecentView();
@@ -2990,6 +3054,7 @@ function startApplication() {
     clearButton: ui.searchClear,
     state,
     render: renderCurrentView,
+    onCommit: markNewSearch,
   });
 
   document.addEventListener("input", (event) => {
@@ -3028,6 +3093,7 @@ function startApplication() {
     event.preventDefault();
     window.clearTimeout(state.searchTimer);
     state.query = ui.search.value.trim();
+    markNewSearch(state.query);
     resetProgressiveCounter(state.visible, { query: state.query });
     renderCurrentView();
   });
