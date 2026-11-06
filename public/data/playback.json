@@ -12,16 +12,6 @@
       "verification": "10.01 s, +300 video frames, no media error; seek and resume passed"
     },
     {
-      "code": "SPSF-65",
-      "slot": "standard.streamtape",
-      "provider": "streamtape",
-      "sourceUrlHash": "sha256:149c3471e544b3eb2a52119c4e217449bf9cbdd1b79c2eebdd933798e24be79e",
-      "sourcePage": "https://streamtape.com/v/AkBd6w67rJIXVLW",
-      "embedUrl": "https://streamtape.com/e/AkBd6w67rJIXVLW",
-      "verifiedAt": "2026-11-06T14:39:41.939Z",
-      "verification": "10.01 s, +300 video frames, no media error"
-    },
-    {
       "code": "SPSF-64",
       "slot": "standard.streamtape",
       "provider": "streamtape",
