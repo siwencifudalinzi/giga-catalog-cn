@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <meta name="color-scheme" content="dark">
+    <title>站内播放 · GIGA Catalog</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #10131b; color: #edf2fa; font-family: system-ui, sans-serif; line-height: 1.6; }
+      main { width: min(100% - 32px, 1100px); margin: 24px auto; }
+      a { color: #a9caff; text-underline-offset: 3px; }
+      a:focus-visible { outline: 2px solid #a9caff; outline-offset: 5px; }
+      h1 { margin: 24px 0 0; font-size: clamp(24px, 5vw, 36px); }
+      .source { margin: 0 0 20px; color: #aab5c7; }
+      iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; background: #000; border-radius: 12px; }
+      .actions { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 20px 0; }
+      .hint { color: #aab5c7; font-size: 14px; }
+      [hidden] { display: none !important; }
+      button { font: inherit; color: #a9caff; background: transparent; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+      button:focus-visible { outline: 2px solid #a9caff; outline-offset: 5px; }
+      #connection-status { min-height: 2em; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a href="../">← 返回影片目录</a>
+      <h1>站内播放</h1>
+      <p id="source" class="source" hidden></p>
+      <p id="connection-status" class="hint" role="status" aria-live="polite">正在读取播放配置，请稍候…</p>
+      <iframe
+        id="player"
+        hidden
+        title="视频播放器"
+        referrerpolicy="no-referrer"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+      <nav class="actions" aria-label="播放操作" hidden>
+        <button id="retry" type="button" aria-controls="player">重新加载播放器</button>
+        <a id="source-link" target="_blank" rel="noopener noreferrer">在来源站打开</a>
+      </nav>
+    </main>
+    <script type="module">
+      import { createPlaybackLoader, selectPlaybackEntry } from "../js/playback.js";
+
+      const status = document.querySelector("#connection-status");
+      const config = await createPlaybackLoader()();
+      const entry = selectPlaybackEntry(config, new URLSearchParams(location.search));
+
+      if (entry) {
+        const player = document.querySelector("#player");
+        const source = document.querySelector("#source");
+        const version = entry.slot.startsWith("uncensored.") ? "无码版" : "普通版";
+        document.title = entry.code + " · 站内播放 · GIGA Catalog";
+        document.querySelector("h1").textContent = entry.code;
+        source.textContent = version + " · Streamtape";
+        source.hidden = false;
+        player.title = entry.code + " " + version + "视频播放器";
+        document.querySelector("#source-link").href = entry.sourcePage;
+        document.querySelector(".actions").hidden = false;
+        let slowTimer;
+
+        function connect() {
+          clearTimeout(slowTimer);
+          status.textContent = "正在连接播放来源，请稍候…";
+          slowTimer = setTimeout(() => {
+            status.textContent = "来源站响应较慢，可以继续等待，或点下方重新加载播放器。";
+          }, 15000);
+          player.src = entry.embedUrl;
+          player.hidden = false;
+        }
+
+        player.addEventListener("load", () => {
+          clearTimeout(slowTimer);
+          // The frame load event does not report media playback.
+          status.textContent = "若播放器已显示，请点按播放；仍为空白时可重新加载或在来源站打开。";
+        });
+        document.querySelector("#retry").addEventListener("click", connect);
+        connect();
+      } else {
+        status.textContent = config.size
+          ? "此编号或版本暂无站内播放，请返回目录查看原有链接。"
+          : "播放配置暂时无法使用，请返回目录查看原有链接。";
+      }
+    </script>
+  </body>
+</html>

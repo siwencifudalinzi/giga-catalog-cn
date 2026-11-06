@@ -31,7 +31,7 @@ function keyFor(code, slot) {
   return `${code}\u0000${slot}`;
 }
 
-function normalizeFinalUrl(value) {
+export function normalizeFinalUrl(value) {
   if (typeof value !== "string" || value.length > 2048 ||
       value !== value.trim() || /[\r\n\t]/u.test(value)) {
     return null;

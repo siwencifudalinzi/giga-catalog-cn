@@ -18,6 +18,7 @@ import { createRuntimeCatalogStore } from "./runtime-catalog.js";
 import { createRuntimeLoader } from "./runtime-loader.js";
 import { createCatalogPrefetcher } from "./catalog-prefetch.js";
 import { afterFirstPreview, createViewerModuleLoader, previewBatchSize, selectDetailCover, startFollowingPreviews } from "./preview-loading.js";
+import { createPlaybackLoader, matchingPlaybackEntries, playbackHref, warmPlayback } from "./playback.js";
 import { nextTagSelection } from "./tags.js";
 import { compareVideoCodes } from "./catalog.js";
 import { filterSeries } from './series-navigation.js';
@@ -43,6 +44,7 @@ export const UI_STORAGE_KEY = "giga_catalog_ui_v1";
 export function warmSpsf66Playback(code, doc = globalThis.document, connection = globalThis.navigator?.connection) {
   if (code !== "SPSF-66" || connection?.saveData || !doc?.head || doc.head.querySelector("[data-spsf66-warm]")) return;
   for (const [rel, href] of [["preconnect", "https://streamtape.com"], ["prefetch", "watch/spsf-66.html"]]) {
+    if (rel === "preconnect" && doc.head.querySelector('link[rel="preconnect"][href="https://streamtape.com"]')) continue;
     const hint = doc.createElement("link");
     hint.dataset.spsf66Warm = "";
     hint.rel = rel;
@@ -56,6 +58,7 @@ const SEARCH_DELAY_MS = 180;
 const FEATURED_COVERS_TIMEOUT_MS = 2000;
 const PREVIEW_BATCH_SIZE = 4;
 const loadResolvedLinks = createResolvedLinkLoader();
+const loadPlayback = createPlaybackLoader();
 const PROVIDERS = Object.freeze([
   ["reupload", "重传链接"],
   ["streamtape", "Streamtape"],
@@ -2463,6 +2466,19 @@ function startApplication() {
       section.querySelector("h3").after(play);
     }
     if (!groups.length) return section;
+    void loadPlayback()
+      .then(index => matchingPlaybackEntries(video.code, groups.flatMap(group => group.links), index))
+      .then(entries => {
+        if (signal.aborted || !section.isConnected) return;
+        for (const entry of entries) {
+          const group = groups.find(group => group.links.some(item => item.slot === entry.slot));
+          const provider = group.links.find(item => item.slot === entry.slot);
+          const play = createElement("a", "external-link", `站内播放 ${video.code} · ${group.label} · ${provider.label}`);
+          play.href = playbackHref(entry);
+          section.querySelector(`a[data-slot="${entry.slot}"]`).before(play);
+          warmPlayback(entry);
+        }
+      }).catch(() => {});
     for (const event of ["pointerover", "focusin", "pointerdown"]) {
       section.addEventListener(event, release, { once: true, signal });
     }
