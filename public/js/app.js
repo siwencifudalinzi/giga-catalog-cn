@@ -40,6 +40,18 @@ export {
 
 export const UI_STORAGE_KEY = "giga_catalog_ui_v1";
 
+export function warmSpsf66Playback(code, doc = globalThis.document, connection = globalThis.navigator?.connection) {
+  if (code !== "SPSF-66" || connection?.saveData || !doc?.head || doc.head.querySelector("[data-spsf66-warm]")) return;
+  for (const [rel, href] of [["preconnect", "https://streamtape.com"], ["prefetch", "watch/spsf-66.html"]]) {
+    const hint = doc.createElement("link");
+    hint.dataset.spsf66Warm = "";
+    hint.rel = rel;
+    hint.href = href;
+    hint.referrerPolicy = "no-referrer";
+    doc.head.append(hint);
+  }
+}
+
 const SEARCH_DELAY_MS = 180;
 const FEATURED_COVERS_TIMEOUT_MS = 2000;
 const PREVIEW_BATCH_SIZE = 4;
@@ -2445,6 +2457,7 @@ function startApplication() {
     const groups = collectLinkGroups(video.links);
     const section = renderLinkSection(groups);
     if (video.code === "SPSF-66") {
+      warmSpsf66Playback(video.code);
       const play = createElement("a", "external-link", "站内播放 SPSF-66");
       play.href = "watch/spsf-66.html";
       section.querySelector("h3").after(play);
