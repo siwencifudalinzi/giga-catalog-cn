@@ -2444,6 +2444,11 @@ function startApplication() {
   function createLinkSection(video, { ready, release, signal }) {
     const groups = collectLinkGroups(video.links);
     const section = renderLinkSection(groups);
+    if (video.code === "SPSF-66") {
+      const play = createElement("a", "external-link", "站内播放 SPSF-66");
+      play.href = "watch/spsf-66.html";
+      section.querySelector("h3").after(play);
+    }
     if (!groups.length) return section;
     for (const event of ["pointerover", "focusin", "pointerdown"]) {
       section.addEventListener(event, release, { once: true, signal });
