@@ -20,6 +20,16 @@
       "embedUrl": "https://streamtape.com/e/XomL19ZaoGSDYye",
       "verifiedAt": "2026-11-06T14:39:58.475Z",
       "verification": "10.00 s, +300 video frames, no media error"
+    },
+    {
+      "code": "THZA-10",
+      "slot": "standard.streamtape",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:fd7f3bc3fbfe10873268218cfdebeb88d1e3c0ba5d445fffa0c84a1ee03e0589",
+      "sourcePage": "https://streamtape.com/v/Pv7zVOyQWpt0wdR/THZA-10.mp4",
+      "embedUrl": "https://streamtape.com/e/Pv7zVOyQWpt0wdR",
+      "verifiedAt": "2026-11-06T14:52:05.217Z",
+      "verification": "10.01 s, +300 video frames, no media error"
     }
   ]
 }
