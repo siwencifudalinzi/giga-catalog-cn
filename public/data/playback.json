@@ -730,6 +730,26 @@
       "embedUrl": "https://streamtape.com/e/AM86qqGpWzSwaP",
       "verifiedAt": "2026-11-07T03:19:17.759Z",
       "verification": "10.01 s, +301 video frames, no media error"
+    },
+    {
+      "code": "SPSF-68",
+      "slot": "standard.streamtape",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:adbb6becd6f1a1aad50bdb446e99072dc2d77e3236c6c820decab4597a4cd3dc",
+      "sourcePage": "https://streamtape.com/v/y7zoJgbrwjSoVM/SPSF-68.mp4",
+      "embedUrl": "https://streamtape.com/e/y7zoJgbrwjSoVM",
+      "verifiedAt": "2026-11-07T03:28:27.225Z",
+      "verification": "10.02 s, +273 video frames, no media error"
+    },
+    {
+      "code": "SPSF-57",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:88a06125e15676098ea4d96abff48b353c548b90f20cd8df89f8b2a966e402bf",
+      "sourcePage": "https://streamtape.com/v/kbbRVArGLqhOVYb/SPSF-57.mp4",
+      "embedUrl": "https://streamtape.com/e/kbbRVArGLqhOVYb",
+      "verifiedAt": "2026-11-07T03:31:32.826Z",
+      "verification": "10.01 s, +300 video frames, no media error"
     }
   ]
 }
