@@ -1272,16 +1272,6 @@
       "verification": "10.05 s, +301 video frames, no media error"
     },
     {
-      "code": "SPSF-69",
-      "slot": "standard.javryo",
-      "provider": "streamtape",
-      "sourceUrlHash": "sha256:32451e09b54f18e0f40d84fd3889c008a3f5280577fbe98cfce6025f7b69a731",
-      "sourcePage": "https://streamtape.com/v/ZXz40rAyJACRDX/SPSF-69.mp4",
-      "embedUrl": "https://streamtape.com/e/ZXz40rAyJACRDX",
-      "verifiedAt": "2026-11-07T09:31:49.362Z",
-      "verification": "10.05 s, +301 video frames, no media error"
-    },
-    {
       "code": "SPSF-56",
       "slot": "standard.javryo",
       "provider": "streamtape",
