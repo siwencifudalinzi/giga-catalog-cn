@@ -942,16 +942,6 @@
       "verification": "10.01 s, +302 video frames, no media error"
     },
     {
-      "code": "GRET-38",
-      "slot": "standard.javryo",
-      "provider": "streamtape",
-      "sourceUrlHash": "sha256:77108902a17d45c618a83124820ec99960a5aa0dd52fc26e09234731744164cb",
-      "sourcePage": "https://streamtape.com/v/ql1koBj0JOHwZz/GRET-38.mp4",
-      "embedUrl": "https://streamtape.com/e/ql1koBj0JOHwZz",
-      "verifiedAt": "2026-11-07T08:07:26.475Z",
-      "verification": "10.04 s, +302 video frames, no media error"
-    },
-    {
       "code": "GHNU-15",
       "slot": "standard.javryo",
       "provider": "streamtape",
