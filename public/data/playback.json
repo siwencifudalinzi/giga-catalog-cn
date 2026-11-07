@@ -940,6 +940,206 @@
       "embedUrl": "https://streamtape.com/e/Ao3LqrLqQjSB4v",
       "verifiedAt": "2026-11-07T03:25:51.131Z",
       "verification": "10.01 s, +302 video frames, no media error"
+    },
+    {
+      "code": "GRET-38",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:77108902a17d45c618a83124820ec99960a5aa0dd52fc26e09234731744164cb",
+      "sourcePage": "https://streamtape.com/v/ql1koBj0JOHwZz/GRET-38.mp4",
+      "embedUrl": "https://streamtape.com/e/ql1koBj0JOHwZz",
+      "verifiedAt": "2026-11-07T08:07:26.475Z",
+      "verification": "10.04 s, +302 video frames, no media error"
+    },
+    {
+      "code": "GHNU-15",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:ddf2388255b4df9a03bf40c2a218ce54a47a427d71eaea49b0f73a0a58ff255d",
+      "sourcePage": "https://streamtape.com/v/D0kldxvxRBI3Xx/GHNU-15.mp4",
+      "embedUrl": "https://streamtape.com/e/D0kldxvxRBI3Xx",
+      "verifiedAt": "2026-11-07T08:07:26.495Z",
+      "verification": "10.10 s, +303 video frames, no media error"
+    },
+    {
+      "code": "GHNU-10",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:ca1803c148eec952c733359bed3e7086d816d87b847281494fa7aba64144711d",
+      "sourcePage": "https://streamtape.com/v/KZzzPLrq93tzzB/GHNU-10.mp4",
+      "embedUrl": "https://streamtape.com/e/KZzzPLrq93tzzB",
+      "verifiedAt": "2026-11-07T08:06:56.431Z",
+      "verification": "10.07 s, +302 video frames, no media error"
+    },
+    {
+      "code": "GHMT-84",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:51e1bebd047b29bbafb572747fba1ab5ebe5ca7ab967826395788c2095b2aede",
+      "sourcePage": "https://streamtape.com/v/7zqRb2OeloUAkj4/GHMT-84.mp4",
+      "embedUrl": "https://streamtape.com/e/7zqRb2OeloUAkj4",
+      "verifiedAt": "2026-11-07T08:07:44.756Z",
+      "verification": "10.06 s, +302 video frames, no media error"
+    },
+    {
+      "code": "DHRY-14",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:7d1f5f2910d7d00e9d988a4a4165196b633a8b8b505882d1c0f45c82eb407bc7",
+      "sourcePage": "https://streamtape.com/v/ZJ6v0DXMWBsB27/DHRY-14.mp4",
+      "embedUrl": "https://streamtape.com/e/ZJ6v0DXMWBsB27",
+      "verifiedAt": "2026-11-07T08:07:44.749Z",
+      "verification": "10.02 s, +301 video frames, no media error"
+    },
+    {
+      "code": "GHMT-75",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:6549ec8072ca9e216c47f2ac6b53b5f6463f8555f1e3fde814ce2dcb3aa75c1e",
+      "sourcePage": "https://streamtape.com/v/2O3P7ml4lYFZgaK/GHMT-75.mp4",
+      "embedUrl": "https://streamtape.com/e/2O3P7ml4lYFZgaK",
+      "verifiedAt": "2026-11-07T08:07:44.779Z",
+      "verification": "10.10 s, +606 video frames, no media error"
+    },
+    {
+      "code": "GHMT-36",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:bb0d97113c97bd569d5c59a224da06aac5471bedaef8bb560af72d698d5f3a66",
+      "sourcePage": "https://streamtape.com/v/2kZ9RZ1V3ASZXpe/GHMT-36.mp4",
+      "embedUrl": "https://streamtape.com/e/2kZ9RZ1V3ASZXpe",
+      "verifiedAt": "2026-11-07T08:08:09.985Z",
+      "verification": "10.07 s, +303 video frames, no media error"
+    },
+    {
+      "code": "THZ-80",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:52fd84ba69ef285d324e1aa00276aec3f8e2b3c592cb865c539c8ff4efe8f166",
+      "sourcePage": "https://streamtape.com/v/9qaOABv10XSa8P8/THZ-80.mp4",
+      "embedUrl": "https://streamtape.com/e/9qaOABv10XSa8P8",
+      "verifiedAt": "2026-11-07T08:08:09.999Z",
+      "verification": "10.11 s, +303 video frames, no media error"
+    },
+    {
+      "code": "GRET-37",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:e2c0d5d00cee68dd1f2b5de1a3d6430b60e569471fc3c3295d2f509ba37e5522",
+      "sourcePage": "https://streamtape.com/v/wyJvg22BOofJqqM/GRET-37.mp4",
+      "embedUrl": "https://streamtape.com/e/wyJvg22BOofJqqM",
+      "verifiedAt": "2026-11-07T08:08:10.010Z",
+      "verification": "10.08 s, +303 video frames, no media error"
+    },
+    {
+      "code": "GIGP-23",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:596814752304a304f7577d02356b10816170c3ee07fe08618818aee8dc0bb7a1",
+      "sourcePage": "https://streamtape.com/v/jA1DdbB0lGHLkw/GIGP-23.mp4",
+      "embedUrl": "https://streamtape.com/e/jA1DdbB0lGHLkw",
+      "verifiedAt": "2026-11-07T08:08:45.712Z",
+      "verification": "10.05 s, +302 video frames, no media error"
+    },
+    {
+      "code": "GHMT-7",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:34599b4409bbacd91ac138afab150d9c84d444569a729be01168a1aca456d97d",
+      "sourcePage": "https://streamtape.com/v/0r0pp8Y1JgSZWy/GHMT-07.mp4",
+      "embedUrl": "https://streamtape.com/e/0r0pp8Y1JgSZWy",
+      "verifiedAt": "2026-11-07T08:08:45.699Z",
+      "verification": "10.02 s, +601 video frames, no media error"
+    },
+    {
+      "code": "GRET-36",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:e668c57b7340038797bd5791c35ddd5a192cfb28041c727027ccf38b453464da",
+      "sourcePage": "https://streamtape.com/v/3oe4OOBpB7cdZ8A/GRET-36.mp4",
+      "embedUrl": "https://streamtape.com/e/3oe4OOBpB7cdZ8A",
+      "verifiedAt": "2026-11-07T08:09:49.051Z",
+      "verification": "10.09 s, +302 video frames, no media error"
+    },
+    {
+      "code": "GHLS-77",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:9dc1019ea57d14e9f5deb9593441a9ea69c80c358d0c88aca8c6357b581df340",
+      "sourcePage": "https://streamtape.com/v/XBAmg82mYLcz8L/GHLS-77.mp4",
+      "embedUrl": "https://streamtape.com/e/XBAmg82mYLcz8L",
+      "verifiedAt": "2026-11-07T08:09:49.051Z",
+      "verification": "10.01 s, +300 video frames, no media error"
+    },
+    {
+      "code": "GHLS-45",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:972edb6dd125233ddbad94ef40d8ea663a7188d5350274045048cdf6db706a3d",
+      "sourcePage": "https://streamtape.com/v/2bp1bRM06ATZ3Qq/GHLS-45.mp4",
+      "embedUrl": "https://streamtape.com/e/2bp1bRM06ATZ3Qq",
+      "verifiedAt": "2026-11-07T08:10:19.160Z",
+      "verification": "10.03 s, +601 video frames, no media error"
+    },
+    {
+      "code": "GRET-34",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:b02b8446130d5485a12f930a255bd30aced46cf738b7483fda41d7017bdb4c80",
+      "sourcePage": "https://streamtape.com/v/BAMQ4rOOxoHrVv/GRET-34.mp4",
+      "embedUrl": "https://streamtape.com/e/BAMQ4rOOxoHrVv",
+      "verifiedAt": "2026-11-07T08:10:41.411Z",
+      "verification": "10.10 s, +243 video frames, no media error"
+    },
+    {
+      "code": "GRET-33",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:540d39a811d8455e50fbfd0873e6efe79ae0202666ed0fa1ba62b35521f48a20",
+      "sourcePage": "https://streamtape.com/v/RgowRW9vd1tddL0/GRET-33.mp4",
+      "embedUrl": "https://streamtape.com/e/RgowRW9vd1tddL0",
+      "verifiedAt": "2026-11-07T08:10:41.430Z",
+      "verification": "10.16 s, +244 video frames, no media error"
+    },
+    {
+      "code": "JMSZ-81",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:8eb85697e4d4dcd25c954926996138f7d13cb7dfc732a46bab8283718dc9685d",
+      "sourcePage": "https://streamtape.com/v/ekY762ORd7iYRqd/JMSZ-81.mp4",
+      "embedUrl": "https://streamtape.com/e/ekY762ORd7iYRqd",
+      "verifiedAt": "2026-11-07T08:10:41.454Z",
+      "verification": "10.05 s, +242 video frames, no media error"
+    },
+    {
+      "code": "GSAD-25",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:55da50d7c9e29e2fa0a3e9b690c9572de59185a4761b82e5a7b19edf56e70442",
+      "sourcePage": "https://streamtape.com/v/Me17z3JMwwtmKzL/GSAD-25.mp4",
+      "embedUrl": "https://streamtape.com/e/Me17z3JMwwtmKzL",
+      "verifiedAt": "2026-11-07T08:10:59.823Z",
+      "verification": "10.11 s, +243 video frames, no media error"
+    },
+    {
+      "code": "THP-80",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:083fb55047ea88ca937a620a9ff7aa41b24bd41ada658b09fad1f02825f9a5dc",
+      "sourcePage": "https://streamtape.com/v/bRR3OajdLbhPYbd/THP-80.mp4",
+      "embedUrl": "https://streamtape.com/e/bRR3OajdLbhPYbd",
+      "verifiedAt": "2026-11-07T08:10:59.818Z",
+      "verification": "10.01 s, +300 video frames, no media error"
+    },
+    {
+      "code": "GRET-31",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:a36bd7b80bca95dec982ad58e24a0d98b3d410be20b0ff22775336e661729e95",
+      "sourcePage": "https://streamtape.com/v/Qy42BjVwwVf0LR8/GRET-31.mp4",
+      "embedUrl": "https://streamtape.com/e/Qy42BjVwwVf0LR8",
+      "verifiedAt": "2026-11-07T08:10:59.838Z",
+      "verification": "10.09 s, +606 video frames, no media error"
     }
   ]
 }
