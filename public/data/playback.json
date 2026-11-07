@@ -530,6 +530,206 @@
       "embedUrl": "https://streamtape.com/e/APAZyaQ0K0tvGx",
       "verifiedAt": "2026-11-07T03:11:52.708Z",
       "verification": "10.07 s, +302 video frames, no media error"
+    },
+    {
+      "code": "SPSE-81",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:67d459c641b8fa57b80aa2c805f94fbf32aeed1948a419f0dfdd691fc880fcb9",
+      "sourcePage": "https://streamtape.com/v/QkzXMz6mYJt0Z1g/SPSE-81.mp4",
+      "embedUrl": "https://streamtape.com/e/QkzXMz6mYJt0Z1g",
+      "verifiedAt": "2026-11-07T03:11:52.712Z",
+      "verification": "10.05 s, +301 video frames, no media error"
+    },
+    {
+      "code": "HTB-12",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:a98d78435528245509b7a4b8ae4889cd87b7f8190cdf4ef226c61186b1616413",
+      "sourcePage": "https://streamtape.com/v/x9XmLb4q2wCkB11/HTB-12.mp4",
+      "embedUrl": "https://streamtape.com/e/x9XmLb4q2wCkB11",
+      "verifiedAt": "2026-11-07T03:11:52.708Z",
+      "verification": "10.02 s, +300 video frames, no media error"
+    },
+    {
+      "code": "SPSE-72",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:ab47eddb220ff23cfcc08eb9cc70e8d9c42418da20155e9f9cc15cf0736f377d",
+      "sourcePage": "https://streamtape.com/v/PJaA1gmvbkS0QPZ/SPSE-72.mp4",
+      "embedUrl": "https://streamtape.com/e/PJaA1gmvbkS0QPZ",
+      "verifiedAt": "2026-11-07T03:12:15.002Z",
+      "verification": "10.10 s, +252 video frames, no media error"
+    },
+    {
+      "code": "SPSE-75",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:f08d7a9a3f0b9f83727b69f455c849269a0b58479da58820b1636cff3007d5b6",
+      "sourcePage": "https://streamtape.com/v/G9GA6kLkbZI13yM/SPSE-75.mp4",
+      "embedUrl": "https://streamtape.com/e/G9GA6kLkbZI13yM",
+      "verifiedAt": "2026-11-07T03:12:15.007Z",
+      "verification": "10.08 s, +302 video frames, no media error"
+    },
+    {
+      "code": "THPA-13",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:80c3c087a86a836b863f813f800fdcf6f6b642de6bf77c1ea729ae28163c187e",
+      "sourcePage": "https://streamtape.com/v/beoVeAxO2bfPZBv/THPA-13.mp4",
+      "embedUrl": "https://streamtape.com/e/beoVeAxO2bfPZBv",
+      "verifiedAt": "2026-11-07T03:12:15.007Z",
+      "verification": "10.03 s, +301 video frames, no media error"
+    },
+    {
+      "code": "GIGP-70",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:77d5372bfa72f44358ab30c37a569adc9e1502c52c2671eef14ac78fd91a2664",
+      "sourcePage": "https://streamtape.com/v/g0aPrj04eeFqRwD/GIGP-70.mp4",
+      "embedUrl": "https://streamtape.com/e/g0aPrj04eeFqRwD",
+      "verifiedAt": "2026-11-07T03:12:50.012Z",
+      "verification": "10.03 s, +301 video frames, no media error"
+    },
+    {
+      "code": "SPSE-31",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:a4fdb59633b8f5254c758fc718c3e6d29d059b5910b0052bfc09afec7153851b",
+      "sourcePage": "https://streamtape.com/v/vow9a8pmOZh4Orp/SPSE-31.mp4",
+      "embedUrl": "https://streamtape.com/e/vow9a8pmOZh4Orp",
+      "verifiedAt": "2026-11-07T03:13:20.179Z",
+      "verification": "10.07 s, +302 video frames, no media error"
+    },
+    {
+      "code": "SPSE-57",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:f4dfdd36b33110505428e1738e6c58cf445b2cbbfa4eed763e0f68e89de92aa6",
+      "sourcePage": "https://streamtape.com/v/Q299aOVBPRu0xWk/SPSE-57.mp4",
+      "embedUrl": "https://streamtape.com/e/Q299aOVBPRu0xWk",
+      "verifiedAt": "2026-11-07T03:14:21.352Z",
+      "verification": "10.02 s, +300 video frames, no media error"
+    },
+    {
+      "code": "SPSE-49",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:709e3f0958d92c828167d43c8b7a4d24e843d5a0b60ba02b242e66ef3e32d1b8",
+      "sourcePage": "https://streamtape.com/v/8Bg2zXXo6AilMd/SPSE-49.mp4",
+      "embedUrl": "https://streamtape.com/e/8Bg2zXXo6AilMd",
+      "verifiedAt": "2026-11-07T03:13:51.246Z",
+      "verification": "10.03 s, +301 video frames, no media error"
+    },
+    {
+      "code": "GRET-50",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:17befa69087f4f4e7373cdc47cc9d05364c00faff5973e0104d2ab485dc4a110",
+      "sourcePage": "https://streamtape.com/v/2oovp9ARAgcZdYv/GRET-50.mp4",
+      "embedUrl": "https://streamtape.com/e/2oovp9ARAgcZdYv",
+      "verifiedAt": "2026-11-07T03:13:51.253Z",
+      "verification": "10.07 s, +302 video frames, no media error"
+    },
+    {
+      "code": "THPA-12",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:0443fcdb2f7fd6128d930a237398a41bff8a069fa8965ec25191b0f8f95caae9",
+      "sourcePage": "https://streamtape.com/v/RWW8r3ebZjCd129/THPA-12.mp4",
+      "embedUrl": "https://streamtape.com/e/RWW8r3ebZjCd129",
+      "verifiedAt": "2026-11-07T03:14:49.784Z",
+      "verification": "10.11 s, +302 video frames, no media error"
+    },
+    {
+      "code": "MSZ-29",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:8e4dd2712a01d1086b184aa25d10774292321b597efba404adc210bf138a654a",
+      "sourcePage": "https://streamtape.com/v/x2qVgJaybZtkYGo/MSZ-29.mp4",
+      "embedUrl": "https://streamtape.com/e/x2qVgJaybZtkYGo",
+      "verifiedAt": "2026-11-07T03:14:49.793Z",
+      "verification": "10.09 s, +301 video frames, no media error"
+    },
+    {
+      "code": "SPSE-23",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:c1f1fe0d4b8976b7dd09b3f81179abc774a23f26957b21a646fe0a1e6da764ee",
+      "sourcePage": "https://streamtape.com/v/k3MALvwOl9iOJ1y/SPSE-23.mp4",
+      "embedUrl": "https://streamtape.com/e/k3MALvwOl9iOJ1y",
+      "verifiedAt": "2026-11-07T03:14:49.817Z",
+      "verification": "10.11 s, +303 video frames, no media error"
+    },
+    {
+      "code": "SPSD-81",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:22fc8a7b544cde04d8dfb684babff020758f7288dfdc099ea5e799404df44ff7",
+      "sourcePage": "https://streamtape.com/v/JkxQJ8LYz1cjMK1/SPSD-81.mp4",
+      "embedUrl": "https://streamtape.com/e/JkxQJ8LYz1cjMK1",
+      "verifiedAt": "2026-11-07T03:15:43.209Z",
+      "verification": "10.01 s, +300 video frames, no media error"
+    },
+    {
+      "code": "SPSE-3",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:b651c3b832d8d138b04c536735696389a45d5a3d4382c67e0483cd81e67645ec",
+      "sourcePage": "https://streamtape.com/v/g3GjVBGYa8cqyqw/SPSE-03.mp4",
+      "embedUrl": "https://streamtape.com/e/g3GjVBGYa8cqyqw",
+      "verifiedAt": "2026-11-07T03:15:13.003Z",
+      "verification": "10.08 s, +302 video frames, no media error"
+    },
+    {
+      "code": "SPSE-4",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:29bd56d843c93bf3f2aff62cf86f8795dd15306d86dbbbcde68db09feaab4d59",
+      "sourcePage": "https://streamtape.com/v/A0pVWPy0pKsXyqa/SPSE-04.mp4",
+      "embedUrl": "https://streamtape.com/e/A0pVWPy0pKsXyqa",
+      "verifiedAt": "2026-11-07T03:15:13.002Z",
+      "verification": "10.10 s, +303 video frames, no media error"
+    },
+    {
+      "code": "SPSD-97",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:25970de2a23a22623820962cd3f7fb19b8639d1aad00b5a48479059dab8cad77",
+      "sourcePage": "https://streamtape.com/v/YLwz0Ryxx4HvmeX/SPSD-97.mp4",
+      "embedUrl": "https://streamtape.com/e/YLwz0Ryxx4HvmeX",
+      "verifiedAt": "2026-11-07T03:16:10.103Z",
+      "verification": "10.14 s, +304 video frames, no media error"
+    },
+    {
+      "code": "SPSD-99",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:d0019917eae3a3f005ae748e42c5d3fd945a10b6ee7f251bda2b3c91f305e168",
+      "sourcePage": "https://streamtape.com/v/dLG91WvLD6Fgkq/SPSD-99.mp4",
+      "embedUrl": "https://streamtape.com/e/dLG91WvLD6Fgkq",
+      "verifiedAt": "2026-11-07T03:16:10.153Z",
+      "verification": "10.01 s, +300 video frames, no media error"
+    },
+    {
+      "code": "THPA-11",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:a31f75af745cfca61667b323feddf550f04547890d803bc42164cfc7388e3454",
+      "sourcePage": "https://streamtape.com/v/vwLzJg2VPQC4xjg/THPA-11.mp4",
+      "embedUrl": "https://streamtape.com/e/vwLzJg2VPQC4xjg",
+      "verifiedAt": "2026-11-07T03:16:10.215Z",
+      "verification": "10.01 s, +300 video frames, no media error"
+    },
+    {
+      "code": "SPSD-87",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:0cb1dec16d391f7fca992be60a769f72ec13d3ca88f04f7823ed1d191c562dca",
+      "sourcePage": "https://streamtape.com/v/AM86qqGpWzSwaP/SPSD-87.mp4",
+      "embedUrl": "https://streamtape.com/e/AM86qqGpWzSwaP",
+      "verifiedAt": "2026-11-07T03:19:17.759Z",
+      "verification": "10.01 s, +301 video frames, no media error"
     }
   ]
 }
