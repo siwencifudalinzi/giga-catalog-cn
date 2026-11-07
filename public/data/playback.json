@@ -752,16 +752,6 @@
       "verification": "10.01 s, +300 video frames, no media error"
     },
     {
-      "code": "SPSD-92",
-      "slot": "standard.javryo",
-      "provider": "streamtape",
-      "sourceUrlHash": "sha256:aa49ce9c7c54418e4ae3d81ce79232e741dd1739eff199db5db6026516057b81",
-      "sourcePage": "https://streamtape.com/v/3dgb0QWLq6fdb4D/SPSD-92.mp4",
-      "embedUrl": "https://streamtape.com/e/3dgb0QWLq6fdb4D",
-      "verifiedAt": "2026-11-07T03:19:17.782Z",
-      "verification": "10.01 s, +300 video frames, no media error"
-    },
-    {
       "code": "SPSD-57",
       "slot": "standard.javryo",
       "provider": "streamtape",
