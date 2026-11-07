@@ -1550,6 +1550,26 @@
       "embedUrl": "https://streamtape.com/e/b7ljl9zbmYSoKB",
       "verifiedAt": "2026-11-07T09:36:37.347Z",
       "verification": "10.08 s, +302 video frames, no media error"
+    },
+    {
+      "code": "SPSD-92",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:aa49ce9c7c54418e4ae3d81ce79232e741dd1739eff199db5db6026516057b81",
+      "sourcePage": "https://streamtape.com/v/3dgb0QWLq6fdb4D/SPSD-92.mp4",
+      "embedUrl": "https://streamtape.com/e/3dgb0QWLq6fdb4D",
+      "verifiedAt": "2026-11-07T10:57:31.780Z",
+      "verification": "10.03 s, +300 video frames, no media error"
+    },
+    {
+      "code": "THZA-10",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:3cb3bcbc4b5d5319795612632d8513c1934a5cdb8ea0d68249d150191854354b",
+      "sourcePage": "https://streamtape.com/v/ykdoX1lQVQCBBl/THZA-10.mp4",
+      "embedUrl": "https://streamtape.com/e/ykdoX1lQVQCBBl",
+      "verifiedAt": "2026-11-07T10:57:31.768Z",
+      "verification": "10.01 s, +300 video frames, no media error"
     }
   ]
 }
