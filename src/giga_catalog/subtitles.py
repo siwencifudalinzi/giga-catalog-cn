@@ -1130,7 +1130,7 @@ def _parse_subtitle_directory_cells(
         anchor
         for cell in cells
         for anchor in cell.anchors
-        if anchor.text.upper() == _PORTAL_LABEL
+        if anchor.text.upper() in {_PORTAL_LABEL, "SRT ENG DOWNLOAD"}
     ]
     if len(portal_anchors) != 1:
         raise SubtitleFormatError(
