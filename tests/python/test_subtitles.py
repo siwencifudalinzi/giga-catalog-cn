@@ -527,6 +527,23 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
                 allow_known_pmid_typo=True,
             )
 
+    def test_collection_child_with_two_urls_keeps_the_primary_url(self) -> None:
+        parser = subtitle_module.parse_collection_child_csv
+        primary = "https://ouo.io/primary"
+        secondary = "https://ouo.io/secondary"
+        options = {"series": "GIGP", "catalog_codes": {"GIGP-71"}}
+        self.assertEqual(
+            parser(f"GIGP-71,{primary},{secondary},,\n", **options),
+            {"GIGP-71": primary},
+        )
+        for row in (
+            f"GIGP-71,{primary},https://example.org/secondary",
+            f"GIGP-71,https://example.org/primary,{secondary}",
+            f"GIGP-71,{primary},{secondary},extra",
+        ):
+            with self.subTest(row=row), self.assertRaises(SubtitleFormatError):
+                parser(row, **options)
+
     def test_collection_child_hardsub_note_does_not_change_link_classification(self) -> None:
         for note in ("hardsub", " HARDSUB "):
             self.assertEqual(

@@ -721,9 +721,10 @@ def parse_collection_child_csv(
     allow_known_pmid_typo: bool = False,
     diagnostics: Optional[List[dict]] = None,
 ) -> Dict[str, str]:
-    """Parse CODE,URL with optional HARDSUB note and empty export padding.
+    """Parse CODE,URL with an optional secondary URL or HARDSUB note and padding.
 
     HARDSUB is a source annotation, not evidence of a standalone subtitle URL.
+    A secondary URL is validated, but only the primary URL is published.
     NEED ASK FOR REUP records supply no available link. Matching catalog codes
     are added to pending_codes only after the entire sheet passes validation.
     Unknown populated columns still fail rather than being silently discarded.
@@ -757,11 +758,13 @@ def parse_collection_child_csv(
                 not row[1].strip()
                 or row[1].strip().upper() == "NEED ASK FOR REUP"
             )
-            if pending_reupload and len(row) == 3:
-                _collection_source_url(row[2].strip())
-                row.pop()
-            if len(row) == 3 and row[2].strip().casefold() == "hardsub":
-                row.pop()
+            if len(row) == 3:
+                extra = row[2].strip()
+                if pending_reupload or extra.startswith("https://"):
+                    _collection_source_url(extra)
+                    row.pop()
+                elif extra.casefold() == "hardsub":
+                    row.pop()
             if len(row) != 2:
                 raise SubtitleFormatError(
                     f"collection child row {row_number} must contain exactly two columns"
