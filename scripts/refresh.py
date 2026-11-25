@@ -56,11 +56,6 @@ KNOWN_UNAVAILABLE_GHVR_CSV_URL = (
     "12s9KVRyrtTD9OCRfP8lnLcBmgnYNZcwtx6oShEYTwFQ/"
     "export?format=csv&gid=0"
 )
-KNOWN_PMID_CSV_URL = (
-    "https://docs.google.com/spreadsheets/d/"
-    "1At1H45bj0W-G9B4g6V06IHOnxKzzjUst5DInw29IOEc/"
-    "export?format=csv&gid=0"
-)
 DEFAULT_BASE_URL = BASE_URL
 DEFAULT_LEGACY_DIR = Path(r"D:\giga-catalog")
 DEFAULT_OUTPUT_ROOT = REPOSITORY_ROOT / "public"
@@ -269,9 +264,7 @@ def run_refresh(
                 series=child.series,
                 catalog_codes=catalog_codes,
                 pending_codes=collection_pending_codes,
-                allow_known_pmid_typo=(
-                    child.series == "PMID" and child.csv_url == KNOWN_PMID_CSV_URL
-                ),
+                source_url=child.csv_url,
                 diagnostics=collection_diagnostics,
             )
         except SubtitleFormatError as error:

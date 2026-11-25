@@ -545,6 +545,24 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
             with self.subTest(row=row), self.assertRaises(SubtitleFormatError):
                 parser(row, **options)
 
+    def test_spse_sheet_quarantines_only_its_verified_non_catalog_typo(self) -> None:
+        url = ("https://docs.google.com/spreadsheets/d/"
+               "1tAo3095B9Tt3X7RDb28DIFG0KWGVfyEBzran27bYTIo/export?format=csv&gid=0")
+        rows = "SPSE-15,https://ouo.io/valid\nSPAE-16,https://ouo.io/unconfirmed"
+        codes = {"SPSE-15", "SPSE-16"}
+        diagnostics = []
+        parser = subtitle_module.parse_collection_child_csv
+        links = parser(rows, series="SPSE", catalog_codes=codes, source_url=url, diagnostics=diagnostics)
+        self.assertEqual(links, {"SPSE-15": "https://ouo.io/valid"})
+        self.assertEqual(diagnostics, [{"series": "SPSE", "row": 2, "reason": "known_non_catalog_code_typo"}])
+        for source, catalog, text in (
+            (url + "1", codes, rows), (url, codes | {"SPAE-16"}, rows),
+            (url, codes, rows.replace("SPAE-16", "SPAE-17")),
+            (url, codes, rows.replace("ouo.io/unconfirmed", "example.org/unconfirmed")),
+        ):
+            with self.subTest(source=source, catalog=catalog, text=text), self.assertRaises(SubtitleFormatError):
+                parser(text, series="SPSE", catalog_codes=catalog, source_url=source)
+
     def test_collection_child_hardsub_note_does_not_change_link_classification(self) -> None:
         for note in ("hardsub", " HARDSUB "):
             self.assertEqual(

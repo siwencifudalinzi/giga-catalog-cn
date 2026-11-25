@@ -15,6 +15,19 @@ import {
 const generation = "a".repeat(64);
 const generatedAt = "2026-08-29T00:00:00Z";
 
+test("HTTP archive covers use the bundled image in the sidebar, cards and detail", () => {
+  const boot = validBootstrap();
+  const original = "http://g-history.jp/db_titles/pisb/pisb01/pac_s.jpg";
+  boot.recentVideos[0].cover = original;
+  const store = createRuntimeCatalogStore(boot);
+  const expected = new URL("../../public/media/archive-covers/pisb01.webp", import.meta.url);
+  assert.equal(store.getSeriesPreview("SPSF").cover, expected.href);
+  assert.equal(store.getRecentVideos()[0].cover, expected.href);
+  assert.equal(store.getVideo("SPSF-2").cover, expected.href);
+  assert.equal(readFileSync(expected).toString("ascii", 8, 12), "WEBP");
+  assert.equal(boot.recentVideos[0].cover, original);
+});
+
 test("combined keywords match across fields while product-code variants remain normalized", () => {
   const store = createRuntimeCatalogStore(validBootstrap());
   store.installSearch(validSearch());

@@ -1,6 +1,7 @@
 import { normalizeText, normalizeVideoCode, searchQueryTerms, compareVideoCodes } from "./catalog.js";
 import { createTagIndex, filterVideosByTags } from "./tags.js";
 import { buildSeriesPreviews } from './series-navigation.js';
+import { displayCover } from "./archive-covers.js";
 
 const GENERATION_RE = /^[0-9a-f]{64}$/u;
 const SERIES_RE = /^[A-Z][A-Z0-9]*$/u;
@@ -459,7 +460,9 @@ export function createRuntimeCatalogStore(bootstrap) {
   function taggedRecord(value) {
     if (!taggedRecords.has(value)) {
       // Parsed records and assigned tag arrays are already deeply immutable.
-      taggedRecords.set(value, Object.freeze({ ...value, tagIds: assignments.get(value.code) ?? noTags }));
+      taggedRecords.set(value, Object.freeze({
+        ...value, cover: displayCover(value.cover), tagIds: assignments.get(value.code) ?? noTags,
+      }));
     }
     return taggedRecords.get(value);
   }
@@ -486,7 +489,8 @@ export function createRuntimeCatalogStore(bootstrap) {
       return checked.series;
     },
     getSeriesPreview(code) {
-      return seriesPreviews.get(code) ?? null;
+      const preview = seriesPreviews.get(code);
+      return preview ? taggedRecord(preview) : null;
     },
     getRecentVideos() {
       recentView ??= Object.freeze([...rawRecent.values()].map(taggedRecord).sort((left, right) =>

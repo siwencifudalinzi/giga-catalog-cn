@@ -74,6 +74,12 @@ _KNOWN_PMID_NON_CATALOG_CODES = frozenset({
     "PIMD-123",
     "PIMD-124",
 })
+_KNOWN_NON_CATALOG_CODES_BY_SOURCE = {
+    ("PMID", "https://docs.google.com/spreadsheets/d/"
+     "1At1H45bj0W-G9B4g6V06IHOnxKzzjUst5DInw29IOEc/export?format=csv&gid=0"): _KNOWN_PMID_NON_CATALOG_CODES,
+    ("SPSE", "https://docs.google.com/spreadsheets/d/"
+     "1tAo3095B9Tt3X7RDb28DIFG0KWGVfyEBzran27bYTIo/export?format=csv&gid=0"): {"SPAE-16"},
+}
 
 
 class SubtitleFormatError(ValueError):
@@ -719,6 +725,7 @@ def parse_collection_child_csv(
     catalog_codes: Iterable[str],
     pending_codes: Optional[set[str]] = None,
     allow_known_pmid_typo: bool = False,
+    source_url: Optional[str] = None,
     diagnostics: Optional[List[dict]] = None,
 ) -> Dict[str, str]:
     """Parse CODE,URL with an optional secondary URL or HARDSUB note and padding.
@@ -747,6 +754,9 @@ def parse_collection_child_csv(
     seen_codes = set()
     pending_catalog_codes = set()
     ignored_rows = []
+    known_typos = _KNOWN_NON_CATALOG_CODES_BY_SOURCE.get((normalized_series, source_url), ())
+    if allow_known_pmid_typo and normalized_series == "PMID":
+        known_typos = _KNOWN_PMID_NON_CATALOG_CODES
     try:
         rows = csv.reader(StringIO(text))
         for row_number, row in enumerate(rows, 1):
@@ -774,12 +784,7 @@ def parse_collection_child_csv(
                 raise SubtitleFormatError(
                     f"collection child row {row_number} has an invalid code"
                 )
-            if (
-                allow_known_pmid_typo
-                and normalized_series == "PMID"
-                and code in _KNOWN_PMID_NON_CATALOG_CODES
-                and code not in normalized_catalog_codes
-            ):
+            if code in known_typos and code not in normalized_catalog_codes:
                 if code in seen_codes:
                     raise SubtitleFormatError(
                         f"duplicate normalized collection child code {code}"
@@ -787,7 +792,7 @@ def parse_collection_child_csv(
                 seen_codes.add(code)
                 _collection_source_url(row[1].strip())
                 ignored_rows.append({
-                    "series": "PMID", "row": row_number,
+                    "series": normalized_series, "row": row_number,
                     "reason": "known_non_catalog_code_typo",
                 })
                 continue
