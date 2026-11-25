@@ -1880,6 +1880,106 @@
       "embedUrl": "https://streamtape.com/e/bgopyrd8BRFPw41",
       "verifiedAt": "2026-11-08T11:56:24.906Z",
       "verification": "10.06 s, +301 video frames, no media error"
+    },
+    {
+      "code": "SPSF-99",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:6fad541165132fdd720f23ec2a2fd6adae58f3039202a354f5e65b7c8007d712",
+      "sourcePage": "https://streamtape.com/v/GjJLOA6bl2c1xa1/SPSF-99.mp4",
+      "embedUrl": "https://streamtape.com/e/GjJLOA6bl2c1xa1",
+      "verifiedAt": "2026-11-25T10:04:02.800Z",
+      "verification": "10.11 s, +303 video frames, no media error"
+    },
+    {
+      "code": "SPSF-97",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:7c4c27e9a09a0e920883c06e791a660faa565410ce073dac18a4ba483180ff3b",
+      "sourcePage": "https://streamtape.com/v/Xk8R9pbw1esDjWw/SPSF-97.mp4",
+      "embedUrl": "https://streamtape.com/e/Xk8R9pbw1esDjWw",
+      "verifiedAt": "2026-11-25T10:04:02.781Z",
+      "verification": "10.02 s, +301 video frames, no media error"
+    },
+    {
+      "code": "GRET-52",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:bd2566c2ba7cad4e0c37bcc07fbabea86a13fa2829be52cdfe41e3e804a95fd6",
+      "sourcePage": "https://streamtape.com/v/XYveeOAKpesDp2j/GRET-52.mp4",
+      "embedUrl": "https://streamtape.com/e/XYveeOAKpesDp2j",
+      "verifiedAt": "2026-11-25T10:04:02.863Z",
+      "verification": "10.06 s, +301 video frames, no media error"
+    },
+    {
+      "code": "SPSF-96",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:7f3bfd9249e79d663c54e857a1b0da8a596d3cd3ed3857e8bcd4b5f5681e9fc9",
+      "sourcePage": "https://streamtape.com/v/qK4ZDy4koDiz2RB/SPSF-96.mp4",
+      "embedUrl": "https://streamtape.com/e/qK4ZDy4koDiz2RB",
+      "verifiedAt": "2026-11-25T10:04:02.865Z",
+      "verification": "10.09 s, +302 video frames, no media error"
+    },
+    {
+      "code": "SPSF-95",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:096fea4aaca0bca3fe4040b942b7525d1ca94a69731a6e6b7feb55548c177334",
+      "sourcePage": "https://streamtape.com/v/06vDyAeMbpCb8YR/SPSF-95.mp4",
+      "embedUrl": "https://streamtape.com/e/06vDyAeMbpCb8YR",
+      "verifiedAt": "2026-11-25T10:04:02.832Z",
+      "verification": "10.10 s, +303 video frames, no media error"
+    },
+    {
+      "code": "SPSF-94",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:66883105004b90f1f1d59b38e3c56a820cbfb594f4d5fe532310071625daf2c2",
+      "sourcePage": "https://streamtape.com/v/vB46Oqkz0Li40Yw/SPSF-94.mp4",
+      "embedUrl": "https://streamtape.com/e/vB46Oqkz0Li40Yw",
+      "verifiedAt": "2026-11-25T10:04:45.632Z",
+      "verification": "10.08 s, +302 video frames, no media error"
+    },
+    {
+      "code": "SPSF-93",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:b2228a806433addfa8163ff1b907f51f94b2a008312262af192137db508eda14",
+      "sourcePage": "https://streamtape.com/v/ApPX69LkeGtXADD/SPSF-93.mp4",
+      "embedUrl": "https://streamtape.com/e/ApPX69LkeGtXADD",
+      "verifiedAt": "2026-11-25T10:04:45.633Z",
+      "verification": "10.07 s, +302 video frames, no media error"
+    },
+    {
+      "code": "GIGP-72",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:41a747372821419de743e5bdf7514b54ee9b23854e5d2a31f4c1887533447741",
+      "sourcePage": "https://streamtape.com/v/W9mJ6zxmdRiAzg/GIGP-72.mp4",
+      "embedUrl": "https://streamtape.com/e/W9mJ6zxmdRiAzg",
+      "verifiedAt": "2026-11-25T10:06:04.713Z",
+      "verification": "10.08 s, +302 video frames, no media error"
+    },
+    {
+      "code": "GIGP-71",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:a34029bdeb72ee411ae2b388ff2add2ca7b9486d848fea5ef6a524d6eac7344e",
+      "sourcePage": "https://streamtape.com/v/XPW1Ap68MyIDOqj/GIGP-71.mp4",
+      "embedUrl": "https://streamtape.com/e/XPW1Ap68MyIDOqj",
+      "verifiedAt": "2026-11-25T10:04:46.146Z",
+      "verification": "10.08 s, +302 video frames, no media error"
+    },
+    {
+      "code": "SPSF-12",
+      "slot": "standard.javryo",
+      "provider": "streamtape",
+      "sourceUrlHash": "sha256:5f3686f7e6f6d94bdd5d3b3283bc057ea9df1a69fcbcf90d042944d2a3c9a6b3",
+      "sourcePage": "https://streamtape.com/v/aRvraXqLZLFMpa/SPSF-12.mp4",
+      "embedUrl": "https://streamtape.com/e/aRvraXqLZLFMpa",
+      "verifiedAt": "2026-11-25T10:04:46.424Z",
+      "verification": "10.05 s, +302 video frames, no media error"
     }
   ]
 }
