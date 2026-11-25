@@ -573,6 +573,31 @@ class RefreshPipelineTests(unittest.TestCase):
                                  "https://ouo.io/ready" if active_row else "https://ouo.io/unchanged")
                 self.assertEqual(result["internal"]["sources"]["collection"]["linkKeys"], int(bool(active_row)))
 
+    def test_unfamiliar_bad_row_preserves_prior_link_while_valid_rows_refresh(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            output = root / "public"
+            write_previous(output, products=[product(f"AHEF-{i}", productId=i) for i in range(1, 4)],
+                           links={"AHEF-2": {"reupload": "https://ouo.io/existing"}})
+            directory = EMPTY_COLLECTION_DIRECTORY_HTML.replace(
+                "</tbody>", '<tr><td class="blue"><a href="https://docs.google.com/'
+                'spreadsheets/d/ahef-child/edit?gid=0">AHEF</a></td></tr></tbody>'
+            ).replace("</style>", ".waffle .blue { color: #1155cc; }</style>")
+            csv_text = ("AHEF-01,https://ouo.io/one\nAHEF-02,https://ouo.io/unverified,unfamiliar note\n"
+                        "AHEF-03,https://ouo.io/three")
+            result = run_refresh(
+                ["--mode", "links-only", "--output-root", str(output), "--data-root", str(root / "private")],
+                sheet_downloader=lambda *args, **kwargs: SHEET_HEADER,
+                collection_downloader=lambda url, **kwargs: directory if url == SUBTITLE_DIRECTORY_URL else csv_text,
+                featured_cover_refresher=lambda *args, **kwargs: {"published": False}, clock=lambda: GENERATED_AT,
+            )
+            catalog = json.loads((output / "data" / "catalog.json").read_text(encoding="utf-8"))
+            self.assertEqual({v["code"]: v["links"]["reupload"] for s in catalog["series"] for v in s["videos"]},
+                             {"AHEF-1": "https://ouo.io/one", "AHEF-2": "https://ouo.io/existing",
+                              "AHEF-3": "https://ouo.io/three"})
+            note, = result["internal"]["sources"]["collection"]["diagnostics"]
+            self.assertEqual((note["series"], note["row"], note["code"]), ("AHEF", 2, "AHEF-2"))
+
     def test_blank_collection_url_marks_only_that_video_pending(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

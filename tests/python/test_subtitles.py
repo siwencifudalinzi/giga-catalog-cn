@@ -528,6 +528,28 @@ class SubtitleDirectoryParserTests(unittest.TestCase):
                 allow_known_pmid_typo=True,
             )
 
+    def test_row_recovery_withholds_conflicting_links_and_pending_removals_in_any_order(self) -> None:
+        parser = subtitle_module.parse_collection_child_csv
+        valid = ["NEW-1,https://ouo.io/one", "NEW-2,https://ouo.io/two"]
+        conflict = ["NEW-03,NEED ASK FOR REUP", "NEW-3,https://ouo.io/conflict"]
+        for rows in (conflict, list(reversed(conflict))):
+            pending, notes = set(), []
+            links = parser("\n".join(valid + rows), series="NEW", catalog_codes={"NEW-1", "NEW-2", "NEW-3"},
+                           quarantine_invalid_rows=True, pending_codes=pending, diagnostics=notes)
+            self.assertEqual(links, {"NEW-1": "https://ouo.io/one", "NEW-2": "https://ouo.io/two"})
+            self.assertEqual(pending, set())
+            self.assertEqual([(n["code"], n["row"]) for n in notes], [("NEW-3", 4)])
+
+    def test_row_recovery_rejects_widespread_drift_and_broken_csv_atomically(self) -> None:
+        for bad in ("NEW-02,https://example.org/wrong", 'NEW-02,"unfinished'):
+            pending, notes = set(), []
+            with self.assertRaises(SubtitleFormatError):
+                subtitle_module.parse_collection_child_csv(
+                    "NEW-1,NEED ASK FOR REUP\n" + bad, series="NEW", catalog_codes={"NEW-1", "NEW-2"},
+                    quarantine_invalid_rows=True, pending_codes=pending, diagnostics=notes,
+                )
+            self.assertEqual((pending, notes), (set(), []))
+
     def test_collection_child_with_two_urls_keeps_the_primary_url(self) -> None:
         parser = subtitle_module.parse_collection_child_csv
         primary = "https://ouo.io/primary"

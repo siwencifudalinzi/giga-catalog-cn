@@ -723,13 +723,15 @@ class LiveReleaseTests(ReleaseTestCase):
 
     def test_missing_probe_404_does_not_read_slow_body_past_wall_deadline(self):
         body = b"missing"
+        release_body = threading.Event()
 
         def slow_404_body(handler):
             handler.send_response(404)
             handler.send_header("Content-Length", str(len(body)))
             handler.end_headers()
             handler.wfile.flush()
-            time.sleep(0.18)
+            if not release_body.wait(timeout=10):
+                return
             try:
                 handler.wfile.write(body)
                 handler.wfile.flush()
@@ -744,23 +746,20 @@ class LiveReleaseTests(ReleaseTestCase):
             manifest_bytes=1024,
             file_bytes=1024,
             total_bytes=4096,
-            wall_seconds=0.12,
+            wall_seconds=5,
         )
         routes = self.full_routes()
         routes["/js/__giga_release_probe_missing__.js"] = [slow_404_body]
         with HttpFixture(routes) as fixture:
-            started = time.monotonic()
-            result = release.compare_live_release(
-                self.build_manifest(),
-                fixture.base_url,
-                attempts=1,
-                timeout=1,
-                delay=0,
-                limits=limits,
-            )
-            elapsed = time.monotonic() - started
+            try:
+                result = release.compare_live_release(
+                    self.build_manifest(), fixture.base_url, attempts=1,
+                    timeout=1, delay=0, limits=limits,
+                )
+            finally:
+                # The verifier must finish with only the 404 headers available.
+                release_body.set()
 
-        self.assertLess(elapsed, limits.wall_seconds)
         self.assertEqual(result.state, "matching")
         self.assertEqual(result.attempts, 1)
 

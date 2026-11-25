@@ -266,6 +266,7 @@ def run_refresh(
                 pending_codes=collection_pending_codes,
                 source_url=child.csv_url,
                 diagnostics=collection_diagnostics,
+                quarantine_invalid_rows=previous_catalog is not None and not options.strict_links,
             )
         except SubtitleFormatError as error:
             raise RefreshError(f"collection series {child.series}: {error}") from error
@@ -1372,6 +1373,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(str(error), file=sys.stderr)
         return 1
     print(result["humanSummary"])
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        for note in result["internal"]["sources"]["collection"]["diagnostics"]:
+            if note.get("action") == "quarantined":
+                print(f"::warning::Collection {note['series']}, row {note['row']}: {note['reason']}")
     print(
         json.dumps(
             result["internal"],

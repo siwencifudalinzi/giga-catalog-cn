@@ -718,6 +718,22 @@ def parse_collection_archive_csv(
     return dict(sorted(links.items())), pending, diagnostics
 
 
+def _collection_row_url(row: List[str], row_number: int) -> Optional[str]:
+    while len(row) > 2 and not row[-1].strip():
+        row.pop()
+    if len(row) not in (2, 3):
+        raise SubtitleFormatError(f"collection child row {row_number} must contain exactly two columns")
+    primary = row[1].strip()
+    pending = not primary or primary.upper() == "NEED ASK FOR REUP"
+    if len(row) == 3:
+        extra = row[2].strip()
+        if pending or extra.startswith("https://"):
+            _collection_source_url(extra)
+        elif extra.casefold() != "hardsub":
+            raise SubtitleFormatError(f"collection child row {row_number} must contain exactly two columns")
+    return None if pending else _collection_source_url(primary)
+
+
 def parse_collection_child_csv(
     text: str,
     *,
@@ -727,6 +743,7 @@ def parse_collection_child_csv(
     allow_known_pmid_typo: bool = False,
     source_url: Optional[str] = None,
     diagnostics: Optional[List[dict]] = None,
+    quarantine_invalid_rows: bool = False,
 ) -> Dict[str, str]:
     """Parse CODE,URL with an optional secondary URL or HARDSUB note and padding.
 
@@ -734,7 +751,7 @@ def parse_collection_child_csv(
     A secondary URL is validated, but only the primary URL is published.
     NEED ASK FOR REUP records supply no available link. Matching catalog codes
     are added to pending_codes only after the entire sheet passes validation.
-    Unknown populated columns still fail rather than being silently discarded.
+    In recovery mode, isolated invalid records are reported and withheld.
     """
     normalized_series = _normalize_series(series)
     if normalized_series is None:
@@ -754,68 +771,59 @@ def parse_collection_child_csv(
     seen_codes = set()
     pending_catalog_codes = set()
     ignored_rows = []
+    quarantined = 0
     known_typos = _KNOWN_NON_CATALOG_CODES_BY_SOURCE.get((normalized_series, source_url), ())
     if allow_known_pmid_typo and normalized_series == "PMID":
         known_typos = _KNOWN_PMID_NON_CATALOG_CODES
     try:
-        rows = csv.reader(StringIO(text))
+        rows = csv.reader(StringIO(text), strict=True)
         for row_number, row in enumerate(rows, 1):
             if not row or not any(value.strip() for value in row):
                 continue
-            while len(row) > 2 and not row[-1].strip():
-                row.pop()
-            pending_reupload = len(row) >= 2 and (
-                not row[1].strip()
-                or row[1].strip().upper() == "NEED ASK FOR REUP"
-            )
-            if len(row) == 3:
-                extra = row[2].strip()
-                if pending_reupload or extra.startswith("https://"):
-                    _collection_source_url(extra)
-                    row.pop()
-                elif extra.casefold() == "hardsub":
-                    row.pop()
-            if len(row) != 2:
-                raise SubtitleFormatError(
-                    f"collection child row {row_number} must contain exactly two columns"
-                )
             code = normalize_code(row[0])
-            if code is None:
-                raise SubtitleFormatError(
-                    f"collection child row {row_number} has an invalid code"
-                )
-            if code in known_typos and code not in normalized_catalog_codes:
+            try:
+                if code is None:
+                    raise SubtitleFormatError(f"collection child row {row_number} has an invalid code")
                 if code in seen_codes:
                     raise SubtitleFormatError(
                         f"duplicate normalized collection child code {code}"
                     )
                 seen_codes.add(code)
-                _collection_source_url(row[1].strip())
+                url = _collection_row_url(row, row_number)
+                if code in known_typos and code not in normalized_catalog_codes and url is not None:
+                    ignored_rows.append({
+                        "series": normalized_series, "row": row_number,
+                        "reason": "known_non_catalog_code_typo",
+                    })
+                    continue
+                if code.rsplit("-", 1)[0] != normalized_series:
+                    raise SubtitleFormatError(f"collection child code {code} has the wrong series prefix")
+            except SubtitleFormatError as error:
+                if not quarantine_invalid_rows:
+                    raise
+                # A later conflicting row invalidates even an earlier valid link or removal.
+                links.pop(code, None)
+                pending_catalog_codes.discard(code)
+                quarantined += 1
                 ignored_rows.append({
-                    "series": normalized_series, "row": row_number,
-                    "reason": "known_non_catalog_code_typo",
+                    "series": normalized_series, "row": row_number, "code": code,
+                    "reason": str(error), "action": "quarantined",
                 })
                 continue
-            if code.rsplit("-", 1)[0] != normalized_series:
-                raise SubtitleFormatError(
-                    f"collection child code {code} has the wrong series prefix"
-                )
-            if code in seen_codes:
-                raise SubtitleFormatError(
-                    f"duplicate normalized collection child code {code}"
-                )
-            seen_codes.add(code)
-            if pending_reupload:
-                if code in normalized_catalog_codes:
-                    pending_catalog_codes.add(code)
+            if code not in normalized_catalog_codes:
                 continue
-            url = _collection_source_url(row[1].strip())
-            if code in normalized_catalog_codes:
+            if url is None:
+                pending_catalog_codes.add(code)
+            else:
                 links[code] = url
     except csv.Error as error:
         raise SubtitleFormatError("collection child CSV is malformed") from error
     if not links and not pending_catalog_codes:
         raise SubtitleFormatError("collection child CSV contains no catalog links")
+    if quarantined >= len(links) + len(pending_catalog_codes):
+        raise SubtitleFormatError(
+            f"collection child CSV has {quarantined} invalid rows and too few confirmed catalog records"
+        )
     if pending_codes is not None:
         pending_codes.update(pending_catalog_codes)
     if diagnostics is not None:
