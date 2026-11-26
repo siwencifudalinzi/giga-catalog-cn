@@ -2030,6 +2030,106 @@
       "embedUrl": "https://sextb.net/e/spsf-92",
       "verifiedAt": "2026-11-26T06:15:48.784Z",
       "verification": "12.417 s continuous playback, +372 video frames, no media error"
+    },
+    {
+      "code": "SPSF-88",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:2955a04219b52eb117e8a8c363626175436f652b11b3a4620aa91601a789b872",
+      "sourcePage": "https://sextb.net/spsf-88",
+      "embedUrl": "https://sextb.net/e/spsf-88",
+      "verifiedAt": "2026-11-26T06:25:40.936Z",
+      "verification": "12.432 s continuous playback, +373 video frames, no media error"
+    },
+    {
+      "code": "GHOV-28",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:02806b084837287245ce2eb65e1994b3e57ebaa9df3830ad5b325943455f6a61",
+      "sourcePage": "https://sextb.net/ghov-28",
+      "embedUrl": "https://sextb.net/e/ghov-28",
+      "verifiedAt": "2026-11-26T06:25:39.321Z",
+      "verification": "12 s continuous playback, +360 video frames, no media error"
+    },
+    {
+      "code": "SPSF-76",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:d1750c9c8bee1000f097eb5577304a2e359af6646fe533d5b33625260d5285cb",
+      "sourcePage": "https://sextb.net/spsf-76",
+      "embedUrl": "https://sextb.net/e/spsf-76",
+      "verifiedAt": "2026-11-26T06:25:40.154Z",
+      "verification": "12.496 s continuous playback, +374 video frames, no media error"
+    },
+    {
+      "code": "GTRL-17",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:bb23e2aedc740609ae61fedbb3bb2e65645222a4ae1003a177907bd9ff3396c7",
+      "sourcePage": "https://sextb.net/gtrl-17",
+      "embedUrl": "https://sextb.net/e/gtrl-17",
+      "verifiedAt": "2026-11-26T06:25:39.413Z",
+      "verification": "12.467 s continuous playback, +374 video frames, no media error"
+    },
+    {
+      "code": "GIRO-85",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:3fbf419954b7c08db251ce91948d2d3cc7a001ed8ca61dade6a0ffe42dff4e93",
+      "sourcePage": "https://sextb.net/giro-85",
+      "embedUrl": "https://sextb.net/e/giro-85",
+      "verifiedAt": "2026-11-26T06:25:39.318Z",
+      "verification": "12.001 s continuous playback, +360 video frames, no media error"
+    },
+    {
+      "code": "GHKR-91",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:72b63e9f0d719d6c119528f87d091bb7dfb8d45398ae58f1016f08033e1c9275",
+      "sourcePage": "https://sextb.net/ghkr-91",
+      "embedUrl": "https://sextb.net/e/ghkr-91",
+      "verifiedAt": "2026-11-26T06:26:50.489Z",
+      "verification": "12.001 s continuous playback, +360 video frames, no media error"
+    },
+    {
+      "code": "GTRL-32",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:1ab9820981ab2117712c04cdeff13c5a043dd211ce436341f0270c9124796a46",
+      "sourcePage": "https://sextb.net/gtrl-32",
+      "embedUrl": "https://sextb.net/e/gtrl-32",
+      "verifiedAt": "2026-11-26T06:26:50.492Z",
+      "verification": "12 s continuous playback, +359 video frames, no media error"
+    },
+    {
+      "code": "MNFC-13",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:676c335cbf5bb8492273453dd29efdada94a3b2477df9288eec4e7734a937efd",
+      "sourcePage": "https://sextb.net/mnfc-13",
+      "embedUrl": "https://sextb.net/e/mnfc-13",
+      "verifiedAt": "2026-11-26T06:26:50.313Z",
+      "verification": "12.012 s continuous playback, +360 video frames, no media error"
+    },
+    {
+      "code": "GHOR-20",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:b8c7d058ec7ca3996ffba0201c1c564f10e5dff3ab81dc72b3c2e69f86f8301b",
+      "sourcePage": "https://sextb.net/ghor-20",
+      "embedUrl": "https://sextb.net/e/ghor-20",
+      "verifiedAt": "2026-11-26T06:26:49.972Z",
+      "verification": "12.009 s continuous playback, +360 video frames, no media error"
+    },
+    {
+      "code": "SPSF-73",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:f3f78972df20ab15a2af24bea91c468ed8cbb45815e6cc5f5c479d68d58d55ac",
+      "sourcePage": "https://sextb.net/spsf-73",
+      "embedUrl": "https://sextb.net/e/spsf-73",
+      "verifiedAt": "2026-11-26T06:26:52.459Z",
+      "verification": "12.008 s continuous playback, +360 video frames, no media error"
     }
   ]
 }
