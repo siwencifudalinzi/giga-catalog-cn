@@ -1990,6 +1990,46 @@
       "embedUrl": "https://sextb.net/e/spsf-98",
       "verifiedAt": "2026-11-26T06:02:37.875Z",
       "verification": "12.013 s continuous playback, +366 video frames, no media error"
+    },
+    {
+      "code": "SPSA-88",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:ca1b4964f4d3fcb5d0fb9e149ad02b789c300397c9e2d2cdf37fec36a8fbeb5c",
+      "sourcePage": "https://sextb.net/spsa-88",
+      "embedUrl": "https://sextb.net/e/spsa-88",
+      "verifiedAt": "2026-11-26T06:15:47.496Z",
+      "verification": "12.475 s continuous playback, +373 video frames, no media error"
+    },
+    {
+      "code": "GHMT-58",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:6b0b4b107d37352c8f40f1696aefb477b88513c669f562fad14214235d2f2919",
+      "sourcePage": "https://sextb.net/ghmt-58",
+      "embedUrl": "https://sextb.net/e/ghmt-58",
+      "verifiedAt": "2026-11-26T06:15:49.021Z",
+      "verification": "12.472 s continuous playback, +374 video frames, no media error"
+    },
+    {
+      "code": "THZA-11",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:17bb0eda6390dc34b2e154e1e16f4d61ac1bd8b97f192b7db59b2b3428ec5a92",
+      "sourcePage": "https://sextb.net/thza-11",
+      "embedUrl": "https://sextb.net/e/thza-11",
+      "verifiedAt": "2026-11-26T06:15:48.500Z",
+      "verification": "12 s continuous playback, +360 video frames, no media error"
+    },
+    {
+      "code": "SPSF-92",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:aa313948401402ef63f50fe8bb09393a252d09a5a98200e374fa31dd614352ea",
+      "sourcePage": "https://sextb.net/spsf-92",
+      "embedUrl": "https://sextb.net/e/spsf-92",
+      "verifiedAt": "2026-11-26T06:15:48.784Z",
+      "verification": "12.417 s continuous playback, +372 video frames, no media error"
     }
   ]
 }
