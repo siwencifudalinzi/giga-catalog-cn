@@ -1980,6 +1980,16 @@
       "embedUrl": "https://streamtape.com/e/aRvraXqLZLFMpa",
       "verifiedAt": "2026-11-25T10:04:46.424Z",
       "verification": "10.05 s, +302 video frames, no media error"
+    },
+    {
+      "code": "SPSF-98",
+      "slot": "standard.sextb",
+      "provider": "sextb",
+      "sourceUrlHash": "sha256:9621290320a38cdefefc74c13b9adbded7e29081ff466ea9af4ee57832a9aae2",
+      "sourcePage": "https://sextb.net/spsf-98",
+      "embedUrl": "https://sextb.net/e/spsf-98",
+      "verifiedAt": "2026-11-26T06:02:37.875Z",
+      "verification": "12.013 s continuous playback, +366 video frames, no media error"
     }
   ]
 }

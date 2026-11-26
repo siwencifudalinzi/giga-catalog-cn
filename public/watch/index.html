@@ -56,7 +56,10 @@
         const version = entry.slot.startsWith("uncensored.") ? "无码版" : "普通版";
         document.title = entry.code + " · 站内播放 · GIGA Catalog";
         document.querySelector("h1").textContent = entry.code;
-        source.textContent = version + " · Streamtape";
+        source.textContent = version + (entry.provider === "sextb" ? " · SEXTB" : " · Streamtape");
+        if (entry.provider === "sextb") {
+          player.setAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation");
+        }
         source.hidden = false;
         player.title = entry.code + " " + version + "视频播放器";
         document.querySelector("#source-link").href = entry.sourcePage;

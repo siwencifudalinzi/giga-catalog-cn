@@ -42,6 +42,25 @@ test("only audited pairs of Streamtape embed and source page are accepted", () =
   }
 });
 
+test("supplemental SEXTB playback is bound to its catalog code and public source", async () => {
+  const sourcePage = "https://sextb.net/spsf-98";
+  const verified = {
+    ...entry, code: "SPSF-98", slot: "standard.sextb", provider: "sextb",
+    sourcePage, embedUrl: "https://sextb.net/e/spsf-98", sourceUrlHash: await sha256SourceUrl(sourcePage),
+  };
+  const index = normalizePlaybackConfig(config(verified));
+  assert.deepEqual(await matchingPlaybackEntries("SPSF-98", [], index), [verified]);
+  assert.deepEqual(await matchingPlaybackEntries("SPSF-97", [], index), []);
+  for (const invalid of [
+    { code: "SPSF-97" }, { embedUrl: verified.embedUrl + "?url=x" },
+    { sourcePage: sourcePage + "/other" }, { slot: "standard.javryo" }, { provider: "streamtape" },
+  ]) {
+    assert.equal(normalizePlaybackConfig(config({ ...verified, ...invalid })).size, 0);
+  }
+  const stale = normalizePlaybackConfig(config({ ...verified, sourceUrlHash: entry.sourceUrlHash }));
+  assert.deepEqual(await matchingPlaybackEntries("SPSF-98", [], stale), []);
+});
+
 test("exact code and slot select distinct versions without accepting query URLs", () => {
   const other = { ...entry, slot: "uncensored.streamtape" };
   const indexed = normalizePlaybackConfig(config(entry, other));

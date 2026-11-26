@@ -2465,12 +2465,19 @@ function startApplication() {
       play.href = "watch/spsf-66.html";
       section.querySelector("h3").after(play);
     }
-    if (!groups.length) return section;
     void loadPlayback()
       .then(index => matchingPlaybackEntries(video.code, groups.flatMap(group => group.links), index))
       .then(entries => {
         if (signal.aborted || !section.isConnected) return;
         for (const entry of entries) {
+          if (entry.provider === "sextb") {
+            const play = createElement("a", "external-link", `站内播放 ${video.code} · SEXTB`);
+            play.href = playbackHref(entry);
+            section.querySelector(".empty-state")?.remove();
+            section.querySelector("h3").after(play);
+            warmPlayback(entry);
+            continue;
+          }
           const group = groups.find(group => group.links.some(item => item.slot === entry.slot));
           const provider = group.links.find(item => item.slot === entry.slot);
           const play = createElement("a", "external-link", `站内播放 ${video.code} · ${group.label} · ${provider.label}`);
@@ -2479,6 +2486,7 @@ function startApplication() {
           warmPlayback(entry);
         }
       }).catch(() => {});
+    if (!groups.length) return section;
     for (const event of ["pointerover", "focusin", "pointerdown"]) {
       section.addEventListener(event, release, { once: true, signal });
     }

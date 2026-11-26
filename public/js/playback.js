@@ -6,6 +6,17 @@ export function streamtapeEmbedUrl(sourcePage) {
   return match ? "https://streamtape.com/e/" + match[1] : null;
 }
 
+function verifiedEmbedUrl(entry) {
+  if (entry.slot === "standard.sextb") {
+    const slug = entry.code.toLowerCase();
+    if (entry.provider === "sextb" && entry.sourcePage === `https://sextb.net/${slug}`) {
+      return `https://sextb.net/e/${slug}`;
+    }
+    return null;
+  }
+  return entry.provider === "streamtape" ? streamtapeEmbedUrl(entry.sourcePage) : null;
+}
+
 export function normalizePlaybackConfig(raw) {
   const index = new Map();
   if (raw?.schemaVersion !== 1 || !Array.isArray(raw.entries)) return index;
@@ -16,12 +27,12 @@ export function normalizePlaybackConfig(raw) {
     if (!entry || typeof entry.code !== "string" ||
         !/^[A-Z0-9]+(?:-[A-Z0-9]+)+$/u.test(entry.code) ||
         typeof entry.slot !== "string" ||
-        !/^(?:standard|uncensored)\.(?:reupload|streamtape|gofile|player4me|javryo)$/u.test(entry.slot)) continue;
+        entry.slot !== "standard.sextb" && !/^(?:standard|uncensored)\.(?:reupload|streamtape|gofile|player4me|javryo)$/u.test(entry.slot)) continue;
     const key = entry.code + "/" + entry.slot;
     if (seen.has(key)) duplicates.add(key);
     seen.add(key);
 
-    const embedUrl = entry.provider === "streamtape" ? streamtapeEmbedUrl(entry.sourcePage) : null;
+    const embedUrl = verifiedEmbedUrl(entry);
     if (!embedUrl || embedUrl !== entry.embedUrl ||
         typeof entry.sourceUrlHash !== "string" ||
         !/^sha256:[0-9a-f]{64}$/u.test(entry.sourceUrlHash) ||
@@ -29,7 +40,7 @@ export function normalizePlaybackConfig(raw) {
         typeof entry.verification !== "string" || !entry.verification.trim()) continue;
 
     if (!index.has(entry.code)) index.set(entry.code, []);
-    index.get(entry.code).push(Object.freeze({ ...entry, sourcePage: normalizeFinalUrl(entry.sourcePage) }));
+    index.get(entry.code).push(Object.freeze({ ...entry, sourcePage: entry.provider === "sextb" ? entry.sourcePage : normalizeFinalUrl(entry.sourcePage) }));
   }
   for (const [code, entries] of index) {
     const unique = entries.filter(entry => !duplicates.has(code + "/" + entry.slot));
@@ -50,7 +61,8 @@ export function selectPlaybackEntry(index, query) {
 export async function matchingPlaybackEntries(code, links, index) {
   const matches = await Promise.all((index.get(code) || []).map(async entry => {
     const link = links.find(item => item.slot === entry.slot);
-    return link && await sha256SourceUrl(link.url) === entry.sourceUrlHash ? entry : null;
+    const source = entry.provider === "sextb" ? entry.sourcePage : link?.url;
+    return source && await sha256SourceUrl(source) === entry.sourceUrlHash ? entry : null;
   }));
   return matches.filter(Boolean);
 }
