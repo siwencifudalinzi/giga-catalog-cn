@@ -61,6 +61,18 @@ test("supplemental SEXTB playback is bound to its catalog code and public source
   assert.deepEqual(await matchingPlaybackEntries("SPSF-98", [], stale), []);
 });
 
+test("a SEXTB share ID belongs only to its verified catalog code", async () => {
+  const sourcePage = "https://sextb.net/b9ckyrfr";
+  const shared = {
+    ...entry, code: "GTRL-16", slot: "standard.sextb", provider: "sextb",
+    sourcePage, embedUrl: "https://sextb.net/e/b9ckyrfr", sourceUrlHash: await sha256SourceUrl(sourcePage),
+  };
+  const matches = await matchingPlaybackEntries(shared.code, [], normalizePlaybackConfig(config(shared)));
+  assert.equal(matches[0]?.embedUrl, shared.embedUrl);
+  assert.equal(normalizePlaybackConfig(config({ ...shared, code: "GTRL-17" })).size, 0);
+  assert.equal(normalizePlaybackConfig(config({ ...shared, embedUrl: "https://sextb.net/e/gtrl-16" })).size, 0);
+});
+
 test("exact code and slot select distinct versions without accepting query URLs", () => {
   const other = { ...entry, slot: "uncensored.streamtape" };
   const indexed = normalizePlaybackConfig(config(entry, other));

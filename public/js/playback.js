@@ -1,5 +1,8 @@
 import { normalizeFinalUrl, sha256SourceUrl } from "./resolved-links.js";
 
+// Some public SEXTB share links use an opaque ID in place of the catalog code.
+const sextbShareIds = new Map([["GTRL-16", "b9ckyrfr"]]);
+
 export function streamtapeEmbedUrl(sourcePage) {
   const url = normalizeFinalUrl(sourcePage);
   const match = url?.match(/^https:\/\/streamtape\.com\/[ve]\/([A-Za-z0-9_-]+)(?:\/[^?#]*)?$/u);
@@ -8,7 +11,7 @@ export function streamtapeEmbedUrl(sourcePage) {
 
 function verifiedEmbedUrl(entry) {
   if (entry.slot === "standard.sextb") {
-    const slug = entry.code.toLowerCase();
+    const slug = sextbShareIds.get(entry.code) ?? entry.code.toLowerCase();
     if (entry.provider === "sextb" && entry.sourcePage === `https://sextb.net/${slug}`) {
       return `https://sextb.net/e/${slug}`;
     }
